@@ -7,6 +7,9 @@
     <meta name="description" content="Rihlati Fleet Management System - Professional fleet tracking and reporting with Firebase real-time sync">
     <title>Rihlati Fleet Management System</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -29,15 +32,332 @@
             --shadow: 0 6px 16px rgba(0,0,0,0.1);
             --sidebar-width: 280px;
             --header-height: 70px;
+            --font-en: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            --font-ar: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--font-en);
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             color: var(--text-color);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Arabic RTL font & layout overrides */
+        [dir="rtl"] body,
+        body[dir="rtl"],
+        html[lang="ar"] body {
+            font-family: var(--font-ar);
+            letter-spacing: 0;
+        }
+
+        [dir="rtl"] .sidebar {
+            left: auto;
+            right: 0;
+            transform: translateX(100%);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            border-right: none;
+            border-left: 1px solid rgba(255,255,255,0.08);
+        }
+
+        [dir="rtl"] .sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        [dir="rtl"] .main-content {
+            margin-left: 0;
+            margin-right: var(--sidebar-width);
+        }
+
+        [dir="rtl"] .nav-item {
+            border-left: none;
+            border-right: 3px solid transparent;
+            text-align: right;
+        }
+
+        [dir="rtl"] .nav-item:hover,
+        [dir="rtl"] .nav-item.active {
+            border-right-color: var(--accent-color);
+            border-left-color: transparent;
+        }
+
+        [dir="rtl"] .top-bar {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .table-header {
+            direction: rtl;
+            text-align: right;
+        }
+
+        [dir="rtl"] th,
+        [dir="rtl"] td {
+            text-align: right;
+        }
+
+        [dir="rtl"] .stat-header {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .modal-header {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .form-grid {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .form-section-divider {
+            text-align: right;
+        }
+
+        [dir="rtl"] .badge {
+            font-family: var(--font-ar);
+        }
+
+        [dir="rtl"] .ticket-row-maintenance td:first-child {
+            border-left: none;
+            border-right: 4px solid #ff9800;
+        }
+        [dir="rtl"] .ticket-row-fuel td:first-child {
+            border-left: none;
+            border-right: 4px solid #2196f3;
+        }
+        [dir="rtl"] .ticket-row-leave td:first-child {
+            border-left: none;
+            border-right: 4px solid #e91e63;
+        }
+
+        [dir="rtl"] .action-buttons {
+            justify-content: flex-end;
+        }
+
+        [dir="rtl"] .user-profile {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .step-indicator {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .ticket-detail-row {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        [dir="rtl"] .perm-row {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .perm-row-label,
+        [dir="rtl"] .perm-row-desc {
+            text-align: right;
+        }
+
+        [dir="rtl"] .sync-status {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .top-bar-actions {
+            flex-direction: row-reverse;
+        }
+
+        [dir="rtl"] .login-container {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .login-form label {
+            text-align: right;
+        }
+
+        [dir="rtl"] .summary-grid {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .stats-grid {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .toast {
+            right: auto;
+            left: 30px;
+        }
+
+        /* Arabic typography refinements */
+        [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, [dir="rtl"] h4 {
+            font-family: var(--font-ar);
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        [dir="rtl"] .btn {
+            font-family: var(--font-ar);
+            letter-spacing: 0;
+        }
+
+        [dir="rtl"] input, [dir="rtl"] select, [dir="rtl"] textarea {
+            font-family: var(--font-ar);
+            text-align: right;
+        }
+
+        [dir="rtl"] select {
+            background-position: left 12px center;
+        }
+
+        [dir="rtl"] .nav-item i {
+            order: 1;
+        }
+
+        [dir="rtl"] .nav-item span {
+            order: 0;
+            flex: 1;
+        }
+
+        /* Login page RTL adjustments */
+        [dir="rtl"] #loginPage .login-header {
+            direction: rtl;
+        }
+
+        [dir="rtl"] #loginPage .form-group label {
+            text-align: right;
+        }
+
+        [dir="rtl"] #loginPage input {
+            text-align: right;
+        }
+
+        [dir="rtl"] #loginPage .login-form > div:first-child {
+            text-align: left;
+        }
+
+        /* Fix auth tab text */
+        [dir="rtl"] #tabLoginBtn,
+        [dir="rtl"] #tabSignupBtn {
+            font-family: var(--font-ar);
+        }
+
+        /* Stat cards RTL */
+        [dir="rtl"] .stat-value,
+        [dir="rtl"] .stat-label {
+            text-align: right;
+        }
+
+        /* Table improvements in RTL */
+        [dir="rtl"] .table-header h3 {
+            text-align: right;
+        }
+
+        [dir="rtl"] .badge {
+            font-family: var(--font-ar);
+            font-size: 11px;
+        }
+
+        /* Modal improvements in RTL */
+        [dir="rtl"] .modal-content {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .modal-header h3 {
+            font-family: var(--font-ar);
+        }
+
+        [dir="rtl"] .form-group label {
+            text-align: right;
+        }
+
+        [dir="rtl"] .form-group input,
+        [dir="rtl"] .form-group select,
+        [dir="rtl"] .form-group textarea {
+            text-align: right;
+            font-family: var(--font-ar);
+        }
+
+        /* Empty state RTL */
+        [dir="rtl"] .empty-state {
+            direction: rtl;
+        }
+
+        /* Ticket type cards RTL */
+        [dir="rtl"] .ticket-type-card {
+            direction: rtl;
+        }
+
+        /* Chart in RTL */
+        [dir="rtl"] .chart-container {
+            direction: rtl;
+        }
+
+        [dir="rtl"] .chart-title {
+            text-align: right;
+        }
+
+        /* Progress bar RTL */
+        [dir="rtl"] .progress-fill {
+            background: linear-gradient(270deg, var(--success-color), var(--info-color));
+        }
+
+        /* Sidebar bottom logout fix for RTL */
+        [dir="rtl"] .sidebar > .nav-item:last-of-type {
+            margin: 0 20px;
+        }
+
+        /* User profile details RTL */
+        [dir="rtl"] .user-details {
+            text-align: right;
+        }
+
+        /* Top bar title center-ish in RTL */
+        [dir="rtl"] #currentPageTitle {
+            font-family: var(--font-ar);
+        }
+
+        /* Settings section RTL */
+        [dir="rtl"] .settings-section {
+            direction: rtl;
+            text-align: right;
+        }
+
+        /* Step indicator RTL */
+        [dir="rtl"] .step-dot {
+            font-family: var(--font-ar);
+        }
+
+        /* Perm section title RTL */
+        [dir="rtl"] .perm-section-title {
+            text-align: right;
+        }
+
+        /* Role form header RTL */
+        [dir="rtl"] .role-form-header {
+            flex-direction: row-reverse;
+            border-left: none;
+            border-right: 4px solid;
+        }
+
+        [dir="rtl"] .form-section-divider {
+            letter-spacing: 0;
+        }
+
+        @media (min-width: 769px) {
+            [dir="rtl"] .sidebar {
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            [dir="rtl"] .main-content {
+                margin-right: 0;
+            }
+            [dir="rtl"] .sidebar {
+                right: 0;
+                left: auto;
+                transform: translateX(100%);
+            }
+            [dir="rtl"] .sidebar.mobile-open {
+                transform: translateX(0);
+            }
         }
 
         /* Loading Spinner */
@@ -191,13 +511,41 @@
             width: var(--sidebar-width);
             background: linear-gradient(180deg, #1a237e 0%, #0d1b3e 100%);
             color: white;
-            padding: 25px 0;
+            padding: 25px 0 0;
             position: fixed;
             height: 100vh;
             overflow-y: auto;
             transition: transform 0.3s ease;
             z-index: 1000;
             box-shadow: 5px 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-menu {
+            flex: 1;
+            margin-top: 10px;
+            overflow-y: auto;
+        }
+
+        .sidebar-logout {
+            padding: 0 0 20px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-logout .nav-item {
+            margin: 0 5px;
+            border-radius: 10px;
+        }
+
+        .sidebar-logout .nav-item:hover {
+            background: rgba(244, 67, 54, 0.2);
+            border-left-color: #f44336;
+        }
+
+        [dir="rtl"] .sidebar-logout .nav-item:hover {
+            border-right-color: #f44336;
+            border-left-color: transparent;
         }
 
         .sidebar-header {
@@ -242,10 +590,6 @@
         .user-details p {
             font-size: 12px;
             opacity: 0.7;
-        }
-
-        .nav-menu {
-            margin-top: 30px;
         }
 
         .nav-item {
@@ -817,6 +1161,14 @@
             }
 
             .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            [dir="rtl"] .sidebar {
+                transform: translateX(100%);
+            }
+
+            [dir="rtl"] .sidebar.mobile-open {
                 transform: translateX(0);
             }
 
@@ -1439,7 +1791,7 @@
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div style="text-align: right; margin-bottom: 10px;">
-            <button onclick="toggleLanguage()" style="background: none; border: 1px solid #ccc; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 13px; color: #555;">🌐 عربي / EN</button>
+            <button onclick="toggleLanguage()" class="lang-toggle-btn" style="background: none; border: 1px solid #ccc; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 13px; color: #555; font-family: inherit;">🌐 عربي / EN</button>
         </div>
         <div class="login-header">
             <div class="login-logo">🚗</div>
@@ -1449,8 +1801,8 @@
 
         <!-- Auth Tabs -->
         <div style="display:flex; border-bottom:2px solid #e0e0e0; margin-bottom:20px;">
-            <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;">Sign In</button>
-            <button id="tabSignupBtn" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:600;color:#999;cursor:pointer;">Create Account</button>
+            <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;font-family:inherit;">Sign In</button>
+            <button id="tabSignupBtn" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:600;color:#999;cursor:pointer;font-family:inherit;">Create Account</button>
         </div>
 
         <!-- LOGIN FORM -->
@@ -1500,7 +1852,7 @@
         <!-- Firebase status badge -->
         <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;">
             <span style="width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;box-shadow:0 0 0 3px rgba(76,175,80,0.25);"></span>
-            <span style="font-size:11px;color:#888;">Powered by Firebase — real-time cloud sync</span>
+            <span style="font-size:11px;color:#888;" class="fb-powered-text">Powered by Firebase — real-time cloud sync</span>
         </div>
 
         <div class="login-footer">
@@ -1696,9 +2048,11 @@ service cloud.firestore {
                 <!-- Navigation items will be loaded dynamically -->
             </nav>
 
-            <div class="nav-item" onclick="logout()" style="position: absolute; bottom: 20px; width: calc(100% - 40px); margin: 0 20px;" role="button" tabindex="0">
-                <i>🚪</i>
-                <span id="logoutLabel">Logout</span>
+            <div class="sidebar-logout" onclick="logout()" role="button" tabindex="0">
+                <div class="nav-item" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 8px;">
+                    <i>🚪</i>
+                    <span id="logoutLabel">Logout</span>
+                </div>
             </div>
         </aside>
 
@@ -1736,7 +2090,7 @@ service cloud.firestore {
             <div id="adminReports" class="content-section">
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>📋 All Reports</h3>
+                        <h3>${t('allReports')}</h3>
                         <div style="display: flex; gap: 10px;">
                             <button class="btn btn-success" onclick="exportReports('csv')">📥 Export CSV</button>
                             <input type="text" class="search-box" placeholder="Search reports..." 
@@ -1754,9 +2108,9 @@ service cloud.firestore {
             <div id="adminUsers" class="content-section">
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>👥 User Management</h3>
+                        <h3 data-i18n="userManagement">👥 User Management</h3>
                         <button class="btn btn-primary" onclick="showAddUserModal()">
-                            ➕ Add User
+                            <span data-i18n="addUser">➕ Add User</span>
                         </button>
                     </div>
                     <div class="table-responsive">
@@ -2480,7 +2834,6 @@ service cloud.firestore {
             formatDate(date, format = 'short') {
                 const d = new Date(date);
                 if (isNaN(d.getTime())) return 'Invalid Date';
-                
                 if (format === 'short') {
                     return d.toLocaleDateString('en-SA', {
                         year: 'numeric',
@@ -3030,7 +3383,7 @@ service cloud.firestore {
             checkSession() {
                 if (this.currentUser && Date.now() - this.lastActivity > this.sessionTimeout) {
                     logout();
-                    Utils.showToast('Session expired. Please login again.', true);
+                    Utils.showToast(t('sessionExpired'), true);
                     return false;
                 }
                 return true;
@@ -3200,30 +3553,30 @@ service cloud.firestore {
             const loginBtn = document.getElementById('loginBtn');
             
             loginBtn.disabled = true;
-            loginBtn.innerHTML = '<span>Signing in…</span>';
+            loginBtn.innerHTML = `<span>${t('signingIn')}</span>`;
             
             try {
                 if (!window.firebaseFns || !window.auth) {
-                    Utils.showToast('Firebase not ready. Please wait…', true);
+                    Utils.showToast(currentLang === 'ar' ? 'Firebase غير جاهز. يرجى الانتظار…' : 'Firebase not ready. Please wait…', true);
                     return;
                 }
                 const { signInWithEmailAndPassword } = window.firebaseFns;
                 const cred = await signInWithEmailAndPassword(window.auth, email, password);
                 // onAuthStateChanged will handle the rest
-                Utils.showToast('Signing in…');
+                Utils.showToast(t('signingIn'));
             } catch (error) {
-                let msg = 'Login failed. Please try again.';
+                let msg = currentLang === 'ar' ? 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.' : 'Login failed. Please try again.';
                 if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
-                    msg = 'Invalid email or password.';
+                    msg = currentLang === 'ar' ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' : 'Invalid email or password.';
                 } else if (error.code === 'auth/too-many-requests') {
-                    msg = 'Too many attempts. Please try again later.';
+                    msg = currentLang === 'ar' ? 'محاولات كثيرة. يرجى المحاولة لاحقاً.' : 'Too many attempts. Please try again later.';
                 } else if (error.code === 'auth/network-request-failed') {
-                    msg = 'Network error. Check your connection.';
+                    msg = currentLang === 'ar' ? 'خطأ في الشبكة. تحقق من اتصالك.' : 'Network error. Check your connection.';
                 }
                 Utils.showToast(msg, true);
             } finally {
                 loginBtn.disabled = false;
-                loginBtn.innerHTML = '<span>Sign In</span>';
+                loginBtn.innerHTML = `<span>${t('signIn')}</span>`;
             }
         }
 
@@ -3235,10 +3588,10 @@ service cloud.firestore {
             const password = document.getElementById('signupPassword').value;
             const signupBtn = document.getElementById('signupBtn');
             
-            if (!name) { Utils.showToast('Please enter your full name', true); return; }
+            if (!name) { Utils.showToast(currentLang === 'ar' ? 'يرجى إدخال اسمك الكامل' : 'Please enter your full name', true); return; }
             
             signupBtn.disabled = true;
-            signupBtn.innerHTML = '<span>Creating account…</span>';
+            signupBtn.innerHTML = `<span>${t('creatingAccount')}</span>`;
             
             try {
                 if (!window.firebaseFns || !window.auth) {
@@ -3365,8 +3718,8 @@ service cloud.firestore {
                     <i>👥</i><span>${t('users')}</span></div>`;
             }
             if (perms.canManagePermissions || user.role === 'admin') {
-                navItems += `<div class="nav-item" onclick="navigateTo('adminPermissions', '🔐 Permissions', this)" role="button" tabindex="0">
-                    <i>🔐</i><span>Permissions</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('adminPermissions', '🔐 ${t('permissions')}', this)" role="button" tabindex="0">
+                    <i>🔐</i><span>${t('permissions')}</span></div>`;
             }
             if (perms.canViewAnalytics) {
                 navItems += `<div class="nav-item" onclick="navigateTo('adminAnalytics', '${t('analytics')}', this)" role="button" tabindex="0">
@@ -3381,22 +3734,22 @@ service cloud.firestore {
                     <i>📋</i><span>${t('myReports')}</span></div>`;
             }
             if (perms.canSubmitTicket) {
-                navItems += `<div class="nav-item" onclick="navigateTo('submitTicket', 'Raise Request', this)" role="button" tabindex="0">
-                    <i>🎫</i><span>Raise Request</span></div>`;
-                navItems += `<div class="nav-item" onclick="navigateTo('myTickets', 'My Requests', this); loadMyTickets();" role="button" tabindex="0">
-                    <i>📬</i><span>My Requests</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('submitTicket', '${t('raiseRequest')}', this)" role="button" tabindex="0">
+                    <i>🎫</i><span>${t('raiseRequest')}</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('myTickets', '${t('myRequests')}', this); loadMyTickets();" role="button" tabindex="0">
+                    <i>📬</i><span>${t('myRequests')}</span></div>`;
             }
             if (perms.canManageTickets) {
-                navItems += `<div class="nav-item" onclick="navigateTo('adminTickets', 'Request Management', this); loadAdminTickets();" role="button" tabindex="0">
-                    <i>📥</i><span>Requests</span><span id="pendingTicketsBadge" style="background:#f44336;color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:6px;display:none;"></span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('adminTickets', '${t('requests')}', this); loadAdminTickets();" role="button" tabindex="0">
+                    <i>📥</i><span>${t('requests')}</span><span id="pendingTicketsBadge" style="background:#f44336;color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-${currentLang === 'ar' ? 'right' : 'left'}:6px;display:none;"></span></div>`;
             }
             if (perms.canViewFinancial || perms.canManageFinancial) {
-                navItems += `<div class="nav-item" onclick="navigateTo('financialDashboard', '💰 Financial', this); loadFinancialDashboard();" role="button" tabindex="0">
-                    <i>💰</i><span>Financial</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('financialDashboard', '💰 ${t('financial')}', this); loadFinancialDashboard();" role="button" tabindex="0">
+                    <i>💰</i><span>${t('financial')}</span></div>`;
             }
             if (perms.canManageCampaigns) {
-                navItems += `<div class="nav-item" onclick="navigateTo('salesDashboard', '📊 Sales', this); loadSalesDashboard();" role="button" tabindex="0">
-                    <i>📊</i><span>Sales & Marketing</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('salesDashboard', '📊 ${t('sales')}', this); loadSalesDashboard();" role="button" tabindex="0">
+                    <i>📊</i><span>${t('sales')}</span></div>`;
             }
 
             navMenu.innerHTML = navItems;
@@ -3446,7 +3799,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${totalReports}</div>
-                            <div class="stat-label">Total Reports</div>
+                            <div class="stat-label">${t('totalReports')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">📋</div>
                     </div>
@@ -3455,7 +3808,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${pendingReports}</div>
-                            <div class="stat-label">Pending Review</div>
+                            <div class="stat-label">${t('pendingReports')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">⏳</div>
                     </div>
@@ -3464,17 +3817,17 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${pendingTickets}</div>
-                            <div class="stat-label">Pending Requests</div>
+                            <div class="stat-label">${currentLang === 'ar' ? 'طلبات قيد الانتظار' : 'Pending Requests'}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b6b, #feca57);">🎫</div>
                     </div>
-                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','Request Management',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">View Requests →</button></div>` : ''}
+                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','${t('requests')}',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">${currentLang === 'ar' ? 'عرض الطلبات ←' : 'View Requests →'}</button></div>` : ''}
                 </div>
                 <div class="stat-card">
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${activeDrivers}</div>
-                            <div class="stat-label">Active Drivers</div>
+                            <div class="stat-label">${t('totalDrivers')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">👥</div>
                     </div>
@@ -3491,16 +3844,22 @@ service cloud.firestore {
             const chartGrid = document.getElementById('adminChartGrid');
             const maxCount = Math.max(...Object.values(statusCounts), 1);
             
-            chartGrid.innerHTML = Object.entries(statusCounts).map(([status, count]) => `
+            chartGrid.innerHTML = Object.entries(statusCounts).map(([status, count]) => {
+                const labels = { 
+                    pending: currentLang === 'ar' ? 'انتظار' : 'PENDING',
+                    approved: currentLang === 'ar' ? 'موافق' : 'APPROVED',
+                    rejected: currentLang === 'ar' ? 'مرفوض' : 'REJECTED'
+                };
+                return `
                 <div class="chart-bar-container">
                     <div class="chart-value">${count}</div>
                     <div class="chart-bar" style="height: ${(count / maxCount) * 150}px; background: ${
                         status === 'approved' ? '#4caf50' : 
                         status === 'pending' ? '#ff9800' : '#f44336'
                     }"></div>
-                    <div class="chart-label">${status.toUpperCase()}</div>
-                </div>
-            `).join('');
+                    <div class="chart-label">${labels[status]}</div>
+                </div>`;
+            }).join('');
             
             // Recent reports
             const recentReports = reports.slice(-5).reverse();
@@ -3509,29 +3868,33 @@ service cloud.firestore {
             if (recentReports.length > 0) {
                 container.innerHTML = `
                     <div class="table-header">
-                        <h3>Recent Reports</h3>
+                        <h3>${t('recentReports')}</h3>
                     </div>
                     <div class="table-responsive">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Date</th>
-                                    <th>Driver</th>
-                                    <th>Vehicle</th>
-                                    <th>Type</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>${t('date')}</th>
+                                    <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                    <th>${t('vehicle')}</th>
+                                    <th>${t('type')}</th>
+                                    <th>${t('statusCol')}</th>
+                                    <th>${t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${recentReports.map(r => `
+                                ${recentReports.map(r => {
+                                    const statusLabel = currentLang === 'ar' 
+                                        ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
+                                        : r.status.toUpperCase();
+                                    return `
                                     <tr>
-                                        <td data-label="Date">${Utils.formatDate(r.date)}</td>
-                                        <td data-label="Driver">${Utils.escapeHTML(r.driverName)}</td>
-                                        <td data-label="Vehicle">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                        <td data-label="Type">${Utils.escapeHTML(r.type)}</td>
-                                        <td data-label="Status"><span class="badge badge-${Utils.escapeHTML(r.status)}">${Utils.escapeHTML(r.status.toUpperCase())}</span></td>
-                                        <td data-label="Actions" class="action-buttons">
+                                        <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
+                                        <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(r.driverName)}</td>
+                                        <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
+                                        <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
+                                        <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                        <td data-label="${t('actions')}" class="action-buttons">
                                             <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})">
                                                 👁️
                                             </button>
@@ -3544,8 +3907,8 @@ service cloud.firestore {
                                                 </button>
                                             ` : ''}
                                         </td>
-                                    </tr>
-                                `).join('')}
+                                    </tr>`;
+                                }).join('')}
                             </tbody>
                         </table>
                     </div>
@@ -3554,8 +3917,8 @@ service cloud.firestore {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <h3>No reports yet</h3>
-                        <p>Reports will appear here once drivers submit them</p>
+                        <h3>${t('noReports')}</h3>
+                        <p>${t('noReportsMsg')}</p>
                     </div>
                 `;
             }
@@ -3570,43 +3933,47 @@ service cloud.firestore {
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Date</th>
-                                <th>Driver</th>
-                                <th>Vehicle</th>
-                                <th>Type</th>
-                                <th>Fuel (L)</th>
-                                <th>Expenses</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>${t('id')}</th>
+                                <th>${t('date')}</th>
+                                <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                <th>${t('vehicle')}</th>
+                                <th>${t('type')}</th>
+                                <th>${t('fuel')}</th>
+                                <th>${t('expenses')}</th>
+                                <th>${t('statusCol')}</th>
+                                <th>${t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody id="reportsTableBody">
-                            ${reports.map(r => `
+                            ${reports.map(r => {
+                                const statusLabel = currentLang === 'ar' 
+                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
+                                    : r.status.toUpperCase();
+                                return `
                                 <tr data-search="${Utils.escapeHTML(r.driverName.toLowerCase())} ${Utils.escapeHTML(r.vehicleNumber.toLowerCase())} ${Utils.escapeHTML(r.type.toLowerCase())} ${Utils.escapeHTML(r.status.toLowerCase())}">
-                                    <td data-label="ID">#${r.id}</td>
-                                    <td data-label="Date">${Utils.formatDate(r.date)}</td>
-                                    <td data-label="Driver">${Utils.escapeHTML(r.driverName)}</td>
-                                    <td data-label="Vehicle">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                    <td data-label="Type">${Utils.escapeHTML(r.type)}</td>
-                                    <td data-label="Fuel">${r.fuel || 0} L</td>
-                                    <td data-label="Expenses">${Utils.formatCurrency(r.expenses || 0)}</td>
-                                    <td data-label="Status"><span class="badge badge-${Utils.escapeHTML(r.status)}">${Utils.escapeHTML(r.status.toUpperCase())}</span></td>
-                                    <td data-label="Actions" class="action-buttons">
-                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})" title="View">
+                                    <td data-label="${t('id')}">${("#"+r.id)}</td>
+                                    <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
+                                    <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(r.driverName)}</td>
+                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
+                                    <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
+                                    <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
+                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                    <td data-label="${t('actions')}" class="action-buttons">
+                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})" title="${t('viewDetails')}">
                                             👁️
                                         </button>
                                         ${r.status === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
-                                            <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport(${r.id})" title="Approve">
+                                            <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport(${r.id})" title="${t('approve')}">
                                                 ✓
                                             </button>
-                                            <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport(${r.id})" title="Reject">
+                                            <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport(${r.id})" title="${t('reject')}">
                                                 ✗
                                             </button>
                                         ` : ''}
                                     </td>
-                                </tr>
-                            `).join('')}
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
@@ -3640,7 +4007,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${Utils.formatCurrency(totalExpenses)}</div>
-                            <div class="stat-label">Total Expenses</div>
+                            <div class="stat-label">${t('totalExpenses')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">💰</div>
                     </div>
@@ -3649,7 +4016,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${totalFuel.toFixed(1)} L</div>
-                            <div class="stat-label">Total Fuel</div>
+                            <div class="stat-label">${t('totalFuel')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">⛽</div>
                     </div>
@@ -3658,7 +4025,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${Utils.formatCurrency(avgExpenses)}</div>
-                            <div class="stat-label">Avg. per Report</div>
+                            <div class="stat-label">${currentLang === 'ar' ? 'متوسط لكل تقرير' : 'Avg. per Report'}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">📊</div>
                     </div>
@@ -3667,7 +4034,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${reportsThisMonth}</div>
-                            <div class="stat-label">Reports This Month</div>
+                            <div class="stat-label">${currentLang === 'ar' ? 'تقارير هذا الشهر' : 'Reports This Month'}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">📅</div>
                     </div>
@@ -3746,7 +4113,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${totalReports}</div>
-                            <div class="stat-label">Total Reports</div>
+                            <div class="stat-label">${t('totalReports')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">📋</div>
                     </div>
@@ -3755,7 +4122,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${pendingReports}</div>
-                            <div class="stat-label">Pending</div>
+                            <div class="stat-label">${t('pendingReports')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">⏳</div>
                     </div>
@@ -3764,7 +4131,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${approvedReports}</div>
-                            <div class="stat-label">Approved</div>
+                            <div class="stat-label">${t('approvedReports')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">✓</div>
                     </div>
@@ -3773,7 +4140,7 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${rejectedReports}</div>
-                            <div class="stat-label">Rejected</div>
+                            <div class="stat-label">${currentLang === 'ar' ? 'مرفوضة' : 'Rejected'}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a, #fee140);">✗</div>
                     </div>
@@ -3784,6 +4151,11 @@ service cloud.firestore {
             const statusCounts = { pending: pendingReports, approved: approvedReports, rejected: rejectedReports };
             const chartGrid = document.getElementById('userChartGrid');
             const maxCount = Math.max(...Object.values(statusCounts), 1);
+            const chartLabels = {
+                pending: currentLang === 'ar' ? 'انتظار' : 'PENDING',
+                approved: currentLang === 'ar' ? 'موافق' : 'APPROVED',
+                rejected: currentLang === 'ar' ? 'مرفوض' : 'REJECTED'
+            };
             
             chartGrid.innerHTML = Object.entries(statusCounts).map(([status, count]) => `
                 <div class="chart-bar-container">
@@ -3792,7 +4164,7 @@ service cloud.firestore {
                         status === 'approved' ? '#4caf50' : 
                         status === 'pending' ? '#ff9800' : '#f44336'
                     }"></div>
-                    <div class="chart-label">${status.toUpperCase()}</div>
+                    <div class="chart-label">${chartLabels[status]}</div>
                 </div>
             `).join('');
         }
@@ -3812,35 +4184,39 @@ service cloud.firestore {
                     <table>
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Date</th>
-                                <th>Vehicle</th>
-                                <th>Type</th>
-                                <th>Odometer</th>
-                                <th>Fuel (L)</th>
-                                <th>Expenses</th>
-                                <th>Status</th>
-                                <th>Actions</th>
+                                <th>${t('id')}</th>
+                                <th>${t('date')}</th>
+                                <th>${t('vehicle')}</th>
+                                <th>${t('type')}</th>
+                                <th>${currentLang === 'ar' ? 'عداد الكيلومتر' : 'Odometer'}</th>
+                                <th>${t('fuel')}</th>
+                                <th>${t('expenses')}</th>
+                                <th>${t('statusCol')}</th>
+                                <th>${t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody id="myReportsTableBody">
-                            ${myReports.map(r => `
+                            ${myReports.map(r => {
+                                const statusLabel = currentLang === 'ar' 
+                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
+                                    : r.status.toUpperCase();
+                                return `
                                 <tr data-search="${Utils.escapeHTML(r.vehicleNumber.toLowerCase())} ${Utils.escapeHTML(r.type.toLowerCase())} ${Utils.escapeHTML(r.status.toLowerCase())}">
-                                    <td data-label="ID">#${r.id}</td>
-                                    <td data-label="Date">${Utils.formatDate(r.date)}</td>
-                                    <td data-label="Vehicle">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                    <td data-label="Type">${Utils.escapeHTML(r.type)}</td>
-                                    <td data-label="Odometer">${r.odometer} km</td>
-                                    <td data-label="Fuel">${r.fuel || 0} L</td>
-                                    <td data-label="Expenses">${Utils.formatCurrency(r.expenses || 0)}</td>
-                                    <td data-label="Status"><span class="badge badge-${Utils.escapeHTML(r.status)}">${Utils.escapeHTML(r.status.toUpperCase())}</span></td>
-                                    <td data-label="Actions">
+                                    <td data-label="${t('id')}">${("#"+r.id)}</td>
+                                    <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
+                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
+                                    <td data-label="${currentLang === 'ar' ? 'عداد الكيلومتر' : 'Odometer'}">${r.odometer} km</td>
+                                    <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
+                                    <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
+                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                    <td data-label="${t('actions')}">
                                         <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})">
                                             👁️
                                         </button>
                                     </td>
-                                </tr>
-                            `).join('')}
+                                </tr>`;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
@@ -3848,10 +4224,10 @@ service cloud.firestore {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <h3>No reports yet</h3>
-                        <p>Click "Submit Report" to create your first report</p>
+                        <h3>${t('noReports')}</h3>
+                        <p>${currentLang === 'ar' ? 'انقر على "إرسال تقرير" لإنشاء أول تقرير لك' : 'Click "Submit Report" to create your first report'}</p>
                         <button class="btn btn-primary" onclick="document.querySelector('.nav-item[onclick*=submitReport]').click()" style="margin-top: 20px;">
-                            ➕ Submit Your First Report
+                            ➕ ${currentLang === 'ar' ? 'إرسال أول تقرير' : 'Submit Your First Report'}
                         </button>
                     </div>
                 `;
@@ -3951,30 +4327,36 @@ service cloud.firestore {
                 <table>
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Username</th>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th>${t('id')}</th>
+                            <th>${currentLang === 'ar' ? 'اسم المستخدم' : 'Username'}</th>
+                            <th>${t('name')}</th>
+                            <th>${t('email')}</th>
+                            <th>${t('role')}</th>
+                            <th>${t('status')}</th>
+                            <th>${t('actions')}</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${users.map(u => `
+                        ${users.map(u => {
+                            const roleInfo = getRoleInfo(u.role);
+                            const roleLabel = currentLang === 'ar' ? roleInfo.labelAr : roleInfo.label;
+                            const statusLabel = currentLang === 'ar' 
+                                ? (u.status === 'active' ? 'نشط' : 'غير نشط') 
+                                : u.status.toUpperCase();
+                            return `
                             <tr>
-                                <td data-label="ID">#${u.id}</td>
-                                <td data-label="Username">${Utils.escapeHTML(u.username)}</td>
-                                <td data-label="Name">${Utils.escapeHTML(u.name)}</td>
-                                <td data-label="Email">${Utils.escapeHTML(u.email)}</td>
-                                <td data-label="Role"><span class="badge" style="background: ${getRoleInfo(u.role).bg}; color: ${getRoleInfo(u.role).color};">${getRoleInfo(u.role).icon} ${Utils.escapeHTML(getRoleInfo(u.role).label)}</span></td>
-                                <td data-label="Status"><span class="badge badge-${u.status === 'active' ? 'approved' : 'rejected'}">${Utils.escapeHTML(u.status.toUpperCase())}</span></td>
-                                <td data-label="Actions" class="action-buttons">
+                                <td data-label="${t('id')}">${("#"+u.id)}</td>
+                                <td data-label="${currentLang === 'ar' ? 'اسم المستخدم' : 'Username'}">${Utils.escapeHTML(u.username || u.email || '')}</td>
+                                <td data-label="${t('name')}">${Utils.escapeHTML(u.name)}</td>
+                                <td data-label="${t('email')}">${Utils.escapeHTML(u.email)}</td>
+                                <td data-label="${t('role')}"><span class="badge" style="background: ${roleInfo.bg}; color: ${roleInfo.color};">${roleInfo.icon} ${Utils.escapeHTML(roleLabel)}</span></td>
+                                <td data-label="${t('status')}"><span class="badge badge-${u.status === 'active' ? 'approved' : 'rejected'}">${statusLabel}</span></td>
+                                <td data-label="${t('actions')}" class="action-buttons">
                                     <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="editUser(${u.id})">
                                         ✏️
                                     </button>
                                     ${u.role !== 'admin' && Utils.isAdmin() ? `
-                                        <button class="btn-icon" style="background: #f3e5f5; color: #7b1fa2;" onclick="showPermissionsModal(${u.id})" title="Manage Permissions">
+                                        <button class="btn-icon" style="background: #f3e5f5; color: #7b1fa2;" onclick="showPermissionsModal(${u.id})" title="${currentLang === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions'}">
                                             🔐
                                         </button>
                                     ` : ''}
@@ -3984,8 +4366,8 @@ service cloud.firestore {
                                         </button>
                                     ` : ''}
                                 </td>
-                            </tr>
-                        `).join('')}
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             `;
@@ -4289,62 +4671,240 @@ service cloud.firestore {
         // ==================== LANGUAGE / RTL SUPPORT ====================
         const i18n = {
             en: {
+                // App
                 appName: '🚗 Rihlati',
                 appSubtitle: 'Fleet Management',
-                signIn: 'Sign In',
-                username: 'Username',
-                password: 'Password',
                 fleetTitle: 'Rihlati Fleet',
                 fleetSubtitle: 'Fleet Management System',
+                langToggle: 'عربي',
+                // Auth
+                signIn: 'Sign In',
+                createAccount: 'Create Account',
+                tabSignIn: 'Sign In',
+                tabCreateAccount: 'Create Account',
+                username: 'Username',
+                password: 'Password',
+                email: 'Email',
+                fullName: 'Full Name',
                 enterUsername: 'Enter username',
                 enterPassword: 'Enter password',
+                enterEmail: 'Enter your email',
+                forgotPassword: '🔑 Forgot password?',
+                signingIn: 'Signing in…',
+                creatingAccount: 'Creating account…',
+                newAccountNote: 'New accounts are assigned the Driver role by default. An admin can change your role after registration.',
+                // Navigation
                 dashboard: 'Dashboard',
                 reports: 'Reports',
                 users: 'Users',
                 analytics: 'Analytics',
                 submitReport: 'Submit Report',
                 myReports: 'My Reports',
+                myRequests: 'My Requests',
+                raiseRequest: 'Raise Request',
+                requests: 'Requests',
+                financial: 'Financial',
+                sales: 'Sales & Marketing',
+                permissions: 'Permissions',
+                vehicles: 'Vehicles',
                 logout: 'Logout',
+                settings: 'Settings',
+                // Roles
                 administrator: 'Administrator',
                 driver: 'Driver',
+                manager: 'Manager',
+                supervisor: 'Supervisor',
+                hr: 'HR',
+                accountant: 'Accountant',
+                // Dashboard
                 welcomeBack: (name) => `Welcome back, ${name}!`,
-                langToggle: 'عربي',
                 recentReports: 'Recent Reports',
+                totalReports: 'Total Reports',
+                pendingReports: 'Pending',
+                approvedReports: 'Approved',
+                totalDrivers: 'Total Drivers',
+                totalVehicles: 'Total Vehicles',
+                totalExpenses: 'Total Expenses',
+                totalFuel: 'Total Fuel',
+                // Reports
                 allReports: '📋 All Reports',
+                noReports: 'No reports yet',
+                noReportsMsg: 'Reports will appear here once drivers submit them',
+                submitReportBtn: '✓ Submit Report',
+                resetForm: '↺ Reset',
+                reportSubmitted: '✅ Report submitted successfully!',
+                fillRequired: 'Please fill in all required fields',
+                // Users
                 userManagement: '👥 User Management',
                 addUser: '➕ Add User',
+                editUser: 'Edit User',
+                deleteUser: 'Delete User',
+                saveUser: 'Save User',
+                cancel: 'Cancel',
+                name: 'Name',
+                role: 'Role',
+                status: 'Status',
+                active: 'Active',
+                inactive: 'Inactive',
+                actions: 'Actions',
+                // Table headers
+                id: 'ID',
+                date: 'Date',
+                type: 'Type',
+                vehicle: 'Vehicle',
+                fuel: 'Fuel (L)',
+                expenses: 'Expenses',
+                statusCol: 'Status',
+                submittedAt: 'Submitted',
+                details: 'Details',
+                priority: 'Priority',
+                // Status badges
+                pending: 'PENDING',
+                approved: 'APPROVED',
+                rejected: 'REJECTED',
+                // Export/Search
                 exportCSV: '📥 Export CSV',
                 searchReports: 'Search reports...',
                 searchMyReports: 'Search my reports...',
+                searchUsers: 'Search users...',
+                // Tickets
+                maintenanceReq: '🔧 Maintenance',
+                fuelReq: '⛽ Fuel',
+                leaveReq: '🏖️ Leave',
+                noRequests: 'No requests yet',
+                noRequestsMsg: 'Click "Raise Request" to submit your first request',
+                requestSubmitted: '✅ Request submitted! Awaiting Admin approval.',
+                // Sync
+                syncConnected: 'Firebase Synced',
+                syncConnecting: 'Connecting…',
+                // Misc
+                viewDetails: 'View',
+                approve: 'Approve',
+                reject: 'Reject',
+                save: 'Save',
+                close: 'Close',
+                confirm: 'Confirm',
+                sessionExpired: 'Session expired. Please login again.',
+                poweredBy: 'Powered by Firebase — real-time cloud sync',
+                copyright: '© 2026 Rihlati Fleet Management System',
             },
             ar: {
+                // App
                 appName: '🚗 رحلتي',
                 appSubtitle: 'إدارة الأسطول',
+                fleetTitle: 'رحلتي للأساطيل',
+                fleetSubtitle: 'نظام إدارة الأسطول',
+                langToggle: 'EN',
+                // Auth
                 signIn: 'تسجيل الدخول',
+                createAccount: 'إنشاء حساب',
+                tabSignIn: 'تسجيل الدخول',
+                tabCreateAccount: 'إنشاء حساب',
                 username: 'اسم المستخدم',
                 password: 'كلمة المرور',
-                fleetTitle: 'رحلتي',
-                fleetSubtitle: 'نظام إدارة الأسطول',
+                email: 'البريد الإلكتروني',
+                fullName: 'الاسم الكامل',
                 enterUsername: 'أدخل اسم المستخدم',
                 enterPassword: 'أدخل كلمة المرور',
+                enterEmail: 'أدخل بريدك الإلكتروني',
+                forgotPassword: '🔑 نسيت كلمة المرور؟',
+                signingIn: 'جارٍ تسجيل الدخول…',
+                creatingAccount: 'جارٍ إنشاء الحساب…',
+                newAccountNote: 'تُمنح الحسابات الجديدة دور "سائق" بشكل افتراضي. يمكن للمسؤول تغيير دورك بعد التسجيل.',
+                // Navigation
                 dashboard: 'لوحة التحكم',
                 reports: 'التقارير',
                 users: 'المستخدمون',
                 analytics: 'التحليلات',
                 submitReport: 'إرسال تقرير',
                 myReports: 'تقاريري',
+                myRequests: 'طلباتي',
+                raiseRequest: 'رفع طلب',
+                requests: 'الطلبات',
+                financial: 'المالية',
+                sales: 'المبيعات والتسويق',
+                permissions: 'الصلاحيات',
+                vehicles: 'المركبات',
                 logout: 'تسجيل الخروج',
+                settings: 'الإعدادات',
+                // Roles
                 administrator: 'مدير النظام',
                 driver: 'سائق',
+                manager: 'مدير',
+                supervisor: 'مشرف',
+                hr: 'الموارد البشرية',
+                accountant: 'محاسب',
+                // Dashboard
                 welcomeBack: (name) => `مرحباً بعودتك، ${name}!`,
-                langToggle: 'EN',
-                recentReports: 'التقارير الأخيرة',
+                recentReports: 'أحدث التقارير',
+                totalReports: 'إجمالي التقارير',
+                pendingReports: 'قيد الانتظار',
+                approvedReports: 'موافق عليها',
+                totalDrivers: 'إجمالي السائقين',
+                totalVehicles: 'إجمالي المركبات',
+                totalExpenses: 'إجمالي المصروفات',
+                totalFuel: 'إجمالي الوقود',
+                // Reports
                 allReports: '📋 جميع التقارير',
+                noReports: 'لا توجد تقارير بعد',
+                noReportsMsg: 'ستظهر التقارير هنا بمجرد إرسال السائقين لها',
+                submitReportBtn: '✓ إرسال التقرير',
+                resetForm: '↺ إعادة تعيين',
+                reportSubmitted: '✅ تم إرسال التقرير بنجاح!',
+                fillRequired: 'يرجى ملء جميع الحقول المطلوبة',
+                // Users
                 userManagement: '👥 إدارة المستخدمين',
                 addUser: '➕ إضافة مستخدم',
+                editUser: 'تعديل المستخدم',
+                deleteUser: 'حذف المستخدم',
+                saveUser: 'حفظ المستخدم',
+                cancel: 'إلغاء',
+                name: 'الاسم',
+                role: 'الدور',
+                status: 'الحالة',
+                active: 'نشط',
+                inactive: 'غير نشط',
+                actions: 'الإجراءات',
+                // Table headers
+                id: 'الرقم',
+                date: 'التاريخ',
+                type: 'النوع',
+                vehicle: 'المركبة',
+                fuel: 'الوقود (لتر)',
+                expenses: 'المصروفات',
+                statusCol: 'الحالة',
+                submittedAt: 'تاريخ الإرسال',
+                details: 'التفاصيل',
+                priority: 'الأولوية',
+                // Status badges
+                pending: 'قيد الانتظار',
+                approved: 'موافق عليه',
+                rejected: 'مرفوض',
+                // Export/Search
                 exportCSV: '📥 تصدير CSV',
                 searchReports: 'بحث في التقارير...',
                 searchMyReports: 'بحث في تقاريري...',
+                searchUsers: 'بحث في المستخدمين...',
+                // Tickets
+                maintenanceReq: '🔧 صيانة',
+                fuelReq: '⛽ وقود',
+                leaveReq: '🏖️ إجازة',
+                noRequests: 'لا توجد طلبات بعد',
+                noRequestsMsg: 'انقر على "رفع طلب" لإرسال طلبك الأول',
+                requestSubmitted: '✅ تم إرسال الطلب! في انتظار موافقة الإدارة.',
+                // Sync
+                syncConnected: 'متزامن مع Firebase',
+                syncConnecting: 'جارٍ الاتصال…',
+                // Misc
+                viewDetails: 'عرض',
+                approve: 'موافقة',
+                reject: 'رفض',
+                save: 'حفظ',
+                close: 'إغلاق',
+                confirm: 'تأكيد',
+                sessionExpired: 'انتهت الجلسة. يرجى تسجيل الدخول مجدداً.',
+                poweredBy: 'مدعوم بـ Firebase — مزامنة فورية',
+                copyright: '© 2026 نظام إدارة أسطول رحلتي',
             }
         };
 
@@ -4365,25 +4925,56 @@ service cloud.firestore {
             const isRTL = currentLang === 'ar';
             document.body.dir = isRTL ? 'rtl' : 'ltr';
             document.documentElement.lang = currentLang;
+            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
 
-            // Lang toggle buttons
+            // Apply Arabic font class
+            if (isRTL) {
+                document.body.classList.add('lang-ar');
+            } else {
+                document.body.classList.remove('lang-ar');
+            }
+
+            // Lang toggle buttons (all instances)
             document.querySelectorAll('#langToggle').forEach(btn => btn.textContent = t('langToggle'));
+            // Login page language toggle
+            const loginLangBtn = document.querySelector('#loginPage .lang-toggle-btn');
+            if (loginLangBtn) loginLangBtn.textContent = `🌐 ${t('langToggle')}`;
 
             // Login page
             const loginTitle = document.querySelector('.login-header h1');
             if (loginTitle) loginTitle.textContent = t('fleetTitle');
             const loginSub = document.querySelector('.login-header p');
             if (loginSub) loginSub.textContent = t('fleetSubtitle');
-            document.querySelectorAll('.login-form label').forEach((label, i) => {
-                if (i === 0) label.textContent = 'Email';
-                if (i === 1) label.textContent = t('password');
-            });
+
+            // Auth tabs
+            const tabLoginBtn = document.getElementById('tabLoginBtn');
+            if (tabLoginBtn) tabLoginBtn.textContent = t('tabSignIn');
+            const tabSignupBtn = document.getElementById('tabSignupBtn');
+            if (tabSignupBtn) tabSignupBtn.textContent = t('tabCreateAccount');
+
+            // Login form labels and placeholders
+            const loginEmailLabel = document.querySelector('#loginTab label[for], #loginTab .form-group:first-child label');
+            if (loginEmailLabel) loginEmailLabel.childNodes[0].textContent = t('email') + ' ';
             const emailInput = document.getElementById('loginEmail');
-            if (emailInput) emailInput.placeholder = 'Enter your email';
+            if (emailInput) emailInput.placeholder = t('enterEmail');
             const passInput = document.getElementById('loginPassword');
             if (passInput) passInput.placeholder = t('enterPassword');
+            const forgotBtn = document.querySelector('#loginTab .forgot-btn, button[onclick="openForgotPassword()"]');
+            if (forgotBtn) forgotBtn.textContent = t('forgotPassword');
             const loginBtn = document.getElementById('loginBtn');
             if (loginBtn && !loginBtn.disabled) loginBtn.innerHTML = `<span>${t('signIn')}</span>`;
+
+            // Signup form
+            const signupBtn = document.getElementById('signupBtn');
+            if (signupBtn && !signupBtn.disabled) signupBtn.innerHTML = `<span>${t('createAccount')}</span>`;
+            const signupNote = document.querySelector('#signupTab p');
+            if (signupNote && signupNote.querySelector('strong')) signupNote.textContent = t('newAccountNote');
+
+            // Firebase badge & copyright
+            const fbBadge = document.querySelector('#loginPage .fb-powered-text');
+            if (fbBadge) fbBadge.textContent = t('poweredBy');
+            const copyrightEl = document.querySelector('#loginPage .login-footer p');
+            if (copyrightEl) copyrightEl.textContent = t('copyright');
 
             // Sidebar
             const sidebarAppName = document.querySelector('.sidebar-header h2');
@@ -4393,7 +4984,19 @@ service cloud.firestore {
             const userRoleEl = document.getElementById('sidebarUserRole');
             if (userRoleEl && AppState.currentUser) {
                 const rInfo = getRoleInfo(AppState.currentUser.role);
-                userRoleEl.textContent = currentLang === 'ar' ? rInfo.labelAr : rInfo.label;
+                userRoleEl.textContent = isRTL ? rInfo.labelAr : rInfo.label;
+            }
+
+            // Logout
+            const logoutLabel = document.getElementById('logoutLabel');
+            if (logoutLabel) logoutLabel.textContent = t('logout');
+
+            // Sync status
+            const syncText = document.getElementById('syncStatusText');
+            if (syncText) {
+                const status = document.getElementById('syncStatus')?.className || '';
+                if (status.includes('connected')) syncText.textContent = t('syncConnected');
+                else syncText.textContent = t('syncConnecting');
             }
 
             // Re-render nav menu items if logged in
@@ -4401,9 +5004,14 @@ service cloud.firestore {
                 loadInterface();
             }
 
-            // Logout label
-            const logoutLabel = document.getElementById('logoutLabel');
-            if (logoutLabel) logoutLabel.textContent = t('logout');
+            // Walk data-i18n elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                const val = t(key);
+                if (val && typeof val === 'string') {
+                    el.textContent = val;
+                }
+            });
         }
 
         // Apply language on load
@@ -4577,7 +5185,7 @@ service cloud.firestore {
             };
 
             AppState.tickets = [...AppState.tickets, ticket];
-            Utils.showToast('✅ Request submitted! Awaiting Admin approval.');
+            Utils.showToast(t('requestSubmitted'));
             resetTicketForm();
 
             // Update pending badge for admin
@@ -4625,26 +5233,26 @@ service cloud.firestore {
             if (myTickets.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">📬</div>
-                    <h3>No requests yet</h3>
-                    <p>Click "Raise Request" to submit your first request</p></div>`;
+                    <h3>${t('noRequests')}</h3>
+                    <p>${t('noRequestsMsg')}</p></div>`;
                 return;
             }
 
             container.innerHTML = `<table>
                 <thead><tr>
-                    <th>ID</th><th>Type</th><th>Driver</th><th>Details</th>
-                    <th>Priority</th><th>Submitted</th><th>Status</th><th>Actions</th>
+                    <th>${t('id')}</th><th>${t('type')}</th><th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th><th>${t('details')}</th>
+                    <th>${t('priority')}</th><th>${t('submittedAt')}</th><th>${t('statusCol')}</th><th>${t('actions')}</th>
                 </tr></thead>
                 <tbody>
                 ${myTickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
-                        <td data-label="ID">#${tk.id}</td>
+                        <td data-label="${t('id')}">${("#"+tk.id)}</td>
                         <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
                         <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
                         <td data-label="Details">${ticketSummary(tk)}</td>
                         <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
                         <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
-                        <td data-label="Status"><span class="badge badge-${tk.status}">${tk.status.toUpperCase()}</span></td>
+                        <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
                         <td data-label="Actions">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                         </td>
@@ -4683,14 +5291,14 @@ service cloud.firestore {
                 <tbody>
                 ${tickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
-                        <td data-label="ID">#${tk.id}</td>
+                        <td data-label="${t('id')}">${("#"+tk.id)}</td>
                         <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
                         <td data-label="From">${Utils.escapeHTML(tk.submitterName)}<br><small style="color:#888">${getRoleInfo(tk.submitterRole).label}</small></td>
                         <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
                         <td data-label="Details">${ticketSummary(tk)}</td>
                         <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
                         <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
-                        <td data-label="Status"><span class="badge badge-${tk.status}">${tk.status.toUpperCase()}</span></td>
+                        <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
                         <td data-label="Actions" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                             ${tk.status === 'pending' && Utils.canManageTickets() ? `
@@ -4755,7 +5363,7 @@ service cloud.firestore {
             fields.push(
                 ['Submitted By', `${Utils.escapeHTML(tk.submitterName)} (${getRoleInfo(tk.submitterRole).label})`],
                 ['Submitted At', Utils.formatDate(tk.submittedAt, 'long')],
-                ['Status', `<span class="badge badge-${tk.status}">${tk.status.toUpperCase()}</span>`],
+                ['Status', `<span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span>`],
             );
             if (tk.reviewedAt) {
                 fields.push(['Reviewed At', Utils.formatDate(tk.reviewedAt, 'long')]);
@@ -6221,14 +6829,14 @@ function json(obj) {
                     <span style="font-size:22px;">${role.icon}</span>
                     <div>
                         <div>${schema.title}</div>
-                        <div style="font-size:12px; font-weight:400; opacity:0.8;">Submit your report for admin review</div>
+                        <div style="font-size:12px; font-weight:400; opacity:0.8;">${currentLang === 'ar' ? 'أرسل تقريرك لمراجعة الإدارة' : 'Submit your report for admin review'}</div>
                     </div>
                 </div>
                 <form id="reportForm" onsubmit="return false;">
                     <div class="form-grid">${schema.fields}</div>
                     <div style="display:flex; gap:15px; margin-top:25px;">
-                        <button type="button" class="btn btn-primary" style="flex:1;" onclick="submitRoleReport()">✓ Submit Report</button>
-                        <button type="button" class="btn btn-secondary" onclick="loadRoleReportForm()">↺ Reset</button>
+                        <button type="button" class="btn btn-primary" style="flex:1;" onclick="submitRoleReport()">${t('submitReportBtn')}</button>
+                        <button type="button" class="btn btn-secondary" onclick="loadRoleReportForm()">${t('resetForm')}</button>
                     </div>
                 </form>`;
             
@@ -6255,7 +6863,7 @@ function json(obj) {
                     if (errEl) errEl.classList.remove('show');
                 }
             });
-            if (!valid) { Utils.showToast('Please fill in all required fields', true); return; }
+            if (!valid) { Utils.showToast(t('fillRequired'), true); return; }
             
             // Build report object from available fields
             const getVal = id => { const el = document.getElementById(id); return el ? el.value : ''; };
@@ -6278,7 +6886,7 @@ function json(obj) {
             };
             
             AppState.reports = [...AppState.reports, newReport];
-            Utils.showToast('✅ Report submitted successfully!');
+            Utils.showToast(t('reportSubmitted'));
             loadRoleReportForm(); // Reset form
             
             setTimeout(() => {
@@ -6407,7 +7015,7 @@ function json(obj) {
                                     });
 
                                     // Firebase sync badge
-                                    setSyncStatus('connected', 'Firebase Synced');
+                                    setSyncStatus('connected', t('syncConnected'));
                                     Utils.showToast(t('welcomeBack', user.name));
                                 } else if (user && user.status === 'inactive') {
                                     if (window.firebaseFns) await window.firebaseFns.signOut(window.auth);

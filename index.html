@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <meta name="theme-color" content="#1a237e">
-    <meta name="description" content="Rihlati Fleet Management System - Professional fleet tracking and reporting with Firebase real-time sync">
-    <title>Rihlati Fleet Management System</title>
+    <meta name="description" content="Rihlati — Fleet Management">
+    <title>Rihlati</title>
     <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,13 +45,266 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Arabic RTL font & layout overrides */
-        [dir="rtl"] body,
-        body[dir="rtl"],
-        html[lang="ar"] body {
-            font-family: var(--font-ar);
+        /* ===== FULL ARABIC / RTL TYPOGRAPHY OVERRIDE ===== */
+        body.lang-ar,
+        body.lang-ar * {
+            font-family: 'Cairo', 'Tajawal', 'Segoe UI', Tahoma, sans-serif !important;
+            letter-spacing: 0 !important;
+        }
+
+        /* Arabic numbers and monospace exceptions */
+        body.lang-ar input[type="number"],
+        body.lang-ar input[type="date"],
+        body.lang-ar input[type="email"],
+        body.lang-ar .recovery-key-box {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif !important;
+            direction: ltr;
+            text-align: right;
+        }
+
+        /* Login page in Arabic */
+        body.lang-ar .login-container {
+            direction: rtl;
+        }
+        body.lang-ar .login-header {
+            direction: rtl;
+        }
+        body.lang-ar .login-form .form-group label {
+            text-align: right;
+            display: block;
+        }
+        body.lang-ar .login-form input {
+            text-align: right;
+        }
+        body.lang-ar #tabLoginBtn,
+        body.lang-ar #tabSignupBtn {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* Sidebar in Arabic */
+        body.lang-ar .sidebar-header {
+            text-align: right;
+        }
+        body.lang-ar .sidebar-header h2 {
+            font-size: 20px;
+            font-weight: 800;
+        }
+        body.lang-ar .nav-item {
+            border-left: none !important;
+            border-right: 3px solid transparent;
+            text-align: right;
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .nav-item:hover,
+        body.lang-ar .nav-item.active {
+            border-right-color: var(--accent-color) !important;
+            border-left-color: transparent !important;
+        }
+        body.lang-ar .nav-item i {
+            margin-left: 10px;
+            margin-right: 0;
+        }
+        body.lang-ar .user-profile {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        /* Top bar in Arabic */
+        body.lang-ar .top-bar {
+            direction: rtl;
+        }
+        body.lang-ar .top-bar h1 {
+            font-size: 18px;
+            font-weight: 700;
+        }
+        body.lang-ar .top-bar-actions {
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .sync-status {
+            flex-direction: row-reverse;
+        }
+
+        /* Tables in Arabic */
+        body.lang-ar th,
+        body.lang-ar td {
+            text-align: right;
+        }
+        body.lang-ar .table-header {
+            direction: rtl;
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .table-header h3 {
+            text-align: right;
+        }
+        body.lang-ar .action-buttons {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        /* Cards and stats in Arabic */
+        body.lang-ar .stat-header {
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .stat-value,
+        body.lang-ar .stat-label {
+            text-align: right;
+        }
+        body.lang-ar .stats-grid {
+            direction: rtl;
+        }
+        body.lang-ar .summary-grid {
+            direction: rtl;
+        }
+
+        /* Modals in Arabic */
+        body.lang-ar .modal-content {
+            direction: rtl;
+        }
+        body.lang-ar .modal-header {
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .modal-header h3 {
+            font-size: 17px;
+            font-weight: 700;
+        }
+        body.lang-ar .form-grid {
+            direction: rtl;
+        }
+        body.lang-ar .form-section-divider {
+            text-align: right;
+            font-size: 14px;
+            font-weight: 700;
+        }
+        body.lang-ar .form-group label {
+            text-align: right;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        body.lang-ar .form-group input,
+        body.lang-ar .form-group select,
+        body.lang-ar .form-group textarea {
+            text-align: right;
+            font-size: 14px;
+        }
+        body.lang-ar select {
+            background-position: left 12px center;
+            padding-right: 14px;
+            padding-left: 32px;
+        }
+
+        /* Buttons in Arabic */
+        body.lang-ar .btn {
+            font-size: 14px;
+            font-weight: 700;
             letter-spacing: 0;
         }
+
+        /* Badges in Arabic */
+        body.lang-ar .badge {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        /* Main content margin flip for RTL sidebar */
+        body.lang-ar .main-content {
+            margin-left: 0;
+            margin-right: var(--sidebar-width);
+        }
+
+        /* Sidebar position flip */
+        body.lang-ar .sidebar {
+            left: auto;
+            right: 0;
+            transform: translateX(100%);
+            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            border-right: none;
+            border-left: 1px solid rgba(255,255,255,0.08);
+        }
+        body.lang-ar .sidebar.show,
+        body.lang-ar .sidebar.mobile-open {
+            transform: translateX(0);
+        }
+
+        /* Toast in Arabic */
+        body.lang-ar .toast {
+            right: auto;
+            left: 30px;
+            direction: rtl;
+        }
+
+        /* Permissions panel */
+        body.lang-ar .perm-row {
+            flex-direction: row-reverse;
+        }
+        body.lang-ar .perm-row-label,
+        body.lang-ar .perm-row-desc {
+            text-align: right;
+        }
+
+        /* Ticket rows */
+        body.lang-ar .ticket-row-maintenance td:first-child {
+            border-left: none;
+            border-right: 4px solid #ff9800;
+        }
+        body.lang-ar .ticket-row-fuel td:first-child {
+            border-left: none;
+            border-right: 4px solid #2196f3;
+        }
+        body.lang-ar .ticket-row-leave td:first-child {
+            border-left: none;
+            border-right: 4px solid #e91e63;
+        }
+
+        /* Step indicator */
+        body.lang-ar .step-indicator {
+            direction: rtl;
+        }
+
+        /* Ticket detail rows */
+        body.lang-ar .ticket-detail-row {
+            flex-direction: row-reverse;
+            text-align: right;
+        }
+
+        /* Chart */
+        body.lang-ar .chart-container {
+            direction: rtl;
+        }
+        body.lang-ar .chart-title {
+            text-align: right;
+            font-weight: 700;
+        }
+
+        /* H tags in Arabic */
+        body.lang-ar h1,
+        body.lang-ar h2,
+        body.lang-ar h3,
+        body.lang-ar h4 {
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        /* Empty state in Arabic */
+        body.lang-ar .empty-state {
+            direction: rtl;
+        }
+
+        /* Mobile responsive Arabic sidebar */
+        @media (max-width: 768px) {
+            body.lang-ar .sidebar {
+                transform: translateX(100%);
+            }
+            body.lang-ar .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+            body.lang-ar .main-content {
+                margin-right: 0;
+            }
+        }
+
+        /* ===== END ARABIC STYLES ===== */
 
         [dir="rtl"] .sidebar {
             left: auto;
@@ -389,112 +642,407 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Login Page */
-        .login-container {
-            max-width: 420px;
-            margin: 80px auto;
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-            animation: slideInUp 0.6s ease;
+        /* ===== PREMIUM LOGIN PAGE ===== */
+
+        /* Full-page split layout */
+        #loginPage {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+            font-family: var(--font-en);
         }
 
-        @keyframes slideInUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        /* ── Brand / Left Panel ── */
+        .login-brand-panel {
+            flex: 0 0 42%;
+            background: linear-gradient(155deg, #0d1b4b 0%, #1a237e 45%, #283593 70%, #1565c0 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .login-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .login-logo {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        /* Decorative rings */
+        .login-brand-panel::before,
+        .login-brand-panel::after {
+            content: '';
+            position: absolute;
             border-radius: 50%;
+            border: 1.5px solid rgba(255,255,255,0.07);
+        }
+        .login-brand-panel::before {
+            width: 500px; height: 500px;
+            top: -180px; right: -180px;
+        }
+        .login-brand-panel::after {
+            width: 320px; height: 320px;
+            bottom: -100px; left: -100px;
+        }
+
+        .login-brand-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .login-brand-orb {
+            width: 110px; height: 110px;
+            background: rgba(255,255,255,0.12);
+            backdrop-filter: blur(10px);
+            border: 1.5px solid rgba(255,255,255,0.2);
+            border-radius: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 48px;
-            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.3);
+            font-size: 52px;
+            margin: 0 auto 28px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25),
+                        inset 0 1px 0 rgba(255,255,255,0.2);
+            animation: floatOrb 4s ease-in-out infinite;
         }
 
-        .login-header h1 {
-            color: var(--primary-color);
-            font-size: 28px;
-            margin-bottom: 10px;
+        @keyframes floatOrb {
+            0%, 100% { transform: translateY(0); }
+            50%       { transform: translateY(-10px); }
         }
 
-        .login-header p {
-            color: #666;
+        .login-brand-name {
+            font-size: 42px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -1px;
+            line-height: 1;
+            margin-bottom: 12px;
+        }
+
+        .login-brand-tagline {
             font-size: 14px;
+            font-weight: 400;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 40px;
         }
 
-        .login-form .form-group {
-            margin-bottom: 25px;
+        .login-brand-dots {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .login-brand-dots span {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+        }
+        .login-brand-dots span:first-child {
+            background: rgba(255,255,255,0.9);
+            width: 24px;
+            border-radius: 4px;
         }
 
-        .login-form label {
-            display: block;
-            margin-bottom: 8px;
-            color: var(--primary-color);
+        .login-brand-footer {
+            position: absolute;
+            bottom: 24px;
+            left: 0; right: 0;
+            text-align: center;
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 1px;
+        }
+
+        /* ── Form / Right Panel ── */
+        .login-form-panel {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f7f8fc;
+            padding: 40px 24px;
+            position: relative;
+        }
+
+        .lang-toggle-btn {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: #fff;
+            border: 1.5px solid #e8eaf0;
+            border-radius: 50px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: 600;
-            font-size: 14px;
+            color: #444;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            font-family: inherit;
+        }
+        .lang-toggle-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            box-shadow: 0 4px 14px rgba(57,73,171,0.15);
+            transform: translateY(-1px);
         }
 
-        .login-form input {
+        .login-form-inner {
             width: 100%;
-            padding: 15px 18px;
-            border: 2px solid #e0e0e0;
-            border-radius: 12px;
-            font-size: 15px;
-            transition: all 0.3s;
-            background: #f8f9fa;
+            max-width: 400px;
         }
 
-        .login-form input:focus {
+        /* ── Tabs ── */
+        .login-tabs {
+            position: relative;
+            display: flex;
+            background: #eceef5;
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 32px;
+        }
+        .login-tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: color 0.2s;
+            font-family: inherit;
+            position: relative;
+            z-index: 1;
+        }
+        .login-tab.active { color: var(--primary-color); }
+        .login-tab-slider {
+            position: absolute;
+            top: 4px; bottom: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+        }
+        .login-tab-slider.right {
+            transform: translateX(100%);
+        }
+
+        /* ── Welcome text ── */
+        .login-welcome {
+            margin-bottom: 28px;
+        }
+        .login-welcome h2 {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1a1a2e;
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+        .login-welcome p {
+            font-size: 14px;
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* ── Input groups ── */
+        .lf-group {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .lf-icon {
+            position: absolute;
+            top: 50%; left: 16px;
+            transform: translateY(-50%);
+            font-size: 16px;
+            pointer-events: none;
+            opacity: 0.5;
+        }
+        .lf-group input {
+            width: 100%;
+            padding: 15px 46px 15px 46px;
+            border: 1.5px solid #e2e5f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            background: #fff;
+            color: #1a1a2e;
+            transition: all 0.2s;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        .lf-group input::placeholder { color: #bbb; }
+        .lf-group input:focus {
             outline: none;
             border-color: var(--secondary-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(57, 73, 171, 0.1);
+            box-shadow: 0 0 0 4px rgba(57,73,171,0.1);
+            background: #fff;
         }
+        .lf-eye {
+            position: absolute;
+            top: 50%; right: 14px;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+            padding: 0;
+            min-height: unset;
+        }
+        .lf-eye:hover { opacity: 0.8; }
 
-        .login-form button {
+        /* ── Forgot password row ── */
+        .lf-forgot-row {
+            text-align: right;
+            margin: -6px 0 20px;
+        }
+        .lf-forgot-btn {
+            background: none;
+            border: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--secondary-color);
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+            transition: color 0.2s;
+        }
+        .lf-forgot-btn:hover { color: var(--primary-color); text-decoration: underline; }
+
+        /* ── Submit button ── */
+        .lf-submit {
             width: 100%;
-            padding: 16px;
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-            color: white;
+            padding: 15px;
+            background: linear-gradient(135deg, #3949ab, #1a237e);
+            color: #fff;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
-            box-shadow: 0 10px 20px rgba(26, 35, 126, 0.2);
+            font-family: inherit;
+            transition: all 0.25s;
+            box-shadow: 0 8px 24px rgba(26,35,126,0.25);
+            letter-spacing: 0.3px;
+            margin-top: 4px;
         }
-
-        .login-form button:hover:not(:disabled) {
+        .lf-submit:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px rgba(26, 35, 126, 0.3);
+            box-shadow: 0 14px 32px rgba(26,35,126,0.35);
+        }
+        .lf-submit:active:not(:disabled) { transform: translateY(0); }
+        .lf-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* ── Signup note ── */
+        .lf-note {
+            font-size: 12px;
+            color: #aaa;
+            text-align: center;
+            margin-top: 14px;
+            line-height: 1.6;
         }
 
-        .login-form button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        /* ── ARABIC LOGIN OVERRIDES ── */
+        body.lang-ar #loginPage { direction: rtl; }
+
+        body.lang-ar .login-brand-name {
+            font-family: 'Cairo', sans-serif;
+            font-size: 46px;
+            letter-spacing: 0;
         }
+        body.lang-ar .login-brand-tagline {
+            font-family: 'Tajawal', sans-serif;
+            letter-spacing: 1px;
+        }
+        body.lang-ar .lang-toggle-btn {
+            right: auto;
+            left: 24px;
+        }
+        body.lang-ar .lf-icon {
+            left: auto;
+            right: 16px;
+        }
+        body.lang-ar .lf-group input {
+            padding: 15px 46px 15px 46px;
+            text-align: right;
+        }
+        body.lang-ar .lf-eye {
+            right: auto;
+            left: 14px;
+        }
+        body.lang-ar .lf-forgot-row {
+            text-align: left;
+        }
+        body.lang-ar .login-welcome h2,
+        body.lang-ar .login-welcome p {
+            text-align: right;
+        }
+        body.lang-ar .lf-note { text-align: right; }
+        body.lang-ar .login-footer { display: none !important; }
+
+        /* ── MOBILE LOGIN ── */
+        @media (max-width: 768px) {
+            #loginPage {
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            .login-brand-panel {
+                flex: 0 0 auto;
+                padding: 36px 24px 32px;
+                border-radius: 0 0 32px 32px;
+            }
+            .login-brand-orb {
+                width: 80px; height: 80px;
+                font-size: 38px;
+                border-radius: 24px;
+                margin-bottom: 16px;
+                animation: none;
+            }
+            .login-brand-name { font-size: 32px; }
+            .login-brand-tagline { font-size: 11px; margin-bottom: 20px; }
+            .login-brand-dots { display: none; }
+            .login-brand-footer { position: static; margin-top: 16px; font-size: 11px; }
+            .login-form-panel {
+                flex: 1;
+                padding: 28px 20px 40px;
+                background: #f7f8fc;
+                align-items: flex-start;
+            }
+            .lang-toggle-btn {
+                position: fixed;
+                top: 16px;
+                right: 16px;
+                z-index: 999;
+                padding: 7px 13px;
+                font-size: 12px;
+            }
+            body.lang-ar .lang-toggle-btn {
+                right: auto;
+                left: 16px;
+            }
+            .login-form-inner { max-width: 100%; }
+            .login-tabs { margin-bottom: 24px; }
+            .login-welcome { margin-bottom: 20px; }
+            .login-welcome h2 { font-size: 22px; }
+            .lf-group input { padding: 14px 44px; font-size: 16px; }
+            .lf-submit { padding: 15px; font-size: 16px; }
+        }
+
+        @media (max-width: 400px) {
+            .login-brand-panel { padding: 28px 16px 24px; }
+            .login-brand-name  { font-size: 28px; }
+            .login-form-panel  { padding: 22px 16px 32px; }
+        }
+
+        /* ===== END PREMIUM LOGIN ===== */
 
         /* Main App Layout */
         .app-container {
@@ -1780,7 +2328,200 @@
             transition: border-color 0.2s;
         }
         .recovery-pin-inputs input:focus { border-color: var(--secondary-color); }
-    </style>
+    
+        /* ===== PREMIUM MOBILE APP ENHANCEMENTS ===== */
+        @media (max-width: 768px) {
+
+            /* Smoother body */
+            body { -webkit-font-smoothing: antialiased; }
+
+            /* Top bar — glassy premium feel */
+            .top-bar {
+                background: rgba(255,255,255,0.96);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border-bottom: 1px solid rgba(0,0,0,0.07);
+                padding: 14px 16px;
+                gap: 10px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            }
+            .top-bar h1 {
+                font-size: 17px;
+                font-weight: 700;
+                letter-spacing: -0.3px;
+                flex: 1;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            /* Hamburger */
+            .hamburger-menu {
+                font-size: 22px;
+                padding: 4px 8px;
+                border-radius: 10px;
+                transition: background 0.2s;
+            }
+            .hamburger-menu:active { background: rgba(0,0,0,0.07); }
+
+            /* Sidebar full-height overlay style */
+            .sidebar {
+                width: 82vw;
+                max-width: 300px;
+                padding-top: 20px;
+                border-radius: 0 24px 24px 0;
+                box-shadow: 4px 0 40px rgba(0,0,0,0.25);
+            }
+            body.lang-ar .sidebar {
+                border-radius: 24px 0 0 24px;
+            }
+
+            /* Sidebar header */
+            .sidebar-header { padding: 0 20px 20px; }
+            .sidebar-header h2 { font-size: 22px; }
+
+            /* Nav items on mobile — bigger tap targets */
+            .nav-item {
+                padding: 14px 20px !important;
+                font-size: 14px;
+                min-height: 52px;
+            }
+            .nav-item i { font-size: 20px; }
+
+            /* Main content */
+            .main-content { margin-left: 0 !important; margin-right: 0 !important; }
+            .content-section { padding: 16px; }
+
+            /* Stat cards — 2 column on mobile */
+            .stats-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 12px;
+            }
+            .stat-card {
+                padding: 14px 12px;
+                border-radius: 14px;
+            }
+            .stat-value { font-size: 22px !important; }
+            .stat-label { font-size: 11px !important; }
+            .stat-icon  { width: 42px !important; height: 42px !important; font-size: 20px !important; border-radius: 12px !important; }
+
+            /* Summary grid */
+            .summary-grid { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+
+            /* Tables — card style on mobile */
+            .table-container { border-radius: 14px; overflow: hidden; }
+            .table-header { padding: 14px 16px; }
+            .table-header h3 { font-size: 15px; }
+
+            table thead { display: none; }
+            table tbody tr {
+                display: block;
+                margin-bottom: 12px;
+                border-radius: 12px;
+                border: 1.5px solid #eee;
+                padding: 12px 14px;
+                background: #fff;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 6px 0;
+                border: none;
+                font-size: 13px;
+                border-bottom: 1px solid #f5f5f5;
+            }
+            table tbody td:last-child { border-bottom: none; }
+            table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: #888;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+                flex-shrink: 0;
+                margin-right: 8px;
+            }
+            body.lang-ar table tbody td {
+                flex-direction: row-reverse;
+            }
+            body.lang-ar table tbody td::before {
+                margin-right: 0;
+                margin-left: 8px;
+            }
+
+            /* Buttons */
+            .btn { padding: 11px 16px; border-radius: 10px; font-size: 13px; }
+            .btn-icon { width: 36px; height: 36px; font-size: 14px; }
+
+            /* Modals */
+            .modal-content {
+                margin: 0;
+                border-radius: 24px 24px 0 0;
+                position: fixed;
+                bottom: 0; left: 0; right: 0;
+                width: 100%;
+                max-height: 90vh;
+                overflow-y: auto;
+                animation: slideModalUp 0.3s cubic-bezier(.4,0,.2,1);
+            }
+            @keyframes slideModalUp {
+                from { transform: translateY(100%); opacity: 0.5; }
+                to   { transform: translateY(0);    opacity: 1; }
+            }
+            .modal-body { padding: 16px; }
+            .modal-header { padding: 16px 20px; }
+
+            /* Search box */
+            .search-box {
+                padding: 10px 14px;
+                border-radius: 10px;
+                font-size: 14px;
+            }
+
+            /* Form groups */
+            .form-group { margin-bottom: 16px; }
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 13px 14px;
+                font-size: 16px; /* prevent iOS zoom */
+                border-radius: 10px;
+            }
+
+            /* Lang toggle in app */
+            .lang-btn {
+                padding: 7px 12px;
+                font-size: 12px;
+                border-radius: 8px;
+            }
+
+            /* Action buttons row */
+            .action-buttons { gap: 6px; flex-wrap: nowrap; }
+
+            /* Page title clamp */
+            #currentPageTitle {
+                font-size: 17px;
+                max-width: calc(100vw - 160px);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr !important; }
+            .summary-grid { grid-template-columns: 1fr !important; }
+            .content-section { padding: 12px; }
+            .top-bar { padding: 12px 12px; }
+        }
+
+        /* ===== END MOBILE ENHANCEMENTS ===== */
+</style>
 </head>
 <body>
     <!-- Global Loader -->
@@ -1789,76 +2530,101 @@
     </div>
 
     <!-- Login Page -->
-    <div id="loginPage" class="login-container">
-        <div style="text-align: right; margin-bottom: 10px;">
-            <button onclick="toggleLanguage()" class="lang-toggle-btn" style="background: none; border: 1px solid #ccc; border-radius: 8px; padding: 6px 14px; cursor: pointer; font-size: 13px; color: #555; font-family: inherit;">🌐 عربي / EN</button>
-        </div>
-        <div class="login-header">
-            <div class="login-logo">🚗</div>
-            <h1>Rihlati Fleet</h1>
-            <p>Fleet Management System</p>
-        </div>
-
-        <!-- Auth Tabs -->
-        <div style="display:flex; border-bottom:2px solid #e0e0e0; margin-bottom:20px;">
-            <button id="tabLoginBtn" onclick="switchAuthTab('login')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;font-family:inherit;">Sign In</button>
-            <button id="tabSignupBtn" onclick="switchAuthTab('signup')" style="flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:600;color:#999;cursor:pointer;font-family:inherit;">Create Account</button>
-        </div>
-
-        <!-- LOGIN FORM -->
-        <div id="loginTab">
-            <form class="login-form" id="loginForm">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" placeholder="Enter your email" required
-                           aria-label="Email" autocomplete="email">
+    <div id="loginPage">
+        <!-- Left panel: branding -->
+        <div class="login-brand-panel">
+            <div class="login-brand-inner">
+                <div class="login-brand-orb">🚗</div>
+                <div class="login-brand-name">Rihlati</div>
+                <div class="login-brand-tagline">Fleet Management System</div>
+                <div class="login-brand-dots">
+                    <span></span><span></span><span></span>
                 </div>
-                <div class="form-group">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <label style="margin-bottom:0;">Password</label>
-                        <button type="button" onclick="openForgotPassword()" style="background:none;border:none;color:var(--secondary-color);font-size:12px;cursor:pointer;padding:0;text-decoration:underline;">🔑 Forgot password?</button>
+            </div>
+            <div class="login-brand-footer">© 2026 Rihlati</div>
+        </div>
+
+        <!-- Right panel: form -->
+        <div class="login-form-panel">
+
+            <!-- Language toggle top right -->
+            <button onclick="toggleLanguage()" class="lang-toggle-btn" aria-label="Switch language">
+                🌐 <span>عربي</span>
+            </button>
+
+            <div class="login-form-inner">
+                <!-- Tab switcher -->
+                <div class="login-tabs">
+                    <button id="tabLoginBtn"  class="login-tab active"  onclick="switchAuthTab('login')">Sign In</button>
+                    <button id="tabSignupBtn" class="login-tab"         onclick="switchAuthTab('signup')">Create Account</button>
+                    <div class="login-tab-slider" id="loginTabSlider"></div>
+                </div>
+
+                <!-- SIGN IN -->
+                <div id="loginTab">
+                    <div class="login-welcome">
+                        <h2>Welcome back</h2>
+                        <p>Sign in to your account to continue</p>
                     </div>
-                    <input type="password" id="loginPassword" placeholder="Enter password" required
-                           aria-label="Password" autocomplete="current-password">
+                    <form class="login-form" id="loginForm" novalidate>
+                        <div class="lf-group">
+                            <span class="lf-icon">✉️</span>
+                            <input type="email" id="loginEmail" placeholder="Email address"
+                                   required autocomplete="email" aria-label="Email">
+                        </div>
+                        <div class="lf-group">
+                            <span class="lf-icon">🔒</span>
+                            <input type="password" id="loginPassword" placeholder="Password"
+                                   required autocomplete="current-password" aria-label="Password">
+                            <button type="button" class="lf-eye" onclick="togglePassVis('loginPassword', this)" aria-label="Show password">👁️</button>
+                        </div>
+                        <!-- Forgot password sits cleanly below the password field -->
+                        <div class="lf-forgot-row">
+                            <button type="button" class="lf-forgot-btn" onclick="openForgotPassword()" id="forgotPassBtn">
+                                Forgot password?
+                            </button>
+                        </div>
+                        <button type="submit" id="loginBtn" class="lf-submit">
+                            <span>Sign In</span>
+                        </button>
+                    </form>
                 </div>
-                <button type="submit" id="loginBtn">
-                    <span>Sign In</span>
-                </button>
-            </form>
-        </div>
 
-        <!-- SIGNUP FORM -->
-        <div id="signupTab" style="display:none;">
-            <form class="login-form" id="signupForm">
-                <div class="form-group">
-                    <label>Full Name <span style="color:red">*</span></label>
-                    <input type="text" id="signupName" placeholder="Your full name" required>
+                <!-- SIGN UP -->
+                <div id="signupTab" style="display:none;">
+                    <div class="login-welcome">
+                        <h2>Create account</h2>
+                        <p>Join Rihlati Fleet Management</p>
+                    </div>
+                    <form class="login-form" id="signupForm" novalidate>
+                        <div class="lf-group">
+                            <span class="lf-icon">👤</span>
+                            <input type="text" id="signupName" placeholder="Full name" required>
+                        </div>
+                        <div class="lf-group">
+                            <span class="lf-icon">✉️</span>
+                            <input type="email" id="signupEmail" placeholder="Email address"
+                                   required autocomplete="email">
+                        </div>
+                        <div class="lf-group">
+                            <span class="lf-icon">🔒</span>
+                            <input type="password" id="signupPassword" placeholder="Password (min 6 chars)"
+                                   required minlength="6" autocomplete="new-password">
+                            <button type="button" class="lf-eye" onclick="togglePassVis('signupPassword', this)" aria-label="Show password">👁️</button>
+                        </div>
+                        <button type="submit" id="signupBtn" class="lf-submit">
+                            <span>Create Account</span>
+                        </button>
+                        <p class="lf-note" id="signupNoteText">New accounts are assigned the Driver role by default. An admin can change your role after registration.</p>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <label>Email <span style="color:red">*</span></label>
-                    <input type="email" id="signupEmail" placeholder="your@email.com" required autocomplete="email">
-                </div>
-                <div class="form-group">
-                    <label>Password <span style="color:red">*</span></label>
-                    <input type="password" id="signupPassword" placeholder="Min 6 characters" required minlength="6" autocomplete="new-password">
-                </div>
-                <button type="submit" id="signupBtn">
-                    <span>Create Account</span>
-                </button>
-                <p style="font-size:12px;color:#888;text-align:center;margin-top:12px;">New accounts are assigned the <strong>Driver</strong> role by default. An admin can change your role after registration.</p>
-            </form>
-        </div>
 
-        <!-- Firebase status badge -->
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:16px;">
-            <span style="width:8px;height:8px;border-radius:50%;background:#4caf50;display:inline-block;box-shadow:0 0 0 3px rgba(76,175,80,0.25);"></span>
-            <span style="font-size:11px;color:#888;" class="fb-powered-text">Powered by Firebase — real-time cloud sync</span>
-        </div>
-
-        <div class="login-footer">
-            <p style="margin-top: 16px; font-size: 12px; color: #999; text-align:center;">
-                &copy; 2026 Rihlati Fleet Management System
-            </p>
+                <!-- hidden firebase badge (kept for applyLanguage selector) -->
+                <span class="fb-powered-text" style="display:none;">Powered by Firebase</span>
+                <div class="login-footer" style="display:none;">
+                    <p class="fb-powered-text"></p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2431,8 +3197,8 @@ service cloud.firestore {
             <!-- ===== VEHICLE MANAGEMENT ===== -->
             <div id="vehicleManagement" class="content-section">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
-                    <h2 style="color:var(--primary-color);">🚗 Vehicle Management</h2>
-                    <button class="btn btn-primary" onclick="showAddVehicleModal()">➕ Add Vehicle</button>
+                    <h2 style="color:var(--primary-color);">🚗 <span data-i18n="vehicleManagement">Vehicle Management</span></h2>
+                    <button class="btn btn-primary" onclick="showAddVehicleModal()">➕ <span data-i18n="addVehicle">Add Vehicle</span></button>
                 </div>
 
                 <!-- Summary Cards -->
@@ -2444,12 +3210,12 @@ service cloud.firestore {
                         <h3>🚘 Fleet Inventory</h3>
                         <div style="display:flex;gap:10px;flex-wrap:wrap;">
                             <select id="vehicleStatusFilter" class="search-box" style="width:150px;" onchange="loadVehiclesTable()">
-                                <option value="">All Status</option>
-                                <option value="active">Active</option>
-                                <option value="maintenance">In Maintenance</option>
-                                <option value="retired">Retired</option>
+                                <option value="" data-i18n="allStatus">All Status</option>
+                                <option value="active">✅ Active</option>
+                                <option value="maintenance">🔧 Maintenance</option>
+                                <option value="retired">❌ Retired</option>
                             </select>
-                            <input type="text" class="search-box" placeholder="Search vehicles..." onkeyup="filterVehicles(this.value)">
+                            <input type="text" class="search-box" data-i18n-placeholder="search" placeholder="Search vehicles..." onkeyup="filterVehicles(this.value)">
                         </div>
                     </div>
                     <div class="table-responsive">
@@ -3472,6 +4238,7 @@ service cloud.firestore {
 
         // Helper: refresh all UI sections based on permissions
         function refreshAllSections() {
+            if (!AppState.currentUser) return;
             const perms = getEffectivePermissions(AppState.currentUser);
             if (perms.canViewAllReports) { loadAdminDashboard(); loadAdminReports(); }
             if (perms.canViewMyReports) loadMyReports();
@@ -3699,14 +4466,22 @@ service cloud.firestore {
 
         // ==================== AUTH TAB SWITCH ====================
         function switchAuthTab(tab) {
-            document.getElementById('loginTab').style.display = tab === 'login' ? '' : 'none';
-            document.getElementById('signupTab').style.display = tab === 'signup' ? '' : 'none';
-            document.getElementById('tabLoginBtn').style.cssText = tab === 'login'
-                ? 'flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;'
-                : 'flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:600;color:#999;cursor:pointer;';
-            document.getElementById('tabSignupBtn').style.cssText = tab === 'signup'
-                ? 'flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:700;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;'
-                : 'flex:1;padding:10px;border:none;background:none;font-size:14px;font-weight:600;color:#999;cursor:pointer;';
+            const isLogin = tab === 'login';
+            document.getElementById('loginTab').style.display  = isLogin  ? '' : 'none';
+            document.getElementById('signupTab').style.display = !isLogin ? '' : 'none';
+            document.getElementById('tabLoginBtn').classList.toggle('active',  isLogin);
+            document.getElementById('tabSignupBtn').classList.toggle('active', !isLogin);
+            const slider = document.getElementById('loginTabSlider');
+            if (slider) slider.classList.toggle('right', !isLogin);
+        }
+
+        function togglePassVis(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            const show = inp.type === 'password';
+            inp.type = show ? 'text' : 'password';
+            btn.textContent = show ? '🙈' : '👁️';
+            btn.style.opacity = show ? '0.8' : '0.4';
         }
 
         // ==================== AUTHENTICATION ====================
@@ -3912,8 +4687,8 @@ service cloud.firestore {
                     <i>📥</i><span>${t('requests')}</span><span id="pendingTicketsBadge" style="background:#f44336;color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-${currentLang === 'ar' ? 'right' : 'left'}:6px;display:none;"></span></div>`;
             }
             if (perms.canManageVehicles) {
-                navItems += `<div class="nav-item" onclick="navigateTo('vehicleManagement', '🚗 Vehicles', this); loadVehiclesTable();" role="button" tabindex="0">
-                    <i>🚗</i><span>Vehicles</span></div>`;
+                navItems += `<div class="nav-item" onclick="navigateTo('vehicleManagement', '🚗 ${currentLang === 'ar' ? 'المركبات' : 'Vehicles'}', this); loadVehiclesTable();" role="button" tabindex="0">
+                    <i>🚗</i><span>${t('vehicles')}</span></div>`;
             }
             if (perms.canViewFinancial || perms.canManageFinancial) {
                 navItems += `<div class="nav-item" onclick="navigateTo('financialDashboard', '💰 ${t('financial')}', this); loadFinancialDashboard();" role="button" tabindex="0">
@@ -4860,8 +5635,8 @@ service cloud.firestore {
                 // App
                 appName: '🚗 Rihlati',
                 appSubtitle: 'Fleet Management',
-                fleetTitle: 'Rihlati Fleet',
-                fleetSubtitle: 'Fleet Management System',
+                fleetTitle: 'Rihlati',
+                fleetSubtitle: 'Fleet Management',
                 langToggle: 'عربي',
                 // Auth
                 signIn: 'Sign In',
@@ -4893,6 +5668,9 @@ service cloud.firestore {
                 sales: 'Sales & Marketing',
                 permissions: 'Permissions',
                 vehicles: 'Vehicles',
+                vehicleManagement: 'Vehicle Management',
+                search: 'Search...',
+                allStatus: 'All Status',
                 logout: 'Logout',
                 settings: 'Settings',
                 // Roles
@@ -4972,14 +5750,14 @@ service cloud.firestore {
                 confirm: 'Confirm',
                 sessionExpired: 'Session expired. Please login again.',
                 poweredBy: 'Powered by Firebase — real-time cloud sync',
-                copyright: '© 2026 Rihlati Fleet Management System',
+                copyright: '© 2026 Rihlati',
             },
             ar: {
                 // App
                 appName: '🚗 رحلتي',
                 appSubtitle: 'إدارة الأسطول',
-                fleetTitle: 'رحلتي للأساطيل',
-                fleetSubtitle: 'نظام إدارة الأسطول',
+                fleetTitle: 'رحلتي',
+                fleetSubtitle: 'إدارة الأسطول',
                 langToggle: 'EN',
                 // Auth
                 signIn: 'تسجيل الدخول',
@@ -5011,6 +5789,10 @@ service cloud.firestore {
                 sales: 'المبيعات والتسويق',
                 permissions: 'الصلاحيات',
                 vehicles: 'المركبات',
+                vehicleManagement: 'إدارة المركبات',
+                addVehicle: 'إضافة مركبة',
+                search: 'بحث...',
+                allStatus: 'جميع الحالات',
                 logout: 'تسجيل الخروج',
                 settings: 'الإعدادات',
                 // Roles
@@ -5090,7 +5872,41 @@ service cloud.firestore {
                 confirm: 'تأكيد',
                 sessionExpired: 'انتهت الجلسة. يرجى تسجيل الدخول مجدداً.',
                 poweredBy: 'مدعوم بـ Firebase — مزامنة فورية',
-                copyright: '© 2026 نظام إدارة أسطول رحلتي',
+                copyright: '© 2026 رحلتي',
+                // Vehicles
+                vehicleManagement: '🚗 إدارة المركبات',
+                addVehicle: '➕ إضافة مركبة',
+                editVehicle: 'تعديل المركبة',
+                deleteVehicle: 'حذف المركبة',
+                saveVehicle: 'حفظ المركبة',
+                totalVehiclesFleet: 'إجمالي الأسطول',
+                fleetCost: 'تكلفة الأسطول',
+                inMaintenance: 'تحت الصيانة',
+                // Common
+                search: 'بحث...',
+                allStatus: 'جميع الحالات',
+                noData: 'لا توجد بيانات',
+                loading: 'جارٍ التحميل…',
+                yes: 'نعم',
+                no: 'لا',
+                add: 'إضافة',
+                edit: 'تعديل',
+                delete: 'حذف',
+                reset: 'إعادة تعيين',
+                filter: 'تصفية',
+                export: 'تصدير',
+                all: 'الكل',
+                // Permissions
+                managePermissions: 'إدارة الصلاحيات',
+                // Tickets/Requests
+                requestManagement: 'إدارة الطلبات',
+                submitTicket: 'رفع طلب',
+                ticketHistory: 'سجل الطلبات',
+                // Financial
+                financialDashboard: 'لوحة المالية',
+                monthlyOverview: 'نظرة شهرية',
+                // Analytics
+                analyticsDashboard: 'لوحة التحليلات',
             }
         };
 
@@ -5107,62 +5923,91 @@ service cloud.firestore {
             applyLanguage();
         }
 
-        function applyLanguage() {
+        function applyLanguage() { try {
             const isRTL = currentLang === 'ar';
+            const html  = document.documentElement;
+
+            // ── Direction & lang attribute ────────────────────────────────
+            html.lang = currentLang;
+            html.dir  = isRTL ? 'rtl' : 'ltr';
             document.body.dir = isRTL ? 'rtl' : 'ltr';
-            document.documentElement.lang = currentLang;
-            document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
 
-            // Apply Arabic font class
-            if (isRTL) {
-                document.body.classList.add('lang-ar');
-            } else {
-                document.body.classList.remove('lang-ar');
-            }
+            // ── Font class ────────────────────────────────────────────────
+            document.body.classList.toggle('lang-ar', isRTL);
 
-            // Lang toggle buttons (all instances)
-            document.querySelectorAll('#langToggle').forEach(btn => btn.textContent = t('langToggle'));
-            // Login page language toggle
-            const loginLangBtn = document.querySelector('#loginPage .lang-toggle-btn');
-            if (loginLangBtn) loginLangBtn.textContent = `🌐 ${t('langToggle')}`;
+            // ── Page title ───────────────────────────────────────────────
+            document.title = isRTL ? 'رحلتي' : 'Rihlati';
 
-            // Login page
-            const loginTitle = document.querySelector('.login-header h1');
-            if (loginTitle) loginTitle.textContent = t('fleetTitle');
-            const loginSub = document.querySelector('.login-header p');
-            if (loginSub) loginSub.textContent = t('fleetSubtitle');
+            // ── Lang toggle buttons ──────────────────────────────────────
+            document.querySelectorAll('#langToggle, .lang-toggle-btn').forEach(btn => {
+                btn.textContent = isRTL ? '🌐 EN' : '🌐 عربي';
+            });
 
-            // Auth tabs
+            // ── Login page brand panel ───────────────────────────────────
+            const brandName = document.querySelector('.login-brand-name');
+            if (brandName) brandName.textContent = t('fleetTitle');
+            const brandTag  = document.querySelector('.login-brand-tagline');
+            if (brandTag)  brandTag.textContent  = t('fleetSubtitle');
+
             const tabLoginBtn = document.getElementById('tabLoginBtn');
-            if (tabLoginBtn) tabLoginBtn.textContent = t('tabSignIn');
+            if (tabLoginBtn) { tabLoginBtn.textContent = t('tabSignIn'); tabLoginBtn.classList.toggle('active', document.getElementById('loginTab').style.display !== 'none'); }
             const tabSignupBtn = document.getElementById('tabSignupBtn');
-            if (tabSignupBtn) tabSignupBtn.textContent = t('tabCreateAccount');
+            if (tabSignupBtn) { tabSignupBtn.textContent = t('tabCreateAccount'); tabSignupBtn.classList.toggle('active', document.getElementById('signupTab').style.display !== 'none'); }
 
-            // Login form labels and placeholders
-            const loginEmailLabel = document.querySelector('#loginTab label[for], #loginTab .form-group:first-child label');
-            if (loginEmailLabel) loginEmailLabel.childNodes[0].textContent = t('email') + ' ';
+            // ── Login welcome text ──────────────────────────────────────────
+            const welcomeH2 = document.querySelector('#loginTab .login-welcome h2');
+            const welcomeP  = document.querySelector('#loginTab .login-welcome p');
+            if (welcomeH2) welcomeH2.textContent = isRTL ? 'مرحباً بعودتك' : 'Welcome back';
+            if (welcomeP)  welcomeP.textContent  = isRTL ? 'سجّل دخولك للمتابعة' : 'Sign in to your account to continue';
+            const signupH2 = document.querySelector('#signupTab .login-welcome h2');
+            const signupP  = document.querySelector('#signupTab .login-welcome p');
+            if (signupH2) signupH2.textContent = isRTL ? 'إنشاء حساب' : 'Create account';
+            if (signupP)  signupP.textContent  = isRTL ? 'انضم إلى رحلتي لإدارة الأسطول' : 'Join Rihlati Fleet Management';
+
+            // ── Input placeholders ────────────────────────────────────────────
+            const emailIn = document.getElementById('loginEmail');
+            if (emailIn) emailIn.placeholder = isRTL ? 'البريد الإلكتروني' : 'Email address';
+            const passIn  = document.getElementById('loginPassword');
+            if (passIn)   passIn.placeholder  = isRTL ? 'كلمة المرور' : 'Password';
+
+            // Form labels (login) - set data-i18n labels safely
+            const loginEmailLabel = document.querySelector('#loginTab .form-group:first-child label');
+            if (loginEmailLabel) loginEmailLabel.firstChild.textContent = t('email');
+            const loginPassLabel  = document.querySelector('#loginTab .form-group:nth-child(2) label');
+            if (loginPassLabel)  loginPassLabel.firstChild.textContent  = t('password');
             const emailInput = document.getElementById('loginEmail');
             if (emailInput) emailInput.placeholder = t('enterEmail');
             const passInput = document.getElementById('loginPassword');
             if (passInput) passInput.placeholder = t('enterPassword');
-            const forgotBtn = document.querySelector('#loginTab .forgot-btn, button[onclick="openForgotPassword()"]');
+            const forgotBtn = document.getElementById('forgotPassBtn');
             if (forgotBtn) forgotBtn.textContent = t('forgotPassword');
             const loginBtn = document.getElementById('loginBtn');
             if (loginBtn && !loginBtn.disabled) loginBtn.innerHTML = `<span>${t('signIn')}</span>`;
 
-            // Signup form
+            // Form labels (signup) - safe update
+            const nameLabel  = document.querySelector('#signupTab .form-group:nth-child(1) label');
+            const sEmailLabel= document.querySelector('#signupTab .form-group:nth-child(2) label');
+            const sPassLabel = document.querySelector('#signupTab .form-group:nth-child(3) label');
+            if (nameLabel  && nameLabel.firstChild)  nameLabel.firstChild.textContent  = t('fullName');
+            if (sEmailLabel && sEmailLabel.firstChild) sEmailLabel.firstChild.textContent = t('email');
+            if (sPassLabel && sPassLabel.firstChild) sPassLabel.firstChild.textContent  = t('password');
+            const nameInput = document.getElementById('signupName');
+            if (nameInput) nameInput.placeholder = isRTL ? 'اسمك الكامل' : 'Your full name';
+            const emailInp = document.getElementById('signupEmail');
+            if (emailInp) emailInp.placeholder = isRTL ? 'بريدك@الإلكتروني.com' : 'your@email.com';
+            const passInp = document.getElementById('signupPassword');
+            if (passInp) passInp.placeholder = isRTL ? 'كلمة المرور (٦ أحرف على الأقل)' : 'Password (min 6 chars)';
             const signupBtn = document.getElementById('signupBtn');
             if (signupBtn && !signupBtn.disabled) signupBtn.innerHTML = `<span>${t('createAccount')}</span>`;
-            const signupNote = document.querySelector('#signupTab p');
-            if (signupNote && signupNote.querySelector('strong')) signupNote.textContent = t('newAccountNote');
+            const signupNote = document.getElementById('signupNoteText');
+            if (signupNote) signupNote.textContent = t('newAccountNote');
 
-            // Firebase badge & copyright
-            const fbBadge = document.querySelector('#loginPage .fb-powered-text');
+            const fbBadge = document.querySelector('.fb-powered-text');
             if (fbBadge) fbBadge.textContent = t('poweredBy');
-            const copyrightEl = document.querySelector('#loginPage .login-footer p');
+            const copyrightEl = document.querySelector('.login-footer p');
             if (copyrightEl) copyrightEl.textContent = t('copyright');
 
-            // Sidebar
+            // ── Sidebar ──────────────────────────────────────────────────
             const sidebarAppName = document.querySelector('.sidebar-header h2');
             if (sidebarAppName) sidebarAppName.textContent = t('appName');
             const sidebarSubtitle = document.querySelector('.sidebar-header p');
@@ -5172,32 +6017,36 @@ service cloud.firestore {
                 const rInfo = getRoleInfo(AppState.currentUser.role);
                 userRoleEl.textContent = isRTL ? rInfo.labelAr : rInfo.label;
             }
-
-            // Logout
             const logoutLabel = document.getElementById('logoutLabel');
             if (logoutLabel) logoutLabel.textContent = t('logout');
 
-            // Sync status
+            // ── Sync status ──────────────────────────────────────────────
             const syncText = document.getElementById('syncStatusText');
             if (syncText) {
-                const status = document.getElementById('syncStatus')?.className || '';
-                if (status.includes('connected')) syncText.textContent = t('syncConnected');
-                else syncText.textContent = t('syncConnecting');
+                const statusClass = document.getElementById('syncStatus')?.className || '';
+                syncText.textContent = statusClass.includes('connected') ? t('syncConnected') : t('syncConnecting');
             }
 
-            // Re-render nav menu items if logged in
-            if (AppState.currentUser) {
-                loadInterface();
-            }
-
-            // Walk data-i18n elements
+            // ── data-i18n elements ────────────────────────────────────────
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 const val = t(key);
-                if (val && typeof val === 'string') {
-                    el.textContent = val;
-                }
+                if (val && typeof val === 'string') el.textContent = val;
             });
+
+            // ── data-i18n-placeholder elements ───────────────────────────
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                const val = t(key);
+                if (val) el.placeholder = val;
+            });
+
+            // ── Re-render nav + all dynamic sections ────────────────────
+            if (AppState.currentUser) {
+                try { loadInterface(); } catch(e) { console.warn('loadInterface error', e); }
+                try { refreshAllSections(); } catch(e) { console.warn('refreshAllSections error', e); }
+            }
+        } catch(e) { console.error('applyLanguage error:', e); }
         }
 
         // Apply language on load
@@ -5205,6 +6054,8 @@ service cloud.firestore {
             currentLang = localStorage.getItem('rihlatiLang') || 'en';
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.documentElement.lang = currentLang;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.body.classList.toggle('lang-ar', currentLang === 'ar');
         })();
 
         // ==================== TICKET SYSTEM ====================
@@ -6328,7 +7179,7 @@ service cloud.firestore {
         }
 
         const APPS_SCRIPT_CODE = `// ============================================================
-// Rihlati Fleet Management — Google Apps Script Backend
+// Rihlati — Google Apps Script Backend
 // Paste this ENTIRE script into script.google.com
 // Deploy as Web App: Execute as Me, Access: Anyone
 // ============================================================
@@ -6337,9 +7188,9 @@ const SPREADSHEET_ID = ''; // Leave blank to auto-create, OR paste your Sheet ID
 
 function getSpreadsheet() {
   if (SPREADSHEET_ID) return SpreadsheetApp.openById(SPREADSHEET_ID);
-  const files = DriveApp.getFilesByName('Rihlati Fleet Data');
+  const files = DriveApp.getFilesByName('Rihlati Data');
   if (files.hasNext()) return SpreadsheetApp.open(files.next());
-  const ss = SpreadsheetApp.create('Rihlati Fleet Data');
+  const ss = SpreadsheetApp.create('Rihlati Data');
   ['Users','Reports','Tickets','Vehicles','Campaigns'].forEach(name => {
     if (!ss.getSheetByName(name)) ss.insertSheet(name);
   });
@@ -7086,21 +7937,21 @@ function json(obj) {
         function loadVehiclesTable() {
             const vehicles = AppState.vehicles || [];
             const statusFilter = (document.getElementById('vehicleStatusFilter')?.value || '').toLowerCase();
+            const ar = currentLang === 'ar';
 
             // Summary cards
             const total     = vehicles.length;
             const active    = vehicles.filter(v => v.status === 'active').length;
             const inMaint   = vehicles.filter(v => v.status === 'maintenance').length;
-            const retired   = vehicles.filter(v => v.status === 'retired').length;
             const totalCost = vehicles.reduce((s, v) => s + (parseFloat(v.purchasePrice) || 0), 0);
 
             const summaryEl = document.getElementById('vehicleSummaryCards');
             if (summaryEl) {
                 summaryEl.innerHTML = `
-                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${total}</div><div class="stat-label">Total Vehicles</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#1a237e,#3949ab);">🚗</div></div></div>
-                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${active}</div><div class="stat-label">Active</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#2e7d32,#43a047);">✅</div></div></div>
-                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${inMaint}</div><div class="stat-label">In Maintenance</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#e65100,#f57c00);">🔧</div></div></div>
-                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${Utils.formatCurrency(totalCost)}</div><div class="stat-label">Total Fleet Cost</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);">💰</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${total}</div><div class="stat-label">${ar ? 'إجمالي المركبات' : 'Total Vehicles'}</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#1a237e,#3949ab);">🚗</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${active}</div><div class="stat-label">${ar ? 'نشطة' : 'Active'}</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#2e7d32,#43a047);">✅</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${inMaint}</div><div class="stat-label">${ar ? 'تحت الصيانة' : 'In Maintenance'}</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#e65100,#f57c00);">🔧</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${Utils.formatCurrency(totalCost)}</div><div class="stat-label">${ar ? 'تكلفة الأسطول' : 'Total Fleet Cost'}</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);">💰</div></div></div>
                 `;
             }
 
@@ -7112,14 +7963,18 @@ function json(obj) {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">🚗</div>
-                        <h3>No vehicles found</h3>
-                        <p>Click "Add Vehicle" to register your first vehicle</p>
+                        <h3>${ar ? 'لا توجد مركبات' : 'No vehicles found'}</h3>
+                        <p>${ar ? 'انقر على "إضافة مركبة" لتسجيل أول مركبة' : 'Click "Add Vehicle" to register your first vehicle'}</p>
                     </div>`;
                 return;
             }
 
             const statusBadge = (s) => {
-                const map = { active: ['badge-approved','Active'], maintenance: ['badge-pending','Maintenance'], retired: ['badge-rejected','Retired'] };
+                const map = {
+                    active:      ['badge-approved', ar ? 'نشطة'        : 'Active'],
+                    maintenance: ['badge-pending',  ar ? 'تحت الصيانة' : 'Maintenance'],
+                    retired:     ['badge-rejected', ar ? 'متقاعدة'     : 'Retired'],
+                };
                 const [cls, lbl] = map[s] || ['badge-pending', s];
                 return `<span class="badge ${cls}">${lbl}</span>`;
             };
@@ -7127,9 +7982,14 @@ function json(obj) {
             container.innerHTML = `
                 <table id="vehiclesTable">
                     <thead><tr>
-                        <th>Plate</th><th>Make / Model</th><th>Year</th>
-                        <th>Purchase Price</th><th>Purchased From</th>
-                        <th>Purchase Date</th><th>Status</th><th>Actions</th>
+                        <th>${ar ? 'رقم اللوحة' : 'Plate'}</th>
+                        <th>${ar ? 'الصانع / الموديل' : 'Make / Model'}</th>
+                        <th>${ar ? 'السنة' : 'Year'}</th>
+                        <th>${ar ? 'سعر الشراء' : 'Purchase Price'}</th>
+                        <th>${ar ? 'المورد / البائع' : 'Purchased From'}</th>
+                        <th>${ar ? 'تاريخ الشراء' : 'Purchase Date'}</th>
+                        <th>${ar ? 'الحالة' : 'Status'}</th>
+                        <th>${ar ? 'الإجراءات' : 'Actions'}</th>
                     </tr></thead>
                     <tbody id="vehiclesTableBody">
                         ${filtered.map(v => `
@@ -7142,9 +8002,9 @@ function json(obj) {
                             <td>${v.purchaseDate ? Utils.formatDate(v.purchaseDate) : '—'}</td>
                             <td>${statusBadge(v.status || 'active')}</td>
                             <td class="action-buttons">
-                                <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewVehicle('${v.id}')" title="View Details">👁️</button>
-                                <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="editVehicle('${v.id}')" title="Edit">✏️</button>
-                                <button class="btn-icon" style="background:#ffebee;color:#c62828;" onclick="deleteVehicle('${v.id}')" title="Delete">🗑️</button>
+                                <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewVehicle('${v.id}')" title="${ar ? 'عرض' : 'View Details'}">👁️</button>
+                                <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="editVehicle('${v.id}')" title="${ar ? 'تعديل' : 'Edit'}">✏️</button>
+                                <button class="btn-icon" style="background:#ffebee;color:#c62828;" onclick="deleteVehicle('${v.id}')" title="${ar ? 'حذف' : 'Delete'}">🗑️</button>
                             </td>
                         </tr>`).join('')}
                     </tbody>
@@ -7271,16 +8131,20 @@ function json(obj) {
             const driver = v.assignedDriver
                 ? (AppState.users || []).find(u => String(u.id) === String(v.assignedDriver))
                 : null;
-
-            const statusMap = { active: ['✅','Active','#4caf50'], maintenance: ['🔧','In Maintenance','#ff9800'], retired: ['❌','Retired','#f44336'] };
+            const ar = currentLang === 'ar';
+            const statusMap = {
+                active:      ['✅', ar ? 'نشطة'        : 'Active',          '#4caf50'],
+                maintenance: ['🔧', ar ? 'تحت الصيانة' : 'In Maintenance',  '#ff9800'],
+                retired:     ['❌', ar ? 'متقاعدة'     : 'Retired',         '#f44336'],
+            };
             const [sIcon, sLabel, sColor] = statusMap[v.status] || ['❓', v.status, '#999'];
 
-            const row = (label, val) => val ? `<div style="display:flex;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:12px;">
-                <div style="width:160px;color:#888;font-size:13px;flex-shrink:0;">${label}</div>
-                <div style="font-weight:500;flex:1;">${val}</div></div>` : '';
+            const row = (label, val) => val ? `<div style="display:flex;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:12px;${ar ? 'flex-direction:row-reverse;' : ''}">
+                <div style="width:160px;color:#888;font-size:13px;flex-shrink:0;${ar ? 'text-align:right;' : ''}">${label}</div>
+                <div style="font-weight:500;flex:1;${ar ? 'text-align:right;' : ''}">${val}</div></div>` : '';
 
             document.getElementById('vehicleDetailContent').innerHTML = `
-                <div style="display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(135deg,#1a237e,#3949ab);border-radius:12px;color:white;margin-bottom:20px;">
+                <div style="display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(135deg,#1a237e,#3949ab);border-radius:12px;color:white;margin-bottom:20px;${ar ? 'flex-direction:row-reverse;text-align:right;' : ''}">
                     <div style="font-size:48px;">🚗</div>
                     <div>
                         <div style="font-size:22px;font-weight:700;">${Utils.escapeHTML(v.plate)}</div>
@@ -7288,26 +8152,26 @@ function json(obj) {
                         <div style="margin-top:6px;"><span style="background:${sColor};padding:3px 10px;border-radius:10px;font-size:12px;">${sIcon} ${sLabel}</span></div>
                     </div>
                 </div>
-                <div style="margin-bottom:8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Vehicle Info</div>
-                ${row('Color', Utils.escapeHTML(v.color || ''))}
-                ${row('VIN / Chassis', Utils.escapeHTML(v.vin || ''))}
-                ${row('Fuel Type', (v.fuelType||'').charAt(0).toUpperCase()+(v.fuelType||'').slice(1))}
-                ${row('Odometer', v.odometer ? `${v.odometer.toLocaleString()} km` : '')}
-                ${row('Assigned Driver', driver ? Utils.escapeHTML(driver.name) : (v.assignedDriver ? 'Unknown' : 'Unassigned'))}
+                <div style="margin-bottom:8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;${ar ? 'text-align:right;' : ''}">${ar ? 'معلومات المركبة' : 'Vehicle Info'}</div>
+                ${row(ar ? 'اللون' : 'Color', Utils.escapeHTML(v.color || ''))}
+                ${row(ar ? 'رقم الهيكل' : 'VIN / Chassis', Utils.escapeHTML(v.vin || ''))}
+                ${row(ar ? 'نوع الوقود' : 'Fuel Type', (v.fuelType||'').charAt(0).toUpperCase()+(v.fuelType||'').slice(1))}
+                ${row(ar ? 'عداد الكيلومتر' : 'Odometer', v.odometer ? `${v.odometer.toLocaleString()} km` : '')}
+                ${row(ar ? 'السائق المخصص' : 'Assigned Driver', driver ? Utils.escapeHTML(driver.name) : (v.assignedDriver ? (ar ? 'غير معروف' : 'Unknown') : (ar ? 'غير محدد' : 'Unassigned')))}
 
-                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Purchase Details</div>
-                ${row('Purchase Date', v.purchaseDate ? Utils.formatDate(v.purchaseDate) : '')}
-                ${row('Purchase Price', v.purchasePrice ? Utils.formatCurrency(parseFloat(v.purchasePrice)) : '')}
-                ${row('Purchased From', Utils.escapeHTML(v.purchasedFrom || ''))}
-                ${row('Dealer City', Utils.escapeHTML(v.dealerCity || ''))}
-                ${row('Warranty Expiry', v.warrantyExpiry ? Utils.formatDate(v.warrantyExpiry) : '')}
+                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;${ar ? 'text-align:right;' : ''}">${ar ? 'معلومات الشراء' : 'Purchase Details'}</div>
+                ${row(ar ? 'تاريخ الشراء' : 'Purchase Date', v.purchaseDate ? Utils.formatDate(v.purchaseDate) : '')}
+                ${row(ar ? 'سعر الشراء' : 'Purchase Price', v.purchasePrice ? Utils.formatCurrency(parseFloat(v.purchasePrice)) : '')}
+                ${row(ar ? 'المورد / البائع' : 'Purchased From', Utils.escapeHTML(v.purchasedFrom || ''))}
+                ${row(ar ? 'مدينة الموزع' : 'Dealer City', Utils.escapeHTML(v.dealerCity || ''))}
+                ${row(ar ? 'انتهاء الضمان' : 'Warranty Expiry', v.warrantyExpiry ? Utils.formatDate(v.warrantyExpiry) : '')}
 
-                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Registration & Insurance</div>
-                ${row('Registration Expiry', v.regExpiry ? Utils.formatDate(v.regExpiry) : '')}
-                ${row('Insurance Expiry', v.insExpiry ? Utils.formatDate(v.insExpiry) : '')}
+                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;${ar ? 'text-align:right;' : ''}">${ar ? 'التسجيل والتأمين' : 'Registration & Insurance'}</div>
+                ${row(ar ? 'انتهاء التسجيل' : 'Registration Expiry', v.regExpiry ? Utils.formatDate(v.regExpiry) : '')}
+                ${row(ar ? 'انتهاء التأمين' : 'Insurance Expiry', v.insExpiry ? Utils.formatDate(v.insExpiry) : '')}
 
-                ${v.notes ? `<div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Notes</div>
-                <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-size:14px;">${Utils.escapeHTML(v.notes)}</div>` : ''}
+                ${v.notes ? `<div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;${ar ? 'text-align:right;' : ''}">${ar ? 'ملاحظات' : 'Notes'}</div>
+                <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-size:14px;${ar ? 'text-align:right;' : ''}">${Utils.escapeHTML(v.notes)}</div>` : ''}
             `;
             openModal('vehicleDetailModal');
         }
@@ -7315,10 +8179,14 @@ function json(obj) {
         function deleteVehicle(vehicleId) {
             const v = (AppState.vehicles || []).find(v => String(v.id) === String(vehicleId));
             if (!v) return;
-            if (!confirm(`Delete vehicle ${v.plate} (${v.make} ${v.model})? This cannot be undone.`)) return;
+            const ar = currentLang === 'ar';
+            const msg = ar
+                ? `هل تريد حذف المركبة ${v.plate} (${v.make} ${v.model})؟ لا يمكن التراجع عن هذا الإجراء.`
+                : `Delete vehicle ${v.plate} (${v.make} ${v.model})? This cannot be undone.`;
+            if (!confirm(msg)) return;
             AppState.vehicles = (AppState.vehicles || []).filter(v => String(v.id) !== String(vehicleId));
             loadVehiclesTable();
-            Utils.showToast('🗑️ Vehicle removed from fleet.');
+            Utils.showToast(ar ? '🗑️ تم حذف المركبة من الأسطول.' : '🗑️ Vehicle removed from fleet.');
         }
 
         // ==================== KEYBOARD NAVIGATION ====================

@@ -2428,6 +2428,166 @@ service cloud.firestore {
                 </div>
             </div>
 
+            <!-- ===== VEHICLE MANAGEMENT ===== -->
+            <div id="vehicleManagement" class="content-section">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <h2 style="color:var(--primary-color);">🚗 Vehicle Management</h2>
+                    <button class="btn btn-primary" onclick="showAddVehicleModal()">➕ Add Vehicle</button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="stats-grid" id="vehicleSummaryCards" style="margin-bottom:24px;"></div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <div class="table-header">
+                        <h3>🚘 Fleet Inventory</h3>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <select id="vehicleStatusFilter" class="search-box" style="width:150px;" onchange="loadVehiclesTable()">
+                                <option value="">All Status</option>
+                                <option value="active">Active</option>
+                                <option value="maintenance">In Maintenance</option>
+                                <option value="retired">Retired</option>
+                            </select>
+                            <input type="text" class="search-box" placeholder="Search vehicles..." onkeyup="filterVehicles(this.value)">
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <div id="vehiclesTableContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Add/Edit Modal -->
+            <div id="vehicleModal" class="modal">
+                <div class="modal-content" style="max-width:700px;">
+                    <div class="modal-header">
+                        <h3 id="vehicleModalTitle">➕ Add Vehicle</h3>
+                        <button class="modal-close" onclick="closeModal('vehicleModal')">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="vehicleForm" onsubmit="return false;">
+                            <input type="hidden" id="editVehicleId">
+
+                            <div class="form-section-divider">🚗 Vehicle Information</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Plate Number <span class="required">*</span></label>
+                                    <input type="text" id="vPlate" placeholder="e.g. ABC-1234" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Make / Brand <span class="required">*</span></label>
+                                    <input type="text" id="vMake" placeholder="e.g. Toyota" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Model <span class="required">*</span></label>
+                                    <input type="text" id="vModel" placeholder="e.g. Hilux" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Year <span class="required">*</span></label>
+                                    <input type="number" id="vYear" min="1990" max="2030" placeholder="e.g. 2022" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Color</label>
+                                    <input type="text" id="vColor" placeholder="e.g. White">
+                                </div>
+                                <div class="form-group">
+                                    <label>VIN / Chassis Number</label>
+                                    <input type="text" id="vVin" placeholder="e.g. 1HGBH41JXMN109186">
+                                </div>
+                                <div class="form-group">
+                                    <label>Fuel Type</label>
+                                    <select id="vFuelType">
+                                        <option value="petrol">Petrol</option>
+                                        <option value="diesel">Diesel</option>
+                                        <option value="electric">Electric</option>
+                                        <option value="hybrid">Hybrid</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Status <span class="required">*</span></label>
+                                    <select id="vStatus" required>
+                                        <option value="active">Active</option>
+                                        <option value="maintenance">In Maintenance</option>
+                                        <option value="retired">Retired</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Current Odometer (km)</label>
+                                    <input type="number" id="vOdometer" min="0" placeholder="e.g. 45000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Assigned Driver</label>
+                                    <select id="vAssignedDriver">
+                                        <option value="">— Unassigned —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-section-divider" style="margin-top:20px;">🛒 Purchase Information</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Purchase Date</label>
+                                    <input type="date" id="vPurchaseDate">
+                                </div>
+                                <div class="form-group">
+                                    <label>Purchase Price (SAR)</label>
+                                    <input type="number" id="vPurchasePrice" min="0" step="0.01" placeholder="e.g. 95000">
+                                </div>
+                                <div class="form-group">
+                                    <label>Purchased From (Dealer/Seller)</label>
+                                    <input type="text" id="vPurchasedFrom" placeholder="e.g. Al-Jazirah Motors">
+                                </div>
+                                <div class="form-group">
+                                    <label>Dealer City</label>
+                                    <input type="text" id="vDealerCity" placeholder="e.g. Riyadh">
+                                </div>
+                                <div class="form-group" style="grid-column:1/-1;">
+                                    <label>Warranty Expiry Date</label>
+                                    <input type="date" id="vWarrantyExpiry">
+                                </div>
+                            </div>
+
+                            <div class="form-section-divider" style="margin-top:20px;">📋 Registration & Insurance</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Registration Expiry</label>
+                                    <input type="date" id="vRegExpiry">
+                                </div>
+                                <div class="form-group">
+                                    <label>Insurance Expiry</label>
+                                    <input type="date" id="vInsExpiry">
+                                </div>
+                                <div class="form-group" style="grid-column:1/-1;">
+                                    <label>Notes</label>
+                                    <textarea id="vNotes" rows="3" placeholder="Any additional notes..."></textarea>
+                                </div>
+                            </div>
+
+                            <div id="vehicleSaveError" style="display:none;color:var(--danger-color);margin-top:10px;padding:10px;background:#ffebee;border-radius:8px;"></div>
+
+                            <div style="display:flex;gap:12px;margin-top:20px;">
+                                <button type="button" class="btn btn-primary" style="flex:1;" onclick="saveVehicle()">💾 Save Vehicle</button>
+                                <button type="button" class="btn btn-secondary" onclick="closeModal('vehicleModal')">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Detail Modal -->
+            <div id="vehicleDetailModal" class="modal">
+                <div class="modal-content" style="max-width:600px;">
+                    <div class="modal-header">
+                        <h3>🚗 Vehicle Details</h3>
+                        <button class="modal-close" onclick="closeModal('vehicleDetailModal')">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="vehicleDetailContent"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- ===== FINANCIAL DASHBOARD (Accountant - View Only) ===== -->
             <div id="financialDashboard" class="content-section">
                 <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
@@ -3330,6 +3490,7 @@ service cloud.firestore {
                 else if (id === 'myReports') loadMyReports();
                 else if (id === 'myTickets') loadMyTickets();
                 else if (id === 'adminTickets') loadAdminTickets();
+                else if (id === 'vehicleManagement') loadVehiclesTable();
                 else if (id === 'financialDashboard') loadFinancialDashboard();
                 else if (id === 'salesDashboard') loadSalesDashboard();
             }
@@ -3409,6 +3570,7 @@ service cloud.firestore {
             canManageTickets:   { label: 'Manage Requests',      desc: 'Approve or reject all requests',   group: 3 },
             canManageFinancial: { label: 'Manage Financial',     desc: 'Full financial management access',  group: 3 },
             canManageCampaigns: { label: 'Sales & Marketing',    desc: 'Manage campaigns and marketing',   group: 3 },
+            canManageVehicles:  { label: 'Manage Vehicles',      desc: 'Add, edit, delete vehicle records', group: 2 },
         };
 
         const ROLES = {
@@ -3419,7 +3581,7 @@ service cloud.firestore {
                 canApprove: true, canReject: true, canManageUsers: true,
                 canSubmitReport: false, canViewAllReports: true, canViewAnalytics: true, canViewMyReports: false,
                 canSubmitTicket: false, canManageTickets: true, canManageFinancial: true, canViewFinancial: true, canManageCampaigns: true,
-                canManagePermissions: true,
+                canManagePermissions: true, canManageVehicles: true,
             },
             manager: {
                 label: 'Manager', labelAr: 'مدير', icon: '👔',
@@ -3428,6 +3590,7 @@ service cloud.firestore {
                 canApprove: true, canReject: true, canManageUsers: false,
                 canSubmitReport: false, canViewAllReports: true, canViewAnalytics: true, canViewMyReports: false,
                 canSubmitTicket: false, canManageTickets: true, canManageFinancial: false, canManageCampaigns: false,
+                canManageVehicles: true,
             },
             supervisor: {
                 label: 'Supervisor', labelAr: 'مشرف', icon: '👷',
@@ -3688,6 +3851,9 @@ service cloud.firestore {
                 case 'adminTickets':
                     loadAdminTickets();
                     break;
+                case 'vehicleManagement':
+                    loadVehiclesTable();
+                    break;
                 case 'financialDashboard':
                     loadFinancialDashboard();
                     break;
@@ -3744,6 +3910,10 @@ service cloud.firestore {
             if (perms.canManageTickets) {
                 navItems += `<div class="nav-item" onclick="navigateTo('adminTickets', '${t('requests')}', this); loadAdminTickets();" role="button" tabindex="0">
                     <i>📥</i><span>${t('requests')}</span><span id="pendingTicketsBadge" style="background:#f44336;color:white;border-radius:10px;padding:1px 7px;font-size:11px;margin-${currentLang === 'ar' ? 'right' : 'left'}:6px;display:none;"></span></div>`;
+            }
+            if (perms.canManageVehicles) {
+                navItems += `<div class="nav-item" onclick="navigateTo('vehicleManagement', '🚗 Vehicles', this); loadVehiclesTable();" role="button" tabindex="0">
+                    <i>🚗</i><span>Vehicles</span></div>`;
             }
             if (perms.canViewFinancial || perms.canManageFinancial) {
                 navItems += `<div class="nav-item" onclick="navigateTo('financialDashboard', '💰 ${t('financial')}', this); loadFinancialDashboard();" role="button" tabindex="0">
@@ -6531,7 +6701,7 @@ function json(obj) {
                         </div>
                         <div class="perm-card-actions">
                             <button class="btn btn-primary" style="padding:9px 16px;font-size:13px;min-height:40px;" onclick="showPermissionsModal(${u.id})">🔐 Manage</button>
-                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions(${u.id})" title="Reset to role defaults">↺ Reset</button>` : ''}
+                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions('${u.id}')" title="Reset to role defaults">↺ Reset</button>` : ''}
                         </div>
                     </div>
                     <div class="perm-chips-row">
@@ -6909,6 +7079,246 @@ function json(obj) {
                 const nav = document.querySelector('.nav-item[onclick*="myReports"]');
                 if (nav) nav.click();
             }, 1500);
+        }
+
+        // ==================== VEHICLE MANAGEMENT ====================
+
+        function loadVehiclesTable() {
+            const vehicles = AppState.vehicles || [];
+            const statusFilter = (document.getElementById('vehicleStatusFilter')?.value || '').toLowerCase();
+
+            // Summary cards
+            const total     = vehicles.length;
+            const active    = vehicles.filter(v => v.status === 'active').length;
+            const inMaint   = vehicles.filter(v => v.status === 'maintenance').length;
+            const retired   = vehicles.filter(v => v.status === 'retired').length;
+            const totalCost = vehicles.reduce((s, v) => s + (parseFloat(v.purchasePrice) || 0), 0);
+
+            const summaryEl = document.getElementById('vehicleSummaryCards');
+            if (summaryEl) {
+                summaryEl.innerHTML = `
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${total}</div><div class="stat-label">Total Vehicles</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#1a237e,#3949ab);">🚗</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${active}</div><div class="stat-label">Active</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#2e7d32,#43a047);">✅</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${inMaint}</div><div class="stat-label">In Maintenance</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#e65100,#f57c00);">🔧</div></div></div>
+                    <div class="stat-card"><div class="stat-header"><div><div class="stat-value">${Utils.formatCurrency(totalCost)}</div><div class="stat-label">Total Fleet Cost</div></div><div class="stat-icon" style="background:linear-gradient(135deg,#6a1b9a,#8e24aa);">💰</div></div></div>
+                `;
+            }
+
+            const filtered = statusFilter ? vehicles.filter(v => v.status === statusFilter) : vehicles;
+            const container = document.getElementById('vehiclesTableContainer');
+            if (!container) return;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🚗</div>
+                        <h3>No vehicles found</h3>
+                        <p>Click "Add Vehicle" to register your first vehicle</p>
+                    </div>`;
+                return;
+            }
+
+            const statusBadge = (s) => {
+                const map = { active: ['badge-approved','Active'], maintenance: ['badge-pending','Maintenance'], retired: ['badge-rejected','Retired'] };
+                const [cls, lbl] = map[s] || ['badge-pending', s];
+                return `<span class="badge ${cls}">${lbl}</span>`;
+            };
+
+            container.innerHTML = `
+                <table id="vehiclesTable">
+                    <thead><tr>
+                        <th>Plate</th><th>Make / Model</th><th>Year</th>
+                        <th>Purchase Price</th><th>Purchased From</th>
+                        <th>Purchase Date</th><th>Status</th><th>Actions</th>
+                    </tr></thead>
+                    <tbody id="vehiclesTableBody">
+                        ${filtered.map(v => `
+                        <tr data-search="${Utils.escapeHTML((v.plate||'').toLowerCase())} ${Utils.escapeHTML((v.make||'').toLowerCase())} ${Utils.escapeHTML((v.model||'').toLowerCase())} ${Utils.escapeHTML((v.purchasedFrom||'').toLowerCase())}">
+                            <td><strong>${Utils.escapeHTML(v.plate || 'N/A')}</strong></td>
+                            <td>${Utils.escapeHTML(v.make || '')} ${Utils.escapeHTML(v.model || '')}</td>
+                            <td>${v.year || '—'}</td>
+                            <td>${v.purchasePrice ? Utils.formatCurrency(parseFloat(v.purchasePrice)) : '—'}</td>
+                            <td>${Utils.escapeHTML(v.purchasedFrom || '—')}</td>
+                            <td>${v.purchaseDate ? Utils.formatDate(v.purchaseDate) : '—'}</td>
+                            <td>${statusBadge(v.status || 'active')}</td>
+                            <td class="action-buttons">
+                                <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewVehicle('${v.id}')" title="View Details">👁️</button>
+                                <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="editVehicle('${v.id}')" title="Edit">✏️</button>
+                                <button class="btn-icon" style="background:#ffebee;color:#c62828;" onclick="deleteVehicle('${v.id}')" title="Delete">🗑️</button>
+                            </td>
+                        </tr>`).join('')}
+                    </tbody>
+                </table>`;
+        }
+
+        function filterVehicles(term) {
+            const rows = document.querySelectorAll('#vehiclesTableBody tr');
+            const t = term.toLowerCase();
+            rows.forEach(row => {
+                row.style.display = (row.getAttribute('data-search') || '').includes(t) ? '' : 'none';
+            });
+        }
+
+        function showAddVehicleModal() {
+            document.getElementById('vehicleModalTitle').textContent = '➕ Add Vehicle';
+            document.getElementById('editVehicleId').value = '';
+            document.getElementById('vehicleForm').reset();
+            document.getElementById('vehicleSaveError').style.display = 'none';
+            // Populate driver dropdown
+            _populateDriverDropdown('');
+            openModal('vehicleModal');
+        }
+
+        function _populateDriverDropdown(selectedId) {
+            const sel = document.getElementById('vAssignedDriver');
+            const drivers = (AppState.users || []).filter(u => u.role === 'driver' && u.status === 'active');
+            sel.innerHTML = `<option value="">— Unassigned —</option>` +
+                drivers.map(d => `<option value="${d.id}" ${String(d.id) === String(selectedId) ? 'selected' : ''}>${Utils.escapeHTML(d.name)}</option>`).join('');
+        }
+
+        function editVehicle(vehicleId) {
+            const v = (AppState.vehicles || []).find(v => String(v.id) === String(vehicleId));
+            if (!v) return;
+            document.getElementById('vehicleModalTitle').textContent = '✏️ Edit Vehicle';
+            document.getElementById('editVehicleId').value = v.id;
+            document.getElementById('vPlate').value         = v.plate || '';
+            document.getElementById('vMake').value          = v.make || '';
+            document.getElementById('vModel').value         = v.model || '';
+            document.getElementById('vYear').value          = v.year || '';
+            document.getElementById('vColor').value         = v.color || '';
+            document.getElementById('vVin').value           = v.vin || '';
+            document.getElementById('vFuelType').value      = v.fuelType || 'petrol';
+            document.getElementById('vStatus').value        = v.status || 'active';
+            document.getElementById('vOdometer').value      = v.odometer || '';
+            document.getElementById('vPurchaseDate').value  = v.purchaseDate || '';
+            document.getElementById('vPurchasePrice').value = v.purchasePrice || '';
+            document.getElementById('vPurchasedFrom').value = v.purchasedFrom || '';
+            document.getElementById('vDealerCity').value    = v.dealerCity || '';
+            document.getElementById('vWarrantyExpiry').value= v.warrantyExpiry || '';
+            document.getElementById('vRegExpiry').value     = v.regExpiry || '';
+            document.getElementById('vInsExpiry').value     = v.insExpiry || '';
+            document.getElementById('vNotes').value         = v.notes || '';
+            document.getElementById('vehicleSaveError').style.display = 'none';
+            _populateDriverDropdown(v.assignedDriver || '');
+            openModal('vehicleModal');
+        }
+
+        function saveVehicle() {
+            const errEl  = document.getElementById('vehicleSaveError');
+            const showErr = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+            errEl.style.display = 'none';
+
+            const plate = document.getElementById('vPlate').value.trim();
+            const make  = document.getElementById('vMake').value.trim();
+            const model = document.getElementById('vModel').value.trim();
+            const year  = document.getElementById('vYear').value.trim();
+
+            if (!plate) return showErr('❌ Plate number is required.');
+            if (!make)  return showErr('❌ Make / Brand is required.');
+            if (!model) return showErr('❌ Model is required.');
+            if (!year)  return showErr('❌ Year is required.');
+
+            const editId = document.getElementById('editVehicleId').value;
+            const vehicles = AppState.vehicles || [];
+
+            // Check duplicate plate
+            const dupPlate = vehicles.find(v => v.plate.toLowerCase() === plate.toLowerCase() && String(v.id) !== String(editId));
+            if (dupPlate) return showErr('❌ A vehicle with this plate number already exists.');
+
+            const vehicleData = {
+                plate:          plate,
+                make:           make,
+                model:          model,
+                year:           parseInt(year),
+                color:          document.getElementById('vColor').value.trim(),
+                vin:            document.getElementById('vVin').value.trim(),
+                fuelType:       document.getElementById('vFuelType').value,
+                status:         document.getElementById('vStatus').value,
+                odometer:       parseInt(document.getElementById('vOdometer').value) || 0,
+                assignedDriver: document.getElementById('vAssignedDriver').value,
+                purchaseDate:   document.getElementById('vPurchaseDate').value,
+                purchasePrice:  parseFloat(document.getElementById('vPurchasePrice').value) || 0,
+                purchasedFrom:  document.getElementById('vPurchasedFrom').value.trim(),
+                dealerCity:     document.getElementById('vDealerCity').value.trim(),
+                warrantyExpiry: document.getElementById('vWarrantyExpiry').value,
+                regExpiry:      document.getElementById('vRegExpiry').value,
+                insExpiry:      document.getElementById('vInsExpiry').value,
+                notes:          document.getElementById('vNotes').value.trim(),
+                updatedAt:      new Date().toISOString(),
+            };
+
+            if (editId) {
+                const idx = vehicles.findIndex(v => String(v.id) === String(editId));
+                if (idx !== -1) {
+                    AppState.vehicles = vehicles.map((v, i) => i === idx ? { ...v, ...vehicleData } : v);
+                }
+            } else {
+                vehicleData.id = Utils.generateId(vehicles);
+                vehicleData.createdAt = new Date().toISOString();
+                vehicleData.createdBy = AppState.currentUser?.name || 'Admin';
+                AppState.vehicles = [...vehicles, vehicleData];
+            }
+
+            closeModal('vehicleModal');
+            loadVehiclesTable();
+            Utils.showToast(editId ? '✅ Vehicle updated!' : '✅ Vehicle added to fleet!');
+        }
+
+        function viewVehicle(vehicleId) {
+            const v = (AppState.vehicles || []).find(v => String(v.id) === String(vehicleId));
+            if (!v) return;
+
+            const driver = v.assignedDriver
+                ? (AppState.users || []).find(u => String(u.id) === String(v.assignedDriver))
+                : null;
+
+            const statusMap = { active: ['✅','Active','#4caf50'], maintenance: ['🔧','In Maintenance','#ff9800'], retired: ['❌','Retired','#f44336'] };
+            const [sIcon, sLabel, sColor] = statusMap[v.status] || ['❓', v.status, '#999'];
+
+            const row = (label, val) => val ? `<div style="display:flex;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:12px;">
+                <div style="width:160px;color:#888;font-size:13px;flex-shrink:0;">${label}</div>
+                <div style="font-weight:500;flex:1;">${val}</div></div>` : '';
+
+            document.getElementById('vehicleDetailContent').innerHTML = `
+                <div style="display:flex;align-items:center;gap:16px;padding:16px;background:linear-gradient(135deg,#1a237e,#3949ab);border-radius:12px;color:white;margin-bottom:20px;">
+                    <div style="font-size:48px;">🚗</div>
+                    <div>
+                        <div style="font-size:22px;font-weight:700;">${Utils.escapeHTML(v.plate)}</div>
+                        <div style="opacity:0.85;">${Utils.escapeHTML(v.make)} ${Utils.escapeHTML(v.model)} · ${v.year || ''}</div>
+                        <div style="margin-top:6px;"><span style="background:${sColor};padding:3px 10px;border-radius:10px;font-size:12px;">${sIcon} ${sLabel}</span></div>
+                    </div>
+                </div>
+                <div style="margin-bottom:8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Vehicle Info</div>
+                ${row('Color', Utils.escapeHTML(v.color || ''))}
+                ${row('VIN / Chassis', Utils.escapeHTML(v.vin || ''))}
+                ${row('Fuel Type', (v.fuelType||'').charAt(0).toUpperCase()+(v.fuelType||'').slice(1))}
+                ${row('Odometer', v.odometer ? `${v.odometer.toLocaleString()} km` : '')}
+                ${row('Assigned Driver', driver ? Utils.escapeHTML(driver.name) : (v.assignedDriver ? 'Unknown' : 'Unassigned'))}
+
+                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Purchase Details</div>
+                ${row('Purchase Date', v.purchaseDate ? Utils.formatDate(v.purchaseDate) : '')}
+                ${row('Purchase Price', v.purchasePrice ? Utils.formatCurrency(parseFloat(v.purchasePrice)) : '')}
+                ${row('Purchased From', Utils.escapeHTML(v.purchasedFrom || ''))}
+                ${row('Dealer City', Utils.escapeHTML(v.dealerCity || ''))}
+                ${row('Warranty Expiry', v.warrantyExpiry ? Utils.formatDate(v.warrantyExpiry) : '')}
+
+                <div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Registration & Insurance</div>
+                ${row('Registration Expiry', v.regExpiry ? Utils.formatDate(v.regExpiry) : '')}
+                ${row('Insurance Expiry', v.insExpiry ? Utils.formatDate(v.insExpiry) : '')}
+
+                ${v.notes ? `<div style="margin:16px 0 8px;font-weight:700;color:var(--primary-color);font-size:13px;text-transform:uppercase;letter-spacing:.5px;">Notes</div>
+                <div style="background:#f5f5f5;padding:12px;border-radius:8px;font-size:14px;">${Utils.escapeHTML(v.notes)}</div>` : ''}
+            `;
+            openModal('vehicleDetailModal');
+        }
+
+        function deleteVehicle(vehicleId) {
+            const v = (AppState.vehicles || []).find(v => String(v.id) === String(vehicleId));
+            if (!v) return;
+            if (!confirm(`Delete vehicle ${v.plate} (${v.make} ${v.model})? This cannot be undone.`)) return;
+            AppState.vehicles = (AppState.vehicles || []).filter(v => String(v.id) !== String(vehicleId));
+            loadVehiclesTable();
+            Utils.showToast('🗑️ Vehicle removed from fleet.');
         }
 
         // ==================== KEYBOARD NAVIGATION ====================

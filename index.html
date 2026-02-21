@@ -2883,7 +2883,9 @@ service cloud.firestore {
             },
 
             generateId(items) {
-                return items.length > 0 ? Math.max(...items.map(i => i.id)) + 1 : 1;
+                if (items.length === 0) return 1;
+                const numericIds = items.map(i => typeof i.id === 'number' ? i.id : parseInt(i.id)).filter(n => !isNaN(n));
+                return numericIds.length > 0 ? Math.max(...numericIds) + 1 : Date.now();
             },
 
             showToast(message, isError = false, duration = 3000) {
@@ -3884,25 +3886,29 @@ service cloud.firestore {
                             </thead>
                             <tbody>
                                 ${recentReports.map(r => {
+                                    const driverName   = r.driverName   || r.name || 'Unknown';
+                                    const vehicleNum   = r.vehicleNumber || 'N/A';
+                                    const reportType   = r.type          || 'report';
+                                    const reportStatus = r.status        || 'pending';
                                     const statusLabel = currentLang === 'ar' 
-                                        ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
-                                        : r.status.toUpperCase();
+                                        ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[reportStatus] || reportStatus)
+                                        : reportStatus.toUpperCase();
                                     return `
                                     <tr>
                                         <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
-                                        <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(r.driverName)}</td>
-                                        <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                        <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
-                                        <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                        <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(driverName)}</td>
+                                        <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
+                                        <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
+                                        <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
                                         <td data-label="${t('actions')}" class="action-buttons">
-                                            <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})">
+                                            <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport('${r.id}')">
                                                 👁️
                                             </button>
-                                            ${r.status === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
-                                                <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport(${r.id})">
+                                            ${reportStatus === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
+                                                <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport('${r.id}')">
                                                     ✓
                                                 </button>
-                                                <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport(${r.id})">
+                                                <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport('${r.id}')">
                                                     ✗
                                                 </button>
                                             ` : ''}
@@ -3946,28 +3952,32 @@ service cloud.firestore {
                         </thead>
                         <tbody id="reportsTableBody">
                             ${reports.map(r => {
+                                const driverName   = r.driverName   || r.name || 'Unknown';
+                                const vehicleNum   = r.vehicleNumber || 'N/A';
+                                const reportType   = r.type          || 'report';
+                                const reportStatus = r.status        || 'pending';
                                 const statusLabel = currentLang === 'ar' 
-                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
-                                    : r.status.toUpperCase();
+                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[reportStatus] || reportStatus)
+                                    : reportStatus.toUpperCase();
                                 return `
-                                <tr data-search="${Utils.escapeHTML(r.driverName.toLowerCase())} ${Utils.escapeHTML(r.vehicleNumber.toLowerCase())} ${Utils.escapeHTML(r.type.toLowerCase())} ${Utils.escapeHTML(r.status.toLowerCase())}">
+                                <tr data-search="${Utils.escapeHTML(driverName.toLowerCase())} ${Utils.escapeHTML(vehicleNum.toLowerCase())} ${Utils.escapeHTML(reportType.toLowerCase())} ${Utils.escapeHTML(reportStatus.toLowerCase())}">
                                     <td data-label="${t('id')}">${("#"+r.id)}</td>
                                     <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
-                                    <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(r.driverName)}</td>
-                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                    <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
+                                    <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(driverName)}</td>
+                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
                                     <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
                                     <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
-                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
                                     <td data-label="${t('actions')}" class="action-buttons">
-                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})" title="${t('viewDetails')}">
+                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport('${r.id}')" title="${t('viewDetails')}">
                                             👁️
                                         </button>
-                                        ${r.status === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
-                                            <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport(${r.id})" title="${t('approve')}">
+                                        ${reportStatus === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
+                                            <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport('${r.id}')" title="${t('approve')}">
                                                 ✓
                                             </button>
-                                            <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport(${r.id})" title="${t('reject')}">
+                                            <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="rejectReport('${r.id}')" title="${t('reject')}">
                                                 ✗
                                             </button>
                                         ` : ''}
@@ -4101,7 +4111,7 @@ service cloud.firestore {
         // ==================== USER DASHBOARD ====================
 
         function loadUserDashboard() {
-            const userReports = AppState.reports.filter(r => r.userId === AppState.currentUser.id);
+            const userReports = AppState.reports.filter(r => String(r.userId) === String(AppState.currentUser.id));
             const totalReports = userReports.length;
             const pendingReports = userReports.filter(r => r.status === 'pending').length;
             const approvedReports = userReports.filter(r => r.status === 'approved').length;
@@ -4175,7 +4185,7 @@ service cloud.firestore {
         function loadMyReports() {
             const container = document.getElementById('myReportsTableContainer');
             const myReports = AppState.reports
-                .filter(r => r.userId === AppState.currentUser.id)
+                .filter(r => String(r.userId) === String(AppState.currentUser.id))
                 .slice()
                 .reverse();
             
@@ -4197,21 +4207,24 @@ service cloud.firestore {
                         </thead>
                         <tbody id="myReportsTableBody">
                             ${myReports.map(r => {
+                                const vehicleNum   = r.vehicleNumber || 'N/A';
+                                const reportType   = r.type          || 'report';
+                                const reportStatus = r.status        || 'pending';
                                 const statusLabel = currentLang === 'ar' 
-                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[r.status] || r.status)
-                                    : r.status.toUpperCase();
+                                    ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[reportStatus] || reportStatus)
+                                    : reportStatus.toUpperCase();
                                 return `
-                                <tr data-search="${Utils.escapeHTML(r.vehicleNumber.toLowerCase())} ${Utils.escapeHTML(r.type.toLowerCase())} ${Utils.escapeHTML(r.status.toLowerCase())}">
+                                <tr data-search="${Utils.escapeHTML(vehicleNum.toLowerCase())} ${Utils.escapeHTML(reportType.toLowerCase())} ${Utils.escapeHTML(reportStatus.toLowerCase())}">
                                     <td data-label="${t('id')}">${("#"+r.id)}</td>
                                     <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
-                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(r.vehicleNumber)}</td>
-                                    <td data-label="${t('type')}">${Utils.escapeHTML(r.type)}</td>
-                                    <td data-label="${currentLang === 'ar' ? 'عداد الكيلومتر' : 'Odometer'}">${r.odometer} km</td>
+                                    <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
+                                    <td data-label="${currentLang === 'ar' ? 'عداد الكيلومتر' : 'Odometer'}">${r.odometer || 0} km</td>
                                     <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
                                     <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
-                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(r.status)}">${statusLabel}</span></td>
+                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
                                     <td data-label="${t('actions')}">
-                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport(${r.id})">
+                                        <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport('${r.id}')">
                                             👁️
                                         </button>
                                     </td>
@@ -4235,7 +4248,7 @@ service cloud.firestore {
         }
 
         function viewReport(reportId) {
-            const report = AppState.reports.find(r => r.id === reportId);
+            const report = AppState.reports.find(r => String(r.id) === String(reportId));
             if (!report) return;
             
             const details = document.getElementById('reportDetails');
@@ -4267,12 +4280,13 @@ service cloud.firestore {
                 Utils.showToast('You do not have permission to approve reports', true);
                 return;
             }
-            const report = AppState.reports.find(r => r.id === reportId);
+            const report = AppState.reports.find(r => String(r.id) === String(reportId));
             if (report && report.status === 'pending') {
-                report.status = 'approved';
-                report.reviewedAt = new Date().toISOString();
-                report.reviewedBy = AppState.currentUser.name;
-                AppState.reports = [...AppState.reports];
+                AppState.reports = AppState.reports.map(r =>
+                    String(r.id) === String(reportId)
+                        ? { ...r, status: 'approved', reviewedAt: new Date().toISOString(), reviewedBy: AppState.currentUser.name }
+                        : r
+                );
                 if (Utils.isAdmin()) { loadAdminDashboard(); loadAdminReports(); }
                 else loadFinancialDashboard();
                 Utils.showToast('✅ Report approved successfully!');
@@ -4285,12 +4299,13 @@ service cloud.firestore {
                 return;
             }
             if (confirm('Are you sure you want to reject this report?')) {
-                const report = AppState.reports.find(r => r.id === reportId);
+                const report = AppState.reports.find(r => String(r.id) === String(reportId));
                 if (report && report.status === 'pending') {
-                    report.status = 'rejected';
-                    report.reviewedAt = new Date().toISOString();
-                    report.reviewedBy = AppState.currentUser.name;
-                    AppState.reports = [...AppState.reports];
+                    AppState.reports = AppState.reports.map(r =>
+                        String(r.id) === String(reportId)
+                            ? { ...r, status: 'rejected', reviewedAt: new Date().toISOString(), reviewedBy: AppState.currentUser.name }
+                            : r
+                    );
                     if (Utils.isAdmin()) { loadAdminDashboard(); loadAdminReports(); }
                     else loadFinancialDashboard();
                     Utils.showToast('Report rejected');
@@ -4352,16 +4367,16 @@ service cloud.firestore {
                                 <td data-label="${t('role')}"><span class="badge" style="background: ${roleInfo.bg}; color: ${roleInfo.color};">${roleInfo.icon} ${Utils.escapeHTML(roleLabel)}</span></td>
                                 <td data-label="${t('status')}"><span class="badge badge-${u.status === 'active' ? 'approved' : 'rejected'}">${statusLabel}</span></td>
                                 <td data-label="${t('actions')}" class="action-buttons">
-                                    <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="editUser(${u.id})">
+                                    <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="editUser('${u.id}')">
                                         ✏️
                                     </button>
                                     ${u.role !== 'admin' && Utils.isAdmin() ? `
-                                        <button class="btn-icon" style="background: #f3e5f5; color: #7b1fa2;" onclick="showPermissionsModal(${u.id})" title="${currentLang === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions'}">
+                                        <button class="btn-icon" style="background: #f3e5f5; color: #7b1fa2;" onclick="showPermissionsModal('${u.id}')" title="${currentLang === 'ar' ? 'إدارة الصلاحيات' : 'Manage Permissions'}">
                                             🔐
                                         </button>
                                     ` : ''}
                                     ${u.id !== AppState.currentUser.id && Utils.isAdmin() ? `
-                                        <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="deleteUser(${u.id})">
+                                        <button class="btn-icon" style="background: #ffebee; color: #c62828;" onclick="deleteUser('${u.id}')">
                                             🗑️
                                         </button>
                                     ` : ''}
@@ -4400,7 +4415,7 @@ service cloud.firestore {
                 Utils.showToast('Only admin can edit users', true);
                 return;
             }
-            const user = AppState.users.find(u => u.id === userId);
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (user) {
                 document.getElementById('userModalTitle').textContent = '✏️ Edit User';
                 document.getElementById('editUserId').value = user.id;
@@ -4457,8 +4472,8 @@ service cloud.firestore {
 
             // Check for duplicate username
             const existingUser = AppState.users.find(u => 
-                u.username.toLowerCase() === username.toLowerCase() && 
-                u.id !== parseInt(userId || 0)
+                u.username && u.username.toLowerCase() === username.toLowerCase() && 
+                String(u.id) !== String(userId || '')
             );
             if (existingUser) {
                 return showErr('❌ Username already exists. Choose a different username.');
@@ -4474,7 +4489,7 @@ service cloud.firestore {
             
             if (userId) {
                 // ── EDIT EXISTING USER ──────────────────────────────────────────
-                const index = AppState.users.findIndex(u => u.id === parseInt(userId));
+                const index = AppState.users.findIndex(u => String(u.id) === String(userId));
                 if (index !== -1) {
                     const updatedUser = {
                         ...AppState.users[index],
@@ -4532,7 +4547,8 @@ service cloud.firestore {
                     // Save to Firestore (AppState) with Firebase UID
                     const hashedPassword = await Utils.hashPassword(password);
                     const newUser = {
-                        id: Utils.generateId(AppState.users),
+                        id: firebaseUid,
+                        uid: firebaseUid,
                         firebaseUid,
                         username,
                         password: hashedPassword,
@@ -4543,7 +4559,7 @@ service cloud.firestore {
                         createdAt: new Date().toISOString(),
                         createdBy: AppState.currentUser?.name || 'Admin'
                     };
-                    AppState.users.push(newUser);
+                    AppState.users = [...AppState.users, newUser];
                     Utils.showToast(`✅ Account created for ${name}! They can log in with their email & password.`);
 
                 } catch (error) {
@@ -4577,8 +4593,8 @@ service cloud.firestore {
                 return;
             }
             if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
-                AppState.users = AppState.users.filter(u => u.id !== userId);
-                AppState.reports = AppState.reports.filter(r => r.userId !== userId);
+                AppState.users = AppState.users.filter(u => String(u.id) !== String(userId));
+                AppState.reports = AppState.reports.filter(r => String(r.userId) !== String(userId));
                 loadUsersTable();
                 Utils.showToast('User deleted successfully');
             }
@@ -6542,7 +6558,7 @@ function json(obj) {
 
         function showPermissionsModal(userId) {
             if (!Utils.isAdmin()) return;
-            const user = AppState.users.find(u => u.id === userId);
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (!user || user.role === 'admin') return;
 
             const role = getRoleInfo(user.role);
@@ -6609,8 +6625,8 @@ function json(obj) {
             if (denyBtn)  denyBtn.classList.toggle('selected',  value === false);
 
             // Update custom badge visibility
-            const userId = parseInt(document.getElementById('permModalUserId').value);
-            const user = AppState.users.find(u => u.id === userId);
+            const userId = document.getElementById('permModalUserId').value;
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (!user) return;
             const roleDefault = (ROLES[user.role] || {})[key] || false;
             const row = document.getElementById(`permrow-${key}`);
@@ -6631,8 +6647,8 @@ function json(obj) {
         }
 
         function saveUserPermissions() {
-            const userId = parseInt(document.getElementById('permModalUserId').value);
-            const user = AppState.users.find(u => u.id === userId);
+            const userId = document.getElementById('permModalUserId').value;
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (!user) return;
 
             const roleDefaults = ROLES[user.role] || {};
@@ -6658,8 +6674,8 @@ function json(obj) {
         }
 
         function resetUserPermissions() {
-            const userId = parseInt(document.getElementById('permModalUserId').value);
-            const user = AppState.users.find(u => u.id === userId);
+            const userId = document.getElementById('permModalUserId').value;
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (!user) return;
 
             // Rebuild state from role defaults
@@ -6671,7 +6687,7 @@ function json(obj) {
         }
 
         function confirmResetPermissions(userId) {
-            const user = AppState.users.find(u => u.id === userId);
+            const user = AppState.users.find(u => String(u.id) === String(userId));
             if (!user) return;
             if (!confirm(`Reset all custom permissions for ${user.name} back to their role defaults?`)) return;
             user.customPermissions = undefined;

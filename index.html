@@ -2833,7 +2833,7 @@ service cloud.firestore {
                         <span class="sync-dot"></span>
                         <span id="syncStatusText">Connecting…</span>
                     </div>
-                    <button class="lang-btn" onclick="openModal('settingsModal')" title="Settings" style="padding: 8px 10px;">⚙️</button>
+                    <button class="lang-btn" onclick="openModal('settingsModal');onSettingsOpen();" title="Settings" style="padding: 8px 10px;">⚙️</button>
                 </div>
                 <button class="lang-btn" id="langToggle" onclick="toggleLanguage()" title="Switch Language">عربي</button>
             </div>
@@ -3725,6 +3725,38 @@ service cloud.firestore {
                         </span>
                     </label>
                 </div>
+            </div>
+
+            <!-- BACKUP & RESTORE -->
+            <div class="settings-section" style="margin-top:20px;border-top:1px solid #f0f0f0;padding-top:20px;margin-bottom:0;">
+                <h4>💾 Backup &amp; Restore</h4>
+                <p style="font-size:13px;color:#666;margin-bottom:16px;line-height:1.7;">
+                    Download a full local backup of all your data (users, reports, vehicles, tickets) as a JSON file.
+                    Restore from any previous backup file at any time.
+                </p>
+
+                <!-- Last backup info -->
+                <div id="lastBackupInfo" style="background:#f0f4ff;border-radius:10px;padding:12px 14px;font-size:13px;color:#3949ab;margin-bottom:16px;display:none;">
+                    <span id="lastBackupText"></span>
+                </div>
+
+                <!-- Action buttons -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="backupAllData()" style="flex:1;min-height:44px;gap:6px;display:flex;align-items:center;justify-content:center;">
+                        📥 Download Backup
+                    </button>
+                    <label class="btn btn-secondary" style="flex:1;min-height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin:0;">
+                        📤 Restore from File
+                        <input type="file" accept=".json" id="restoreFileInput" onchange="restoreFromBackup(this)" style="display:none;">
+                    </label>
+                </div>
+
+                <!-- Restore status -->
+                <div id="restoreStatus" style="display:none;margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.6;"></div>
+
+                <p style="font-size:11px;color:#aaa;margin-top:10px;">
+                    Backup includes: Users · Reports · Vehicles · Tickets · Campaigns · Settings
+                </p>
             </div>
 
             <!-- SECURITY / RECOVERY PIN -->
@@ -8187,6 +8219,171 @@ function json(obj) {
             AppState.vehicles = (AppState.vehicles || []).filter(v => String(v.id) !== String(vehicleId));
             loadVehiclesTable();
             Utils.showToast(ar ? '🗑️ تم حذف المركبة من الأسطول.' : '🗑️ Vehicle removed from fleet.');
+        }
+
+        // ==================== BACKUP & RESTORE ====================
+
+        function backupAllData() {
+            try {
+                const ar = currentLang === 'ar';
+                const data = {
+                    _meta: {
+                        version: '2.0',
+                        app: 'Rihlati',
+                        exportedAt: new Date().toISOString(),
+                        exportedBy: AppState.currentUser?.name || 'Admin',
+                        collections: ['users','reports','tickets','vehicles','campaigns'],
+                    },
+                    users:     AppState.data.users     || [],
+                    reports:   AppState.data.reports   || [],
+                    tickets:   AppState.data.tickets   || [],
+                    vehicles:  AppState.data.vehicles  || [],
+                    campaigns: AppState.data.campaigns || [],
+                    settings: {
+                        recoveryPin: localStorage.getItem('rihlati_recovery_pin') || null,
+                        lang:        localStorage.getItem('rihlatiLang')           || 'en',
+                    }
+                };
+
+                const json     = JSON.stringify(data, null, 2);
+                const blob     = new Blob([json], { type: 'application/json' });
+                const url      = URL.createObjectURL(blob);
+                const dateStr  = new Date().toISOString().slice(0,10);
+                const filename = `rihlati-backup-${dateStr}.json`;
+
+                const a  = document.createElement('a');
+                a.href   = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                // Save last backup timestamp
+                const now = new Date().toLocaleString(ar ? 'ar-SA' : 'en-US');
+                localStorage.setItem('rihlatiLastBackup', now);
+                updateLastBackupInfo();
+
+                const counts = `${data.users.length} users · ${data.reports.length} reports · ${data.vehicles.length} vehicles · ${data.tickets.length} tickets`;
+                Utils.showToast(ar
+                    ? `✅ تم تنزيل النسخة الاحتياطية — ${counts}`
+                    : `✅ Backup downloaded — ${counts}`);
+            } catch(e) {
+                Utils.showToast(currentLang === 'ar'
+                    ? '❌ فشل تنزيل النسخة الاحتياطية'
+                    : '❌ Backup failed: ' + e.message, true);
+            }
+        }
+
+        function updateLastBackupInfo() {
+            const el   = document.getElementById('lastBackupInfo');
+            const txt  = document.getElementById('lastBackupText');
+            const last = localStorage.getItem('rihlatiLastBackup');
+            const ar   = currentLang === 'ar';
+            if (el && txt && last) {
+                txt.textContent = (ar ? '🕒 آخر نسخة احتياطية: ' : '🕒 Last backup: ') + last;
+                el.style.display = 'block';
+            }
+        }
+
+        async function restoreFromBackup(input) {
+            const ar     = currentLang === 'ar';
+            const file   = input.files[0];
+            const status = document.getElementById('restoreStatus');
+            if (!file) return;
+
+            // Reset file input so same file can be re-selected
+            input.value = '';
+
+            if (!file.name.endsWith('.json')) {
+                showRestoreStatus(ar ? '❌ يرجى اختيار ملف JSON صالح' : '❌ Please select a valid .json backup file', 'error');
+                return;
+            }
+
+            const confirmed = confirm(ar
+                ? `⚠️ تحذير: ستُستبدل جميع البيانات الحالية بالبيانات من الملف:
+"${file.name}"
+
+هل أنت متأكد؟`
+                : `⚠️ Warning: All current data will be replaced with data from:
+"${file.name}"
+
+Are you sure? This cannot be undone.`);
+            if (!confirmed) return;
+
+            showRestoreStatus(ar ? '⏳ جارٍ استعادة البيانات…' : '⏳ Restoring data…', 'loading');
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                // Validate structure
+                if (!data._meta || !data.users) {
+                    throw new Error(ar ? 'ملف غير صالح — لا يبدو أنه نسخة احتياطية من رحلتي' : 'Invalid file — does not appear to be a Rihlati backup');
+                }
+
+                const meta = data._meta;
+
+                // Restore all collections to Firestore
+                const tasks = [];
+                if (Array.isArray(data.users))     tasks.push(DataService.saveCollection('users',     data.users));
+                if (Array.isArray(data.reports))   tasks.push(DataService.saveCollection('reports',   data.reports));
+                if (Array.isArray(data.tickets))   tasks.push(DataService.saveCollection('tickets',   data.tickets));
+                if (Array.isArray(data.vehicles))  tasks.push(DataService.saveCollection('vehicles',  data.vehicles));
+                if (Array.isArray(data.campaigns)) tasks.push(DataService.saveCollection('campaigns', data.campaigns));
+                await Promise.all(tasks);
+
+                // Update in-memory state
+                if (Array.isArray(data.users))     AppState.data.users     = data.users;
+                if (Array.isArray(data.reports))   AppState.data.reports   = data.reports;
+                if (Array.isArray(data.tickets))   AppState.data.tickets   = data.tickets;
+                if (Array.isArray(data.vehicles))  AppState.data.vehicles  = data.vehicles;
+                if (Array.isArray(data.campaigns)) AppState.data.campaigns = data.campaigns;
+
+                // Restore settings if present
+                if (data.settings?.recoveryPin) localStorage.setItem('rihlati_recovery_pin', data.settings.recoveryPin);
+
+                // Refresh UI
+                refreshAllSections();
+
+                const exportedAt = meta.exportedAt ? new Date(meta.exportedAt).toLocaleDateString(ar ? 'ar-SA' : 'en-US') : '—';
+                const counts = `${(data.users||[]).length} ${ar?'مستخدم':'users'} · ${(data.reports||[]).length} ${ar?'تقرير':'reports'} · ${(data.vehicles||[]).length} ${ar?'مركبة':'vehicles'}`;
+
+                showRestoreStatus(
+                    (ar ? `✅ تمت الاستعادة بنجاح!
+من نسخة بتاريخ ${exportedAt}
+${counts}`
+                        : `✅ Restore successful!
+From backup dated ${exportedAt}
+${counts}`),
+                    'success'
+                );
+                Utils.showToast(ar ? '✅ تمت استعادة البيانات بنجاح!' : '✅ Data restored successfully!');
+
+            } catch(e) {
+                showRestoreStatus((ar ? '❌ فشلت الاستعادة: ' : '❌ Restore failed: ') + e.message, 'error');
+            }
+        }
+
+        function showRestoreStatus(msg, type) {
+            const el = document.getElementById('restoreStatus');
+            if (!el) return;
+            const colors = {
+                success: { bg: '#e8f5e9', color: '#2e7d32', border: '#a5d6a7' },
+                error:   { bg: '#ffebee', color: '#c62828', border: '#ef9a9a' },
+                loading: { bg: '#e3f2fd', color: '#1565c0', border: '#90caf9' },
+            };
+            const c = colors[type] || colors.loading;
+            el.style.cssText = `display:block;background:${c.bg};color:${c.color};border:1.5px solid ${c.border};padding:12px 14px;border-radius:10px;font-size:13px;white-space:pre-line;line-height:1.7;margin-top:12px;`;
+            el.textContent = msg;
+        }
+
+        // Call on settings modal open
+        function onSettingsOpen() {
+            updateLastBackupInfo();
+            // Reset restore status
+            const s = document.getElementById('restoreStatus');
+            if (s) s.style.display = 'none';
         }
 
         // ==================== KEYBOARD NAVIGATION ====================

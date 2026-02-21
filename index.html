@@ -82,32 +82,58 @@
             font-weight: 700;
         }
 
-        /* Sidebar in Arabic */
+        /* ── Sidebar in Arabic ─────────────────────────────────────── */
         body.lang-ar .sidebar-header {
             text-align: right;
+            padding: 0 20px 20px;
         }
         body.lang-ar .sidebar-header h2 {
             font-size: 20px;
             font-weight: 800;
+            direction: rtl;
         }
+        body.lang-ar .sidebar-header p {
+            direction: rtl;
+        }
+
+        /* nav items flip to RTL */
         body.lang-ar .nav-item {
             border-left: none !important;
-            border-right: 3px solid transparent;
+            border-right: 3px solid transparent !important;
             text-align: right;
             flex-direction: row-reverse;
+            padding-right: 20px;
+            padding-left: 16px;
         }
         body.lang-ar .nav-item:hover,
         body.lang-ar .nav-item.active {
             border-right-color: var(--accent-color) !important;
             border-left-color: transparent !important;
+            padding-right: 17px;
         }
         body.lang-ar .nav-item i {
-            margin-left: 10px;
+            margin-left: 12px;
             margin-right: 0;
         }
+        body.lang-ar .nav-item span {
+            flex: 1;
+            text-align: right;
+        }
+
+        /* user profile card */
         body.lang-ar .user-profile {
             flex-direction: row-reverse;
             text-align: right;
+            padding-right: 20px;
+            padding-left: 16px;
+        }
+        body.lang-ar .user-details {
+            text-align: right;
+        }
+
+        /* logout row */
+        body.lang-ar .sidebar-logout .nav-item {
+            flex-direction: row-reverse;
         }
 
         /* Top bar in Arabic */
@@ -208,23 +234,36 @@
         }
 
         /* Main content margin flip for RTL sidebar */
+        /* ── Main content margin (desktop RTL) ─────────────────────── */
         body.lang-ar .main-content {
-            margin-left: 0;
-            margin-right: var(--sidebar-width);
+            margin-left: 0 !important;
+            margin-right: var(--sidebar-width) !important;
+            transition: margin 0.3s ease;
         }
 
-        /* Sidebar position flip */
+        /* ── Sidebar position flip (desktop RTL) ────────────────────── */
         body.lang-ar .sidebar {
-            left: auto;
-            right: 0;
-            transform: translateX(100%);
-            box-shadow: -5px 0 20px rgba(0,0,0,0.1);
+            left: auto !important;
+            right: 0 !important;
+            /* Desktop: always visible, no translate needed */
+            transform: none !important;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.12);
             border-right: none;
             border-left: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0;
         }
-        body.lang-ar .sidebar.show,
-        body.lang-ar .sidebar.mobile-open {
-            transform: translateX(0);
+        /* Mobile: hidden off right edge by default */
+        @media (max-width: 768px) {
+            body.lang-ar .sidebar {
+                transform: translateX(100%) !important;
+                border-radius: 24px 0 0 24px;
+            }
+            body.lang-ar .sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+            body.lang-ar .main-content {
+                margin-right: 0 !important;
+            }
         }
 
         /* Toast in Arabic */
@@ -292,18 +331,6 @@
         }
 
         /* Mobile responsive Arabic sidebar */
-        @media (max-width: 768px) {
-            body.lang-ar .sidebar {
-                transform: translateX(100%);
-            }
-            body.lang-ar .sidebar.mobile-open {
-                transform: translateX(0);
-            }
-            body.lang-ar .main-content {
-                margin-right: 0;
-            }
-        }
-
         /* ===== END ARABIC STYLES ===== */
 
         [dir="rtl"] .sidebar {
@@ -2332,22 +2359,37 @@
         /* ===== PREMIUM MOBILE APP ENHANCEMENTS ===== */
         @media (max-width: 768px) {
 
-            /* Smoother body */
-            body { -webkit-font-smoothing: antialiased; }
+            body { -webkit-font-smoothing: antialiased; overflow-x: hidden; }
 
-            /* Top bar — glassy premium feel */
+            /* ── Top bar ──────────────────────────────────────────────── */
             .top-bar {
-                background: rgba(255,255,255,0.96);
-                backdrop-filter: blur(12px);
-                -webkit-backdrop-filter: blur(12px);
+                background: rgba(255,255,255,0.97);
+                backdrop-filter: blur(14px);
+                -webkit-backdrop-filter: blur(14px);
                 border-bottom: 1px solid rgba(0,0,0,0.07);
-                padding: 14px 16px;
+                padding: 13px 16px;
                 gap: 10px;
                 position: sticky;
                 top: 0;
                 z-index: 100;
                 box-shadow: 0 2px 12px rgba(0,0,0,0.06);
             }
+            /* RTL top bar: keep hamburger on the LEFT (leading edge) */
+            body.lang-ar .top-bar {
+                flex-direction: row-reverse;
+            }
+            body.lang-ar .top-bar .hamburger-menu {
+                order: 3; /* push to visual left in RTL row-reverse */
+            }
+            body.lang-ar .top-bar h1 {
+                order: 2;
+                flex: 1;
+                text-align: right;
+            }
+            body.lang-ar #adminOnlyControls,
+            body.lang-ar #topBarActions { order: 1; }
+            body.lang-ar #langToggle    { order: 0; }
+
             .top-bar h1 {
                 font-size: 17px;
                 font-weight: 700;
@@ -2358,32 +2400,38 @@
                 text-overflow: ellipsis;
             }
 
-            /* Hamburger */
+            /* ── Hamburger ────────────────────────────────────────────── */
             .hamburger-menu {
                 font-size: 22px;
-                padding: 4px 8px;
+                padding: 6px 8px;
                 border-radius: 10px;
-                transition: background 0.2s;
+                transition: background 0.15s;
+                min-height: 44px;
+                min-width: 44px;
             }
             .hamburger-menu:active { background: rgba(0,0,0,0.07); }
 
-            /* Sidebar full-height overlay style */
+            /* ── Sidebar ─────────────────────────────────────────────── */
             .sidebar {
                 width: 82vw;
                 max-width: 300px;
                 padding-top: 20px;
+                /* LTR: slides from left */
                 border-radius: 0 24px 24px 0;
-                box-shadow: 4px 0 40px rgba(0,0,0,0.25);
+                box-shadow: 6px 0 40px rgba(0,0,0,0.22);
+                transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+                will-change: transform;
             }
+            /* RTL: slides from right */
             body.lang-ar .sidebar {
-                border-radius: 24px 0 0 24px;
+                border-radius: 24px 0 0 24px !important;
+                box-shadow: -6px 0 40px rgba(0,0,0,0.22) !important;
             }
 
-            /* Sidebar header */
             .sidebar-header { padding: 0 20px 20px; }
             .sidebar-header h2 { font-size: 22px; }
 
-            /* Nav items on mobile — bigger tap targets */
+            /* ── Nav items ───────────────────────────────────────────── */
             .nav-item {
                 padding: 14px 20px !important;
                 font-size: 14px;
@@ -2391,27 +2439,29 @@
             }
             .nav-item i { font-size: 20px; }
 
-            /* Main content */
+            /* Make close button show on mobile */
+            .sidebar-close-btn { display: block !important; }
+
+            /* ── Overlay ─────────────────────────────────────────────── */
+            .menu-overlay {
+                backdrop-filter: blur(2px);
+                -webkit-backdrop-filter: blur(2px);
+                transition: opacity 0.25s;
+            }
+
+            /* ── Main content ────────────────────────────────────────── */
             .main-content { margin-left: 0 !important; margin-right: 0 !important; }
             .content-section { padding: 16px; }
 
-            /* Stat cards — 2 column on mobile */
-            .stats-grid {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 12px;
-            }
-            .stat-card {
-                padding: 14px 12px;
-                border-radius: 14px;
-            }
-            .stat-value { font-size: 22px !important; }
-            .stat-label { font-size: 11px !important; }
-            .stat-icon  { width: 42px !important; height: 42px !important; font-size: 20px !important; border-radius: 12px !important; }
-
-            /* Summary grid */
+            /* ── Stat cards: 2-col ───────────────────────────────────── */
+            .stats-grid   { grid-template-columns: 1fr 1fr !important; gap: 12px; }
             .summary-grid { grid-template-columns: 1fr 1fr !important; gap: 12px; }
+            .stat-card    { padding: 14px 12px; border-radius: 14px; }
+            .stat-value   { font-size: 22px !important; }
+            .stat-label   { font-size: 11px !important; }
+            .stat-icon    { width: 42px !important; height: 42px !important; font-size: 20px !important; border-radius: 12px !important; }
 
-            /* Tables — card style on mobile */
+            /* ── Tables → card-per-row ───────────────────────────────── */
             .table-container { border-radius: 14px; overflow: hidden; }
             .table-header { padding: 14px 16px; }
             .table-header h3 { font-size: 15px; }
@@ -2430,94 +2480,113 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                padding: 6px 0;
+                padding: 7px 0;
                 border: none;
                 font-size: 13px;
                 border-bottom: 1px solid #f5f5f5;
+                gap: 8px;
             }
             table tbody td:last-child { border-bottom: none; }
             table tbody td::before {
                 content: attr(data-label);
-                font-weight: 600;
-                color: #888;
-                font-size: 11px;
+                font-weight: 700;
+                color: #999;
+                font-size: 10px;
                 text-transform: uppercase;
-                letter-spacing: 0.3px;
+                letter-spacing: 0.4px;
                 flex-shrink: 0;
-                margin-right: 8px;
+                min-width: 80px;
             }
+            /* RTL table cells */
             body.lang-ar table tbody td {
                 flex-direction: row-reverse;
+                text-align: right;
             }
             body.lang-ar table tbody td::before {
-                margin-right: 0;
-                margin-left: 8px;
+                text-align: left;
             }
 
-            /* Buttons */
-            .btn { padding: 11px 16px; border-radius: 10px; font-size: 13px; }
+            /* ── Buttons ─────────────────────────────────────────────── */
+            .btn      { padding: 11px 16px; border-radius: 10px; font-size: 13px; }
             .btn-icon { width: 36px; height: 36px; font-size: 14px; }
 
-            /* Modals */
+            /* ── Modals: slide up from bottom ────────────────────────── */
+            .modal { align-items: flex-end !important; }
             .modal-content {
                 margin: 0;
                 border-radius: 24px 24px 0 0;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                width: 100%;
+                width: 100% !important;
+                max-width: 100% !important;
                 max-height: 90vh;
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 animation: slideModalUp 0.3s cubic-bezier(.4,0,.2,1);
             }
+            body.lang-ar .modal-content { direction: rtl; }
             @keyframes slideModalUp {
-                from { transform: translateY(100%); opacity: 0.5; }
+                from { transform: translateY(60px); opacity: 0.6; }
                 to   { transform: translateY(0);    opacity: 1; }
             }
-            .modal-body { padding: 16px; }
+            .modal-body   { padding: 16px; }
             .modal-header { padding: 16px 20px; }
 
-            /* Search box */
-            .search-box {
-                padding: 10px 14px;
-                border-radius: 10px;
-                font-size: 14px;
-            }
-
-            /* Form groups */
+            /* ── Forms ───────────────────────────────────────────────── */
             .form-group { margin-bottom: 16px; }
             .form-group input,
             .form-group select,
             .form-group textarea {
                 padding: 13px 14px;
-                font-size: 16px; /* prevent iOS zoom */
+                font-size: 16px; /* prevents iOS auto-zoom */
                 border-radius: 10px;
             }
-
-            /* Lang toggle in app */
-            .lang-btn {
-                padding: 7px 12px;
-                font-size: 12px;
-                border-radius: 8px;
+            body.lang-ar .form-group input,
+            body.lang-ar .form-group select,
+            body.lang-ar .form-group textarea {
+                text-align: right;
+                direction: rtl;
+            }
+            /* select arrow side for RTL */
+            body.lang-ar .form-group select {
+                background-position: left 12px center;
+                padding-right: 14px;
+                padding-left: 36px;
             }
 
-            /* Action buttons row */
-            .action-buttons { gap: 6px; flex-wrap: nowrap; }
+            /* ── Search box ──────────────────────────────────────────── */
+            .search-box { padding: 10px 14px; border-radius: 10px; font-size: 14px; width: 100%; }
+            body.lang-ar .search-box { text-align: right; direction: rtl; }
 
-            /* Page title clamp */
+            /* ── Lang button ─────────────────────────────────────────── */
+            .lang-btn { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+
+            /* ── Action buttons ──────────────────────────────────────── */
+            .action-buttons { gap: 6px; flex-wrap: nowrap; }
+            body.lang-ar .action-buttons { flex-direction: row-reverse; }
+
+            /* ── Table header (filter row) ───────────────────────────── */
+            .table-header { flex-direction: column; align-items: stretch; gap: 10px; }
+            body.lang-ar .table-header { align-items: flex-end; }
+
+            /* ── Page title ──────────────────────────────────────────── */
             #currentPageTitle {
                 font-size: 17px;
-                max-width: calc(100vw - 160px);
+                max-width: calc(100vw - 140px);
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+
+            /* ── Toast position ──────────────────────────────────────── */
+            .toast { bottom: 20px; left: 16px; right: 16px; width: auto; max-width: 100%; }
+            body.lang-ar .toast { left: 16px; right: 16px; direction: rtl; }
         }
 
+        /* Very small screens */
         @media (max-width: 400px) {
-            .stats-grid { grid-template-columns: 1fr !important; }
+            .stats-grid   { grid-template-columns: 1fr !important; }
             .summary-grid { grid-template-columns: 1fr !important; }
             .content-section { padding: 12px; }
-            .top-bar { padding: 12px 12px; }
+            .top-bar { padding: 11px 12px; }
         }
 
         /* ===== END MOBILE ENHANCEMENTS ===== */
@@ -4608,8 +4677,17 @@ service cloud.firestore {
         function toggleMobileMenu() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('menuOverlay');
-            sidebar.classList.toggle('mobile-open');
-            overlay.classList.toggle('show');
+            const isRTL   = document.documentElement.dir === 'rtl';
+            const opening = !sidebar.classList.contains('mobile-open');
+
+            sidebar.classList.toggle('mobile-open', opening);
+            overlay.classList.toggle('show',        opening);
+
+            // Prevent body scroll when sidebar is open on mobile
+            document.body.style.overflow = opening ? 'hidden' : '';
+
+            // Accessibility
+            sidebar.setAttribute('aria-hidden', String(!opening));
         }
 
         // ==================== NAVIGATION ====================

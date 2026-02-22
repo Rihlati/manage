@@ -331,6 +331,55 @@
         }
 
         /* Mobile responsive Arabic sidebar */
+
+        /* ═══════════════════════════════════════════════════════════════
+           MASTER ARABIC SIDEBAR — single authoritative source of truth
+           Overrides ALL [dir=rtl] rules below via body.lang-ar specificity
+        ═══════════════════════════════════════════════════════════════ */
+
+        /* ── Desktop (≥769px): sidebar fixed to right, always visible ── */
+        @media (min-width: 769px) {
+            body.lang-ar .sidebar {
+                left: auto !important;
+                right: 0 !important;
+                top: 0 !important;
+                transform: none !important;
+                box-shadow: -4px 0 24px rgba(0,0,0,0.14) !important;
+                border-right: none !important;
+                border-left: 1px solid rgba(255,255,255,0.08) !important;
+                border-radius: 0 !important;
+            }
+            body.lang-ar .main-content {
+                margin-right: var(--sidebar-width) !important;
+                margin-left: 0 !important;
+            }
+        }
+
+        /* ── Mobile (≤768px): sidebar off-screen right, slides in ────── */
+        @media (max-width: 768px) {
+            body.lang-ar .sidebar {
+                left: auto !important;
+                right: 0 !important;
+                top: 0 !important;
+                transform: translateX(110%) !important;   /* fully off-screen */
+                border-radius: 20px 0 0 20px !important;
+                box-shadow: -6px 0 40px rgba(0,0,0,0.22) !important;
+                border-right: none !important;
+                border-left: none !important;
+            }
+            body.lang-ar .sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+            body.lang-ar .main-content {
+                margin-right: 0 !important;
+                margin-left: 0 !important;
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════════
+           END MASTER ARABIC SIDEBAR
+        ═══════════════════════════════════════════════════════════════ */
+
         /* ===== END ARABIC STYLES ===== */
 
         [dir="rtl"] .sidebar {
@@ -1088,13 +1137,22 @@
             color: white;
             padding: 25px 0 0;
             position: fixed;
-            height: 100vh;
+            top: 0;
+            left: 0;
+            right: auto;
+            height: 100%;
             overflow-y: auto;
-            transition: transform 0.3s ease;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
             z-index: 1000;
             box-shadow: 5px 0 20px rgba(0,0,0,0.1);
             display: flex;
             flex-direction: column;
+            will-change: transform;
+            transform: translateX(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
 
         .nav-menu {
@@ -1197,9 +1255,11 @@
         /* Main Content */
         .main-content {
             margin-left: var(--sidebar-width);
+            margin-right: 0;
             flex: 1;
             min-height: 100vh;
             background: var(--bg-color);
+            transition: margin 0.28s cubic-bezier(.4,0,.2,1);
         }
 
         .top-bar {
@@ -1730,13 +1790,15 @@
         /* Responsive Design */
         @media (max-width: 768px) {
             .sidebar {
-                transform: translateX(-100%);
+                transform: translateX(-110%);   /* fully off-screen LTR */
                 position: fixed;
+                top: 0 !important;
+                left: 0 !important;
                 z-index: 1001;
             }
 
             .sidebar.mobile-open {
-                transform: translateX(0);
+                transform: translateX(0) !important;
             }
 
             [dir="rtl"] .sidebar {
@@ -2861,14 +2923,14 @@ service cloud.firestore {
     <!-- Main App Container -->
     <div id="appContainer" class="app-container">
         <!-- Mobile Menu Overlay -->
-        <div id="menuOverlay" class="menu-overlay" onclick="toggleMobileMenu()"></div>
+        <div id="menuOverlay" class="menu-overlay" onclick="toggleMobileMenu(true)"></div>
 
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <h2>🚗 Rihlati</h2>
                 <p>Fleet Management</p>
-                <button class="sidebar-close-btn" onclick="toggleMobileMenu()" aria-label="Close menu">✕</button>
+                <button class="sidebar-close-btn" onclick="toggleMobileMenu(true)" aria-label="Close menu">✕</button>
             </div>
 
             <div class="user-profile">
@@ -4674,20 +4736,19 @@ service cloud.firestore {
         }
 
         // ==================== MOBILE MENU ====================
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('menuOverlay');
-            const isRTL   = document.documentElement.dir === 'rtl';
-            const opening = !sidebar.classList.contains('mobile-open');
+        function toggleMobileMenu(forceClose) {
+            const sidebar  = document.getElementById('sidebar');
+            const overlay  = document.getElementById('menuOverlay');
+            const opening  = forceClose ? false : !sidebar.classList.contains('mobile-open');
 
-            sidebar.classList.toggle('mobile-open', opening);
-            overlay.classList.toggle('show',        opening);
-
-            // Prevent body scroll when sidebar is open on mobile
-            document.body.style.overflow = opening ? 'hidden' : '';
-
-            // Accessibility
-            sidebar.setAttribute('aria-hidden', String(!opening));
+            requestAnimationFrame(() => {
+                sidebar.classList.toggle('mobile-open', opening);
+                overlay.classList.toggle('show',        opening);
+                // Lock/unlock scroll (prevents iOS background scroll)
+                document.body.style.overflow      = opening ? 'hidden' : '';
+                document.body.style.touchAction   = opening ? 'none'   : '';
+                sidebar.setAttribute('aria-hidden', String(!opening));
+            });
         }
 
         // ==================== NAVIGATION ====================

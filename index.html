@@ -4935,11 +4935,11 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${pendingTickets}</div>
-                            <div class="stat-label">${currentLang === 'ar' ? 'طلبات قيد الانتظار' : 'Pending Requests'}</div>
+                            <div class="stat-label">${t('pendingRequestsLabel')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b6b, #feca57);">🎫</div>
                     </div>
-                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','${t('requests')}',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">${currentLang === 'ar' ? 'عرض الطلبات ←' : 'View Requests →'}</button></div>` : ''}
+                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','${t('requests')}',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">${t('viewRequests')}</button></div>` : ''}
                 </div>
                 <div class="stat-card">
                     <div class="stat-header">
@@ -4993,7 +4993,7 @@ service cloud.firestore {
                             <thead>
                                 <tr>
                                     <th>${t('date')}</th>
-                                    <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                    <th>${t('driver')}</th>
                                     <th>${t('vehicle')}</th>
                                     <th>${t('type')}</th>
                                     <th>${t('statusCol')}</th>
@@ -5057,7 +5057,7 @@ service cloud.firestore {
                             <tr>
                                 <th>${t('id')}</th>
                                 <th>${t('date')}</th>
-                                <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                <th>${t('driver')}</th>
                                 <th>${t('vehicle')}</th>
                                 <th>${t('type')}</th>
                                 <th>${t('fuel')}</th>
@@ -5107,8 +5107,8 @@ service cloud.firestore {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <h3>No reports submitted</h3>
-                        <p>Driver reports will appear here</p>
+                        <h3>${t('noReports')}</h3>
+                        <p>${t('noReportsMsg')}</p>
                     </div>
                 `;
             }
@@ -5922,6 +5922,84 @@ service cloud.firestore {
                 sessionExpired: 'Session expired. Please login again.',
                 poweredBy: 'Powered by Firebase — real-time cloud sync',
                 copyright: '© 2026 Rihlati',
+                // Financial
+                pendingFinancialItems: 'Pending Financial Items',
+                totalAwaitingApproval: 'Total amount awaiting approval',
+                maintenance: 'Maintenance',
+                expenseReports: 'Expense Reports',
+                noFinancialItems: 'No pending financial items',
+                sendReportToAdmin: '📤 Send Report to Admin',
+                description: 'Description',
+                amount: 'Amount',
+                from: 'From',
+                driver: 'Driver',
+                // Tickets Admin
+                accessDenied: 'Access Denied',
+                noPermissionRequests: "You don't have permission to manage requests",
+                noRequestsFound: 'No requests found',
+                requestsAppearHere: 'Requests from users will appear here',
+                viewRequests: 'View Requests →',
+                pendingRequestsLabel: 'Pending Requests',
+                // Permissions
+                totalUsers: 'Total Users',
+                customPermissionsLabel: 'Custom Permissions',
+                roleDefaults: 'Role Defaults',
+                noUsersFound: 'No users found',
+                resetToRoleDefaults: 'Reset to role defaults',
+                noPermissionsGranted: 'No permissions granted',
+                editPermissions: 'Edit Permissions',
+                customBadge: 'CUSTOM',
+                // Sales / Campaigns
+                totalCampaignBudget: 'Total Campaign Budget',
+                acrossCampaigns: (n) => `Across ${n} campaigns`,
+                pendingCampaignsLabel: 'Pending Campaigns',
+                awaitingApproval: 'Awaiting approval',
+                approvedCampaignsLabel: 'Approved Campaigns',
+                readyForExecution: 'Ready for execution',
+                avgExpectedRoi: 'Avg. Expected ROI',
+                returnOnInvestment: 'Return on investment',
+                noCampaigns: 'No campaigns yet',
+                newCampaignRequest: 'New Campaign Request',
+                campaignName: 'Campaign Name',
+                budget: 'Budget',
+                period: 'Period',
+                expectedRoi: 'Expected ROI',
+                // Settings
+                settingsTitle: '⚙️ Settings',
+                languageSettings: 'Language Settings',
+                appLanguage: 'App Language',
+                backupRestore: '💾 Backup & Restore',
+                backupData: '⬇️ Backup Data',
+                restoreData: '⬆️ Restore Data',
+                lastBackup: 'Last backup',
+                noBackupYet: 'No backup created yet',
+                firebaseSettings: 'Firebase Settings',
+                firebaseConfig: 'Firebase Configuration',
+                // Vehicles form
+                plateNumber: 'Plate Number',
+                make: 'Make',
+                model: 'Model',
+                year: 'Year',
+                purchasePrice: 'Purchase Price',
+                purchasedFrom: 'Purchased From',
+                purchaseDate: 'Purchase Date',
+                registrationExpiry: 'Registration Expiry',
+                insuranceExpiry: 'Insurance Expiry',
+                assignedDriver: 'Assigned Driver',
+                vehicleStatus: 'Vehicle Status',
+                // Table
+                plate: 'Plate',
+                makeModel: 'Make / Model',
+                // Reports
+                odometer: 'Odometer',
+                submitFirstReport: 'Submit Your First Report',
+                noMyReports: 'No reports yet',
+                // User form
+                userEmail: 'Email',
+                userRole: 'Role',
+                userStatus: 'Status',
+                // Misc
+                unknown: 'Unknown',
             },
             ar: {
                 // App
@@ -6078,6 +6156,84 @@ service cloud.firestore {
                 monthlyOverview: 'نظرة شهرية',
                 // Analytics
                 analyticsDashboard: 'لوحة التحليلات',
+                // Financial
+                pendingFinancialItems: 'عناصر مالية معلقة',
+                totalAwaitingApproval: 'إجمالي المبالغ في انتظار الموافقة',
+                maintenance: 'الصيانة',
+                expenseReports: 'تقارير المصروفات',
+                noFinancialItems: 'لا توجد عناصر مالية معلقة',
+                sendReportToAdmin: '📤 إرسال تقرير للمدير',
+                description: 'الوصف',
+                amount: 'المبلغ',
+                from: 'من',
+                driver: 'السائق',
+                // Tickets Admin
+                accessDenied: 'وصول مرفوض',
+                noPermissionRequests: 'ليس لديك صلاحية لإدارة الطلبات',
+                noRequestsFound: 'لا توجد طلبات',
+                requestsAppearHere: 'ستظهر طلبات المستخدمين هنا',
+                viewRequests: '← عرض الطلبات',
+                pendingRequestsLabel: 'طلبات قيد الانتظار',
+                // Permissions
+                totalUsers: 'إجمالي المستخدمين',
+                customPermissionsLabel: 'صلاحيات مخصصة',
+                roleDefaults: 'إعدادات الدور',
+                noUsersFound: 'لا يوجد مستخدمون',
+                resetToRoleDefaults: 'إعادة تعيين لإعدادات الدور',
+                noPermissionsGranted: 'لا توجد صلاحيات ممنوحة',
+                editPermissions: 'تعديل الصلاحيات',
+                customBadge: 'مخصص',
+                // Sales / Campaigns
+                totalCampaignBudget: 'إجمالي ميزانية الحملات',
+                acrossCampaigns: (n) => `عبر ${n} حملة`,
+                pendingCampaignsLabel: 'حملات معلقة',
+                awaitingApproval: 'في انتظار الموافقة',
+                approvedCampaignsLabel: 'حملات موافق عليها',
+                readyForExecution: 'جاهزة للتنفيذ',
+                avgExpectedRoi: 'متوسط العائد المتوقع',
+                returnOnInvestment: 'العائد على الاستثمار',
+                noCampaigns: 'لا توجد حملات بعد',
+                newCampaignRequest: 'طلب حملة جديدة',
+                campaignName: 'اسم الحملة',
+                budget: 'الميزانية',
+                period: 'الفترة',
+                expectedRoi: 'العائد المتوقع',
+                // Settings
+                settingsTitle: '⚙️ الإعدادات',
+                languageSettings: 'إعدادات اللغة',
+                appLanguage: 'لغة التطبيق',
+                backupRestore: '💾 النسخ الاحتياطي والاستعادة',
+                backupData: '⬇️ نسخ احتياطي',
+                restoreData: '⬆️ استعادة البيانات',
+                lastBackup: 'آخر نسخة احتياطية',
+                noBackupYet: 'لم يتم إنشاء نسخة احتياطية بعد',
+                firebaseSettings: 'إعدادات Firebase',
+                firebaseConfig: 'إعداد Firebase',
+                // Vehicles form
+                plateNumber: 'رقم اللوحة',
+                make: 'الشركة المصنعة',
+                model: 'الطراز',
+                year: 'السنة',
+                purchasePrice: 'سعر الشراء',
+                purchasedFrom: 'تم الشراء من',
+                purchaseDate: 'تاريخ الشراء',
+                registrationExpiry: 'انتهاء التسجيل',
+                insuranceExpiry: 'انتهاء التأمين',
+                assignedDriver: 'السائق المعين',
+                vehicleStatus: 'حالة المركبة',
+                // Table
+                plate: 'اللوحة',
+                makeModel: 'الشركة / الطراز',
+                // Reports
+                odometer: 'عداد الكيلومتر',
+                submitFirstReport: 'أرسل تقريرك الأول',
+                noMyReports: 'لا توجد تقارير بعد',
+                // User form
+                userEmail: 'البريد الإلكتروني',
+                userRole: 'الدور الوظيفي',
+                userStatus: 'الحالة',
+                // Misc
+                unknown: 'غير معروف',
             }
         };
 
@@ -6190,6 +6346,10 @@ service cloud.firestore {
             }
             const logoutLabel = document.getElementById('logoutLabel');
             if (logoutLabel) logoutLabel.textContent = t('logout');
+
+            // ── Settings modal ───────────────────────────────────────────
+            const settingsModalTitle = document.getElementById('settingsModalTitle');
+            if (settingsModalTitle) settingsModalTitle.textContent = t('settingsTitle');
 
             // ── Sync status ──────────────────────────────────────────────
             const syncText = document.getElementById('syncStatusText');
@@ -6448,20 +6608,20 @@ service cloud.firestore {
 
             container.innerHTML = `<table>
                 <thead><tr>
-                    <th>${t('id')}</th><th>${t('type')}</th><th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th><th>${t('details')}</th>
+                    <th>${t('id')}</th><th>${t('type')}</th><th>${t('driver')}</th><th>${t('details')}</th>
                     <th>${t('priority')}</th><th>${t('submittedAt')}</th><th>${t('statusCol')}</th><th>${t('actions')}</th>
                 </tr></thead>
                 <tbody>
                 ${myTickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
                         <td data-label="${t('id')}">${("#"+tk.id)}</td>
-                        <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
-                        <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
-                        <td data-label="Details">${ticketSummary(tk)}</td>
-                        <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
-                        <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
+                        <td data-label="${t('type')}">${ticketTypeBadge(tk.type)}</td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(tk.driverName)}</td>
+                        <td data-label="${t('details')}">${ticketSummary(tk)}</td>
+                        <td data-label="${t('priority')}">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
+                        <td data-label="${t('submittedAt')}">${Utils.formatDate(tk.submittedAt)}</td>
                         <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
-                        <td data-label="Actions">
+                        <td data-label="${t('actions')}">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                         </td>
                     </tr>`).join('')}
@@ -6471,7 +6631,7 @@ service cloud.firestore {
         function loadAdminTickets() {
             if (!Utils.canManageTickets()) {
                 document.getElementById('adminTicketsTableContainer').innerHTML = 
-                    `<div class="empty-state"><div class="empty-state-icon">🔒</div><h3>Access Denied</h3><p>You don't have permission to manage requests</p></div>`;
+                    `<div class="empty-state"><div class="empty-state-icon">🔒</div><h3>${t('accessDenied')}</h3><p>${t('noPermissionRequests')}</p></div>`;
                 return;
             }
             
@@ -6486,28 +6646,28 @@ service cloud.firestore {
             if (tickets.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">📥</div>
-                    <h3>No requests found</h3>
-                    <p>Requests from users will appear here</p></div>`;
+                    <h3>${t('noRequestsFound')}</h3>
+                    <p>${t('requestsAppearHere')}</p></div>`;
                 return;
             }
 
             container.innerHTML = `<table>
                 <thead><tr>
-                    <th>ID</th><th>Type</th><th>From</th><th>Driver</th><th>Details</th>
-                    <th>Priority</th><th>Submitted</th><th>Status</th><th>Actions</th>
+                    <th>${t('id')}</th><th>${t('type')}</th><th>${t('from')}</th><th>${t('driver')}</th><th>${t('details')}</th>
+                    <th>${t('priority')}</th><th>${t('submittedAt')}</th><th>${t('statusCol')}</th><th>${t('actions')}</th>
                 </tr></thead>
                 <tbody>
                 ${tickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
                         <td data-label="${t('id')}">${("#"+tk.id)}</td>
-                        <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
-                        <td data-label="From">${Utils.escapeHTML(tk.submitterName)}<br><small style="color:#888">${getRoleInfo(tk.submitterRole).label}</small></td>
-                        <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
-                        <td data-label="Details">${ticketSummary(tk)}</td>
-                        <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
-                        <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
+                        <td data-label="${t('type')}">${ticketTypeBadge(tk.type)}</td>
+                        <td data-label="${t('from')}">${Utils.escapeHTML(tk.submitterName)}<br><small style="color:#888">${getRoleInfo(tk.submitterRole)[currentLang === 'ar' ? 'labelAr' : 'label']}</small></td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(tk.driverName)}</td>
+                        <td data-label="${t('details')}">${ticketSummary(tk)}</td>
+                        <td data-label="${t('priority')}">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
+                        <td data-label="${t('submittedAt')}">${Utils.formatDate(tk.submittedAt)}</td>
                         <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                             ${tk.status === 'pending' && Utils.canManageTickets() ? `
                             <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveTicket(${tk.id}, true)" title="Approve">✓</button>
@@ -6665,8 +6825,8 @@ service cloud.firestore {
             const bar = document.getElementById('financialActionBar');
             if (bar) {
                 bar.innerHTML = Utils.canManageFinancial() ? `
-                    <button class="btn btn-success" onclick="exportFinancialCSV()" style="font-size:13px;">📥 Export CSV</button>
-                    <button class="btn btn-primary"  onclick="showSendFinancialReportModal()" style="font-size:13px;">📤 Send Report to Admin</button>
+                    <button class="btn btn-success" onclick="exportFinancialCSV()" style="font-size:13px;">${t('exportCSV')}</button>
+                    <button class="btn btn-primary"  onclick="showSendFinancialReportModal()" style="font-size:13px;">${t('sendReportToAdmin')}</button>
                 ` : '';
             }
 
@@ -6683,24 +6843,25 @@ service cloud.firestore {
             const pendingFuel = tickets.filter(t => t.type === 'fuel').reduce((sum, t) => sum + (t.cost || 0), 0);
             const pendingExpenses = reports.reduce((sum, r) => sum + (r.expenses || 0), 0);
             
+            const ar = currentLang === 'ar';
             document.getElementById('financialSummary').innerHTML = `
                 <div class="summary-card">
-                    <h4>Pending Financial Items</h4>
+                    <h4>${t('pendingFinancialItems')}</h4>
                     <div class="amount">${Utils.formatCurrency(totalPendingAmount)}</div>
-                    <div class="sub">Total amount awaiting approval</div>
+                    <div class="sub">${t('totalAwaitingApproval')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Maintenance</h4>
+                    <h4>${t('maintenance')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingMaintenance)}</div>
-                    <div class="sub">${tickets.filter(t => t.type === 'maintenance').length} requests</div>
+                    <div class="sub">${tickets.filter(t => t.type === 'maintenance').length} ${ar ? 'طلب' : 'requests'}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Fuel</h4>
+                    <h4>${t('fuelReq').replace('⛽ ','')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingFuel)}</div>
-                    <div class="sub">${tickets.filter(t => t.type === 'fuel').length} requests</div>
+                    <div class="sub">${tickets.filter(t => t.type === 'fuel').length} ${ar ? 'طلب' : 'requests'}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Expense Reports</h4>
+                    <h4>${t('expenseReports')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingExpenses)}</div>
                     <div class="sub">${reports.length} reports</div>
                 </div>
@@ -6754,7 +6915,7 @@ service cloud.firestore {
             if (financialItems.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">💰</div>
-                    <h3>No pending financial items</h3>
+                    <h3>${t('noFinancialItems')}</h3>
                     <p>All financial requests have been processed</p></div>`;
                 return;
             }
@@ -6762,27 +6923,27 @@ service cloud.firestore {
             container.innerHTML = `<table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Type</th>
-                        <th>Driver</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Priority</th>
-                        <th>Actions</th>
+                        <th>${t('id')}</th>
+                        <th>${t('type')}</th>
+                        <th>${t('driver')}</th>
+                        <th>${t('description')}</th>
+                        <th>${t('amount')}</th>
+                        <th>${t('date')}</th>
+                        <th>${t('priority')}</th>
+                        <th>${t('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                 ${financialItems.map(item => `
                     <tr class="financial-row">
-                        <td data-label="ID">${item.id}</td>
-                        <td data-label="Type">${item.type === 'maintenance' ? '🔧 Maintenance' : item.type === 'fuel' ? '⛽ Fuel' : '📋 Expense'}</td>
-                        <td data-label="Driver">${Utils.escapeHTML(item.driver)}</td>
-                        <td data-label="Description">${Utils.escapeHTML(item.title)}</td>
-                        <td data-label="Amount" class="amount-pending">${Utils.formatCurrency(item.amount)}</td>
-                        <td data-label="Date">${Utils.formatDate(item.date)}</td>
-                        <td data-label="Priority">${item.priority ? `<span class="priority-badge priority-${item.priority}">${item.priority}</span>` : '—'}</td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('id')}">${item.id}</td>
+                        <td data-label="${t('type')}">${item.type === 'maintenance' ? '🔧 Maintenance' : item.type === 'fuel' ? '⛽ Fuel' : '📋 Expense'}</td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(item.driver)}</td>
+                        <td data-label="${t('description')}">${Utils.escapeHTML(item.title)}</td>
+                        <td data-label="${t('amount')}" class="amount-pending">${Utils.formatCurrency(item.amount)}</td>
+                        <td data-label="${t('date')}">${Utils.formatDate(item.date)}</td>
+                        <td data-label="${t('priority')}">${item.priority ? `<span class="priority-badge priority-${item.priority}">${item.priority}</span>` : '—'}</td>
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewFinancialItem('${item.source}', ${item.original.id})">👁️</button>
                             ${Utils.canManageFinancial() ? `
                                 <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveFinancialItem('${item.source}', ${item.original.id})" title="Approve">✓</button>
@@ -6952,24 +7113,24 @@ service cloud.firestore {
             
             document.getElementById('salesSummary').innerHTML = `
                 <div class="summary-card">
-                    <h4>Total Campaign Budget</h4>
+                    <h4>${t('totalCampaignBudget')}</h4>
                     <div class="amount">${Utils.formatCurrency(totalBudget)}</div>
-                    <div class="sub">Across ${campaigns.length} campaigns</div>
+                    <div class="sub">${t('acrossCampaigns')(campaigns.length)}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Pending Campaigns</h4>
+                    <h4>${t('pendingCampaignsLabel')}</h4>
                     <div class="amount">${pendingCampaigns}</div>
-                    <div class="sub">Awaiting approval</div>
+                    <div class="sub">${t('awaitingApproval')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Approved Campaigns</h4>
+                    <h4>${t('approvedCampaignsLabel')}</h4>
                     <div class="amount">${approvedCampaigns}</div>
-                    <div class="sub">Ready for execution</div>
+                    <div class="sub">${t('readyForExecution')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Avg. Expected ROI</h4>
+                    <h4>${t('avgExpectedRoi')}</h4>
                     <div class="amount">${avgRoi.toFixed(1)}%</div>
-                    <div class="sub">Return on investment</div>
+                    <div class="sub">${t('returnOnInvestment')}</div>
                 </div>
             `;
             
@@ -6980,35 +7141,35 @@ service cloud.firestore {
             if (sortedCampaigns.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">📊</div>
-                    <h3>No campaigns yet</h3>
-                    <p>Click "New Campaign Request" to create your first campaign</p></div>`;
+                    <h3>${t('noCampaigns')}</h3>
+                    <p>${currentLang === 'ar' ? 'انقر على "طلب حملة جديدة" لإنشاء أول حملة' : 'Click "New Campaign Request" to create your first campaign'}</p></div>`;
                 return;
             }
             
             container.innerHTML = `<table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Campaign Name</th>
-                        <th>Type</th>
-                        <th>Budget</th>
-                        <th>Period</th>
-                        <th>Expected ROI</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('id')}</th>
+                        <th>${t('campaignName')}</th>
+                        <th>${t('type')}</th>
+                        <th>${t('budget')}</th>
+                        <th>${t('period')}</th>
+                        <th>${t('expectedRoi')}</th>
+                        <th>${t('statusCol')}</th>
+                        <th>${t('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                 ${sortedCampaigns.map(c => `
                     <tr>
-                        <td data-label="ID">#${c.id}</td>
-                        <td data-label="Name">${Utils.escapeHTML(c.name)}</td>
-                        <td data-label="Type">${c.type}</td>
-                        <td data-label="Budget">${Utils.formatCurrency(c.budget || 0)}</td>
-                        <td data-label="Period">${Utils.formatDate(c.startDate)} - ${Utils.formatDate(c.endDate)}</td>
+                        <td data-label="${t('id')}">#${c.id}</td>
+                        <td data-label="${t('name')}">${Utils.escapeHTML(c.name)}</td>
+                        <td data-label="${t('type')}">${c.type}</td>
+                        <td data-label="${t('budget')}">${Utils.formatCurrency(c.budget || 0)}</td>
+                        <td data-label="${t('period')}">${Utils.formatDate(c.startDate)} - ${Utils.formatDate(c.endDate)}</td>
                         <td data-label="ROI">${c.expectedRoi ? c.expectedRoi + '%' : '—'}</td>
                         <td data-label="Status"><span class="badge badge-${c.status || 'pending'}">${(c.status || 'pending').toUpperCase()}</span></td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewCampaign(${c.id})">👁️</button>
                             ${Utils.isAdmin() && c.status === 'pending' ? `
                             <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveCampaign(${c.id})">✓</button>
@@ -7680,19 +7841,19 @@ function json(obj) {
             document.getElementById('permStatsBar').innerHTML = `
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">👥</span>
-                    <div><div style="font-size:18px;font-weight:700;color:var(--primary-color);">${nonAdmins.length}</div><div style="font-size:11px;color:#888;">Total Users</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:var(--primary-color);">${nonAdmins.length}</div><div style="font-size:11px;color:#888;">${t('totalUsers')}</div></div>
                 </div>
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">🔧</span>
-                    <div><div style="font-size:18px;font-weight:700;color:#e65100;">${customCount}</div><div style="font-size:11px;color:#888;">Custom Permissions</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:#e65100;">${customCount}</div><div style="font-size:11px;color:#888;">${t('customPermissionsLabel')}</div></div>
                 </div>
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">✅</span>
-                    <div><div style="font-size:18px;font-weight:700;color:#2e7d32;">${nonAdmins.length - customCount}</div><div style="font-size:11px;color:#888;">Role Defaults</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:#2e7d32;">${nonAdmins.length - customCount}</div><div style="font-size:11px;color:#888;">${t('roleDefaults')}</div></div>
                 </div>`;
 
             if (!nonAdmins.length) {
-                document.getElementById('permUsersGrid').innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div><h3>No users found</h3></div>`;
+                document.getElementById('permUsersGrid').innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div><h3>${t('noUsersFound')}</h3></div>`;
                 return;
             }
 
@@ -7714,7 +7875,7 @@ function json(obj) {
                     <div class="perm-card-header">
                         <div class="perm-avatar" style="background:linear-gradient(135deg,${role.color},${role.color}99);">${u.name.charAt(0).toUpperCase()}</div>
                         <div style="flex:1;min-width:0;">
-                            <div class="perm-user-name">${Utils.escapeHTML(u.name)}${hasCustom ? ' <span class="custom-badge">CUSTOM</span>' : ''}</div>
+                            <div class="perm-user-name">${Utils.escapeHTML(u.name)}${hasCustom ? ` <span class="custom-badge">${t('customBadge')}</span>` : ''}</div>
                             <div class="perm-user-meta">
                                 @${Utils.escapeHTML(u.username)} ·
                                 <span style="background:${role.bg};color:${role.color};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;">${role.icon} ${Utils.escapeHTML(role.label)}</span>
@@ -7722,12 +7883,12 @@ function json(obj) {
                             </div>
                         </div>
                         <div class="perm-card-actions">
-                            <button class="btn btn-primary" style="padding:9px 16px;font-size:13px;min-height:40px;" onclick="showPermissionsModal(${u.id})">🔐 Manage</button>
-                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions('${u.id}')" title="Reset to role defaults">↺ Reset</button>` : ''}
+                            <button class="btn btn-primary" style="padding:9px 16px;font-size:13px;min-height:40px;" onclick="showPermissionsModal(${u.id})">🔐 ${t('editPermissions')}</button>
+                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions('${u.id}')" title="Reset to role defaults">↺ ${t('resetToRoleDefaults')}</button>` : ''}
                         </div>
                     </div>
                     <div class="perm-chips-row">
-                        ${chips || '<span style="font-size:12px;color:#aaa;font-style:italic;">No permissions granted</span>'}
+                        ${chips || `<span style="font-size:12px;color:#aaa;font-style:italic;">${t('noPermissionsGranted')}</span>`}
                     </div>
                 </div>`;
             }).join('');
@@ -8153,13 +8314,13 @@ function json(obj) {
             container.innerHTML = `
                 <table id="vehiclesTable">
                     <thead><tr>
-                        <th>${ar ? 'رقم اللوحة' : 'Plate'}</th>
-                        <th>${ar ? 'الصانع / الموديل' : 'Make / Model'}</th>
-                        <th>${ar ? 'السنة' : 'Year'}</th>
-                        <th>${ar ? 'سعر الشراء' : 'Purchase Price'}</th>
-                        <th>${ar ? 'المورد / البائع' : 'Purchased From'}</th>
-                        <th>${ar ? 'تاريخ الشراء' : 'Purchase Date'}</th>
-                        <th>${ar ? 'الحالة' : 'Status'}</th>
+                        <th>${t('plate')}</th>
+                        <th>${t('makeModel')}</th>
+                        <th>${t('year')}</th>
+                        <th>${t('purchasePrice')}</th>
+                        <th>${t('purchasedFrom')}</th>
+                        <th>${t('purchaseDate')}</th>
+                        <th>${t('statusCol')}</th>
                         <th>${ar ? 'الإجراءات' : 'Actions'}</th>
                     </tr></thead>
                     <tbody id="vehiclesTableBody">

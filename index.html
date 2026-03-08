@@ -1981,10 +1981,37 @@
         .ticket-detail-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
         .ticket-detail-row:last-child { border-bottom: none; }
         .ticket-detail-label { font-weight: 600; color: #555; min-width: 140px; font-size: 13px; }
-        .ticket-detail-value { color: #333; font-size: 13px; flex: 1; }
+        .ticket-detail-value { color: #333; font-size: 13px; flex: 1; word-break: break-word; }
 
+        /* ── Ticket responsive ────────────────────────────── */
+        @media (max-width: 480px) {
+            .ticket-type-grid { grid-template-columns: 1fr; gap: 10px; }
+            .ticket-type-card { padding: 14px 10px; }
+            .ticket-type-card .ticket-icon { font-size: 28px; margin-bottom: 6px; }
+            .form-card { padding: 18px 14px !important; }
+            .step-indicator { gap: 5px; }
+            .step-dot { width: 24px; height: 24px; font-size: 11px; }
+            .ticket-detail-row { flex-direction: column; gap: 4px; }
+            .ticket-detail-label { min-width: unset; }
+        }
+        @media (min-width: 481px) and (max-width: 768px) {
+            .ticket-type-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .form-card { padding: 22px 18px !important; }
+        }
+        @media (min-width: 769px) {
+            .ticket-type-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        /* ── General mobile layout fixes ─────────────────── */
         @media (max-width: 768px) {
-            .ticket-type-grid { grid-template-columns: 1fr; }
+            .content-section { padding: 14px !important; }
+            .top-bar { padding: 12px 16px !important; gap: 8px; }
+            .top-bar h1 { font-size: 16px !important; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px; }
+            .modal-content { padding: 16px !important; margin: 8px !important; width: calc(100% - 16px) !important; max-height: 92vh; overflow-y: auto; }
+        }
+        @media (max-width: 400px) {
+            .stats-grid { grid-template-columns: 1fr !important; }
         }
 
         /* ===== GOOGLE SHEETS SYNC ===== */
@@ -3107,8 +3134,8 @@ service cloud.firestore {
             <div id="myReports" class="content-section">
                 <div class="table-container">
                     <div class="table-header">
-                        <h3>📋 My Reports</h3>
-                        <input type="text" class="search-box" placeholder="Search my reports..." 
+                        <h3 id="myReportsHeader">📋 My Reports</h3>
+                        <input type="text" id="myReportsSearch" class="search-box" placeholder="Search my reports..." 
                                onkeyup="debouncedFilterMyReports(this.value)" aria-label="Search my reports">
                     </div>
                     <div class="table-responsive">
@@ -3296,15 +3323,15 @@ service cloud.firestore {
 
                     <!-- Step 3: Preview & Submit -->
                     <div id="ticketStep3" class="ticket-form-step">
-                        <h3 style="margin-bottom:16px; font-size:15px; color:#555;">Step 3: Review & Submit</h3>
+                        <h3 style="margin-bottom:16px; font-size:15px; color:#555;" data-i18n="ticketStep3Title">Step 3: Review & Submit</h3>
                         <div id="ticketPreview" style="background:#f8f9ff; border:1px solid #c5cae9; border-radius:12px; padding:20px; margin-bottom:20px;"></div>
                         <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:10px; padding:12px 16px; font-size:13px; color:#555; margin-bottom:20px;">
-                            ⚠️ This request will be sent to <strong>Admin</strong> for approval. You will see the status in "My Requests".
+                            <span data-i18n="ticketApprovalNote">⚠️ This request will be sent to <strong>Admin</strong> for approval. You will see the status in "My Requests".</span>
                         </div>
                         <div style="display:flex; gap:10px; justify-content:space-between;">
-                            <button class="btn btn-secondary" onclick="ticketNextStep(2)">← Edit</button>
+                            <button class="btn btn-secondary" onclick="ticketNextStep(2)"><span data-i18n="ticketBack">← Edit</span></button>
                             <button class="btn btn-primary" onclick="submitTicket()" style="min-width:160px;">
-                                📤 Send Request
+                                📤 <span data-i18n="ticketSendRequest">Send Request</span>
                             </button>
                         </div>
                     </div>
@@ -3500,13 +3527,13 @@ service cloud.firestore {
                 <!-- Financial Overview (View Only) -->
                 <div class="table-container" style="margin-top: 30px;">
                     <div class="table-header">
-                        <h3>📊 Financial Overview</h3>
+                        <h3>📊 <span data-i18n="financialOverview">Financial Overview</span></h3>
                         <div style="display:flex; gap:10px;">
                             <select id="financialTypeFilter" class="search-box" style="width:160px;" onchange="loadFinancialDashboard()">
-                                <option value="">All Types</option>
-                                <option value="maintenance">🔧 Maintenance</option>
-                                <option value="fuel">⛽ Fuel</option>
-                                <option value="report">📋 Expense Reports</option>
+                                <option value="" data-i18n="allTypes">All Types</option>
+                                <option value="maintenance">🔧 <span data-i18n="maintenance">Maintenance</span></option>
+                                <option value="fuel">⛽ <span data-i18n="fuelReq">Fuel</span></option>
+                                <option value="report">📋 <span data-i18n="expenseReports">Expense Reports</span></option>
                             </select>
                         </div>
                     </div>
@@ -3517,7 +3544,7 @@ service cloud.firestore {
 
                 <!-- Financial Analytics -->
                 <div class="chart-container" style="margin-top: 30px;">
-                    <div class="chart-title">Monthly Financial Overview</div>
+                    <div class="chart-title" data-i18n="monthlyFinancialOverview">Monthly Financial Overview</div>
                     <div class="chart-grid" id="financialChartGrid"></div>
                 </div>
             </div>
@@ -4698,40 +4725,24 @@ service cloud.firestore {
             
             try {
                 if (!window.firebaseFns || !window.auth) {
-                    Utils.showToast('Firebase not ready. Please wait…', true);
+                    Utils.showToast(currentLang === 'ar' ? 'Firebase غير جاهز. يرجى الانتظار…' : 'Firebase not ready. Please wait…', true);
+                    signupBtn.disabled = false;
+                    signupBtn.innerHTML = `<span>${t('createAccount')}</span>`;
                     return;
                 }
                 const { createUserWithEmailAndPassword } = window.firebaseFns;
-                const cred = await createUserWithEmailAndPassword(window.auth, email, password);
-                const uid = cred.user.uid;
-                
-                // Create user profile in Firestore
-                const newUser = {
-                    id: uid,
-                    uid: uid,
-                    email: email,
-                    name: name,
-                    role: 'driver',
-                    status: 'active',
-                    createdAt: new Date().toISOString(),
-                    customPermissions: null
-                };
-                
-                // Add to users collection
-                const updatedUsers = [...AppState.data.users, newUser];
-                await DataService.saveCollection('users', updatedUsers);
-                AppState.data.users = updatedUsers;
-                
-                Utils.showToast(`✅ Account created! Welcome, ${name}`);
+                // onAuthStateChanged will handle profile creation automatically (avoids race condition)
+                await createUserWithEmailAndPassword(window.auth, email, password);
+                // Login flow continues in onAuthStateChanged — no need to do anything else here
             } catch (error) {
-                let msg = 'Registration failed.';
-                if (error.code === 'auth/email-already-in-use') msg = 'Email already registered.';
-                else if (error.code === 'auth/weak-password') msg = 'Password too weak (min 6 characters).';
-                else if (error.code === 'auth/invalid-email') msg = 'Invalid email address.';
+                let msg = currentLang === 'ar' ? 'فشل إنشاء الحساب.' : 'Registration failed.';
+                if (error.code === 'auth/email-already-in-use') msg = currentLang === 'ar' ? 'البريد الإلكتروني مسجل مسبقاً.' : 'Email already registered.';
+                else if (error.code === 'auth/weak-password') msg = currentLang === 'ar' ? 'كلمة المرور ضعيفة (6 أحرف على الأقل).' : 'Password too weak (min 6 characters).';
+                else if (error.code === 'auth/invalid-email') msg = currentLang === 'ar' ? 'البريد الإلكتروني غير صالح.' : 'Invalid email address.';
+                else if (error.code === 'auth/network-request-failed') msg = currentLang === 'ar' ? 'خطأ في الشبكة. تحقق من اتصالك.' : 'Network error. Check your connection.';
                 Utils.showToast(msg, true);
-            } finally {
                 signupBtn.disabled = false;
-                signupBtn.innerHTML = '<span>Create Account</span>';
+                signupBtn.innerHTML = `<span>${t('createAccount')}</span>`;
             }
         }
 
@@ -4935,11 +4946,11 @@ service cloud.firestore {
                     <div class="stat-header">
                         <div>
                             <div class="stat-value">${pendingTickets}</div>
-                            <div class="stat-label">${currentLang === 'ar' ? 'طلبات قيد الانتظار' : 'Pending Requests'}</div>
+                            <div class="stat-label">${t('pendingRequestsLabel')}</div>
                         </div>
                         <div class="stat-icon" style="background: linear-gradient(135deg, #ff6b6b, #feca57);">🎫</div>
                     </div>
-                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','${t('requests')}',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">${currentLang === 'ar' ? 'عرض الطلبات ←' : 'View Requests →'}</button></div>` : ''}
+                    ${Utils.canManageTickets() && pendingTickets > 0 ? `<div style="margin-top:10px;"><button class="btn btn-primary" style="font-size:12px;padding:6px 14px;" onclick="navigateTo('adminTickets','${t('requests')}',document.querySelector('.nav-item[onclick*=adminTickets]'));loadAdminTickets()">${t('viewRequests')}</button></div>` : ''}
                 </div>
                 <div class="stat-card">
                     <div class="stat-header">
@@ -4993,7 +5004,7 @@ service cloud.firestore {
                             <thead>
                                 <tr>
                                     <th>${t('date')}</th>
-                                    <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                    <th>${t('driver')}</th>
                                     <th>${t('vehicle')}</th>
                                     <th>${t('type')}</th>
                                     <th>${t('statusCol')}</th>
@@ -5014,12 +5025,9 @@ service cloud.firestore {
                                         <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
                                         <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(driverName)}</td>
                                         <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
-                                        <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
-                                        <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
+                                        <td data-label="${t('type')}">${Utils.escapeHTML(getReportTypeLabel(reportType))}</td>
                                         <td data-label="${t('actions')}" class="action-buttons">
-                                            <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport('${r.id}')">
-                                                👁️
-                                            </button>
+                                            <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewReport('${r.id}')" title="${t('viewDetails')}">👁️</button>
                                             ${reportStatus === 'pending' && (Utils.isAdmin() || Utils.canManageFinancial()) ? `
                                                 <button class="btn-icon" style="background: #e8f5e9; color: #388e3c;" onclick="approveReport('${r.id}')">
                                                     ✓
@@ -5057,7 +5065,7 @@ service cloud.firestore {
                             <tr>
                                 <th>${t('id')}</th>
                                 <th>${t('date')}</th>
-                                <th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th>
+                                <th>${t('driver')}</th>
                                 <th>${t('vehicle')}</th>
                                 <th>${t('type')}</th>
                                 <th>${t('fuel')}</th>
@@ -5081,8 +5089,7 @@ service cloud.firestore {
                                     <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
                                     <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(driverName)}</td>
                                     <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
-                                    <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
-                                    <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(getReportTypeLabel(reportType))}</td>
                                     <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
                                     <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
                                     <td data-label="${t('actions')}" class="action-buttons">
@@ -5107,8 +5114,8 @@ service cloud.firestore {
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📋</div>
-                        <h3>No reports submitted</h3>
-                        <p>Driver reports will appear here</p>
+                        <h3>${t('noReports')}</h3>
+                        <p>${t('noReportsMsg')}</p>
                     </div>
                 `;
             }
@@ -5184,7 +5191,7 @@ service cloud.firestore {
                         status === 'approved' ? '#4caf50' : 
                         status === 'pending' ? '#ff9800' : '#f44336'
                     }"></div>
-                    <div class="chart-label">${status.toUpperCase()}</div>
+                    <div class="chart-label">${currentLang === 'ar' ? {pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[status] : status.toUpperCase()}</div>
                 </div>
             `).join('');
             
@@ -5201,7 +5208,7 @@ service cloud.firestore {
                 <div class="chart-bar-container">
                     <div class="chart-value">${count}</div>
                     <div class="chart-bar" style="height: ${(count / maxType) * 150}px; background: linear-gradient(135deg, #667eea, #764ba2);"></div>
-                    <div class="chart-label">${type}</div>
+                    <div class="chart-label">${getReportTypeLabel(type)}</div>
                 </div>
             `).join('');
             
@@ -5334,8 +5341,7 @@ service cloud.firestore {
                                     <td data-label="${t('id')}">${("#"+r.id)}</td>
                                     <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
                                     <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
-                                    <td data-label="${t('type')}">${Utils.escapeHTML(reportType)}</td>
-                                    <td data-label="${currentLang === 'ar' ? 'عداد الكيلومتر' : 'Odometer'}">${r.odometer || 0} km</td>
+                                    <td data-label="${t('type')}">${Utils.escapeHTML(getReportTypeLabel(reportType))}</td>
                                     <td data-label="${t('fuel')}">${r.fuel || 0} L</td>
                                     <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
                                     <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
@@ -5367,24 +5373,41 @@ service cloud.firestore {
             const report = AppState.reports.find(r => String(r.id) === String(reportId));
             if (!report) return;
             
+            const ar = currentLang === 'ar';
+            const reportTypeLabels = ar ? {
+                daily: 'تقرير يومي', incident: 'حادثة', fuel: 'تقرير وقود',
+                maintenance: 'صيانة', oil_change: 'تغيير زيت', tire_change: 'تغيير إطارات',
+                brake_service: 'صيانة فرامل', engine_repair: 'إصلاح محرك', ac_repair: 'إصلاح مكيف',
+                electrical: 'كهرباء', body_repair: 'إصلاح هيكل', periodic_service: 'صيانة دورية',
+                routine: 'فحص دوري', safety: 'فحص أمان', pre_trip: 'قبل الرحلة',
+                post_trip: 'بعد الرحلة', annual: 'فحص سنوي',
+                weekly: 'أسبوعي', monthly: 'شهري',
+                headcount: 'تقرير القوى العاملة', attendance: 'ملخص الحضور',
+                recruitment: 'تحديث التوظيف', training: 'تقرير تدريب', performance: 'ملخص الأداء',
+                other: 'أخرى', report: 'تقرير'
+            } : {};
+            const statusLabels = ar ? {pending:'قيد الانتظار', approved:'موافق عليه', rejected:'مرفوض'} : {};
+            const typeDisplay = ar ? (reportTypeLabels[report.type] || report.type) : report.type;
+            const statusDisplay = ar ? (statusLabels[report.status] || report.status.toUpperCase()) : report.status.toUpperCase();
+
             const details = document.getElementById('reportDetails');
             details.innerHTML = `
-                <div style="line-height: 1.8;">
-                    <p><strong>Report ID:</strong> #${report.id}</p>
-                    <p><strong>Date:</strong> ${Utils.formatDate(report.date, 'long')}</p>
-                    <p><strong>Driver:</strong> ${Utils.escapeHTML(report.driverName)}</p>
-                    <p><strong>Vehicle:</strong> ${Utils.escapeHTML(report.vehicleNumber)}</p>
-                    <p><strong>Type:</strong> ${Utils.escapeHTML(report.type)}</p>
-                    <p><strong>Odometer:</strong> ${report.odometer} km</p>
-                    <p><strong>Fuel:</strong> ${report.fuel || 0} liters</p>
-                    <p><strong>Expenses:</strong> ${Utils.formatCurrency(report.expenses || 0)}</p>
-                    <p><strong>Route:</strong> ${Utils.escapeHTML(report.route || 'N/A')}</p>
-                    <p><strong>Status:</strong> <span class="badge badge-${Utils.escapeHTML(report.status)}">${Utils.escapeHTML(report.status.toUpperCase())}</span></p>
+                <div style="line-height: 1.8; direction:${ar?'rtl':'ltr'}; text-align:${ar?'right':'left'};">
+                    <p><strong>${ar?'رقم التقرير':'Report ID'}:</strong> #${report.id}</p>
+                    <p><strong>${ar?'التاريخ':'Date'}:</strong> ${Utils.formatDate(report.date, 'long')}</p>
+                    <p><strong>${ar?'السائق':'Driver'}:</strong> ${Utils.escapeHTML(report.driverName)}</p>
+                    <p><strong>${ar?'رقم المركبة':'Vehicle Number'}:</strong> ${Utils.escapeHTML(report.vehicleNumber)}</p>
+                    <p><strong>${ar?'نوع التقرير':'Report Type'}:</strong> ${Utils.escapeHTML(typeDisplay)}</p>
+                    <p><strong>${ar?'عداد الكيلومتر':'Odometer'}:</strong> ${report.odometer} km</p>
+                    <p><strong>${ar?'الوقود':'Fuel'}:</strong> ${report.fuel || 0} ${ar?'لتر':'liters'}</p>
+                    <p><strong>${ar?'المصروفات':'Expenses'}:</strong> ${Utils.formatCurrency(report.expenses || 0)}</p>
+                    <p><strong>${ar?'المسار / الموقع':'Route / Location'}:</strong> ${Utils.escapeHTML(report.route || (ar?'غير محدد':'N/A'))}</p>
+                    <p><strong>${ar?'الحالة':'Status'}:</strong> <span class="badge badge-${Utils.escapeHTML(report.status)}">${statusDisplay}</span></p>
                     <hr style="margin: 15px 0;">
-                    <p><strong>Notes:</strong></p>
+                    <p><strong>${ar?'الملاحظات':'Notes'}:</strong></p>
                     <p style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-top: 10px;">${Utils.escapeHTML(report.notes)}</p>
-                    <p style="margin-top: 15px; font-size: 12px; color: #999;">Submitted: ${Utils.formatDate(report.submittedAt, 'long')}</p>
-                    ${report.reviewedAt ? `<p style="font-size: 12px; color: #999;">Reviewed: ${Utils.formatDate(report.reviewedAt, 'long')}</p>` : ''}
+                    <p style="margin-top: 15px; font-size: 12px; color: #999;">${ar?'تاريخ الإرسال':'Submitted'}: ${Utils.formatDate(report.submittedAt, 'long')}</p>
+                    ${report.reviewedAt ? `<p style="font-size: 12px; color: #999;">${ar?'تاريخ المراجعة':'Reviewed'}: ${Utils.formatDate(report.reviewedAt, 'long')}</p>` : ''}
                 </div>
             `;
             
@@ -5393,7 +5416,7 @@ service cloud.firestore {
 
         function approveReport(reportId) {
             if (!Utils.isAdmin() && !Utils.canManageFinancial()) {
-                Utils.showToast('You do not have permission to approve reports', true);
+                Utils.showToast(currentLang === 'ar' ? 'ليس لديك صلاحية لقبول التقارير' : 'You do not have permission to approve reports', true);
                 return;
             }
             const report = AppState.reports.find(r => String(r.id) === String(reportId));
@@ -5405,16 +5428,16 @@ service cloud.firestore {
                 );
                 if (Utils.isAdmin()) { loadAdminDashboard(); loadAdminReports(); }
                 else loadFinancialDashboard();
-                Utils.showToast('✅ Report approved successfully!');
+                Utils.showToast(currentLang === 'ar' ? '✅ تمت الموافقة على التقرير بنجاح!' : '✅ Report approved successfully!');
             }
         }
 
         function rejectReport(reportId) {
             if (!Utils.isAdmin() && !Utils.canManageFinancial()) {
-                Utils.showToast('You do not have permission to reject reports', true);
+                Utils.showToast(currentLang === 'ar' ? 'ليس لديك صلاحية لرفض التقارير' : 'You do not have permission to reject reports', true);
                 return;
             }
-            if (confirm('Are you sure you want to reject this report?')) {
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من رفض هذا التقرير؟' : 'Are you sure you want to reject this report?')) {
                 const report = AppState.reports.find(r => String(r.id) === String(reportId));
                 if (report && report.status === 'pending') {
                     AppState.reports = AppState.reports.map(r =>
@@ -5424,7 +5447,7 @@ service cloud.firestore {
                     );
                     if (Utils.isAdmin()) { loadAdminDashboard(); loadAdminReports(); }
                     else loadFinancialDashboard();
-                    Utils.showToast('Report rejected');
+                    Utils.showToast(currentLang === 'ar' ? 'تم رفض التقرير' : 'Report rejected');
                 }
             }
         }
@@ -5697,22 +5720,22 @@ service cloud.firestore {
             
             AppState.users = [...AppState.users];
             saveBtn.disabled = false;
-            saveBtn.textContent = 'Save User';
+            saveBtn.textContent = t('saveUser');
             closeModal('userModal');
             loadUsersTable();
-            if (userId) Utils.showToast('✅ User updated successfully!');
+            if (userId) Utils.showToast(currentLang === 'ar' ? '✅ تم تحديث المستخدم بنجاح!' : '✅ User updated successfully!');
         }
 
         function deleteUser(userId) {
             if (!Utils.isAdmin()) {
-                Utils.showToast('Only admin can delete users', true);
+                Utils.showToast(currentLang === 'ar' ? 'فقط المسؤول يمكنه حذف المستخدمين' : 'Only admin can delete users', true);
                 return;
             }
-            if (confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من حذف هذا المستخدم؟ لا يمكن التراجع عن هذا الإجراء.' : 'Are you sure you want to delete this user? This action cannot be undone.')) {
                 AppState.users = AppState.users.filter(u => String(u.id) !== String(userId));
                 AppState.reports = AppState.reports.filter(r => String(r.userId) !== String(userId));
                 loadUsersTable();
-                Utils.showToast('User deleted successfully');
+                Utils.showToast(currentLang === 'ar' ? 'تم حذف المستخدم بنجاح' : 'User deleted successfully');
             }
         }
 
@@ -5771,7 +5794,7 @@ service cloud.firestore {
 
         // ==================== LOGOUT ====================
         async function logout() {
-            if (confirm('Are you sure you want to logout?')) {
+            if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من تسجيل الخروج؟' : 'Are you sure you want to logout?')) {
                 try {
                     // Detach Firestore listeners
                     if (AppState._unsubscribers) {
@@ -5792,7 +5815,7 @@ service cloud.firestore {
                     document.getElementById('loginPassword').value = '';
                     
                     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-                    Utils.showToast('Logged out successfully');
+                    Utils.showToast(currentLang === 'ar' ? 'تم تسجيل الخروج بنجاح' : 'Logged out successfully');
                 } catch (error) {
                     console.error('Logout error:', error);
                     Utils.showToast('Logout failed: ' + error.message, true);
@@ -5922,6 +5945,101 @@ service cloud.firestore {
                 sessionExpired: 'Session expired. Please login again.',
                 poweredBy: 'Powered by Firebase — real-time cloud sync',
                 copyright: '© 2026 Rihlati',
+                // Financial
+                pendingFinancialItems: 'Pending Financial Items',
+                totalAwaitingApproval: 'Total amount awaiting approval',
+                maintenance: 'Maintenance',
+                expenseReports: 'Expense Reports',
+                noFinancialItems: 'No pending financial items',
+                sendReportToAdmin: '📤 Send Report to Admin',
+                description: 'Description',
+                amount: 'Amount',
+                from: 'From',
+                driver: 'Driver',
+                // Tickets Admin
+                accessDenied: 'Access Denied',
+                noPermissionRequests: "You don't have permission to manage requests",
+                noRequestsFound: 'No requests found',
+                requestsAppearHere: 'Requests from users will appear here',
+                viewRequests: 'View Requests →',
+                pendingRequestsLabel: 'Pending Requests',
+                // Permissions
+                totalUsers: 'Total Users',
+                customPermissionsLabel: 'Custom Permissions',
+                roleDefaults: 'Role Defaults',
+                noUsersFound: 'No users found',
+                resetToRoleDefaults: 'Reset to role defaults',
+                noPermissionsGranted: 'No permissions granted',
+                editPermissions: 'Edit Permissions',
+                customBadge: 'CUSTOM',
+                // Sales / Campaigns
+                totalCampaignBudget: 'Total Campaign Budget',
+                acrossCampaigns: (n) => `Across ${n} campaigns`,
+                pendingCampaignsLabel: 'Pending Campaigns',
+                awaitingApproval: 'Awaiting approval',
+                approvedCampaignsLabel: 'Approved Campaigns',
+                readyForExecution: 'Ready for execution',
+                avgExpectedRoi: 'Avg. Expected ROI',
+                returnOnInvestment: 'Return on investment',
+                noCampaigns: 'No campaigns yet',
+                newCampaignRequest: 'New Campaign Request',
+                campaignName: 'Campaign Name',
+                budget: 'Budget',
+                period: 'Period',
+                expectedRoi: 'Expected ROI',
+                // Settings
+                settingsTitle: '⚙️ Settings',
+                languageSettings: 'Language Settings',
+                appLanguage: 'App Language',
+                backupRestore: '💾 Backup & Restore',
+                backupData: '⬇️ Backup Data',
+                restoreData: '⬆️ Restore Data',
+                lastBackup: 'Last backup',
+                noBackupYet: 'No backup created yet',
+                firebaseSettings: 'Firebase Settings',
+                firebaseConfig: 'Firebase Configuration',
+                // Vehicles form
+                plateNumber: 'Plate Number',
+                make: 'Make',
+                model: 'Model',
+                year: 'Year',
+                purchasePrice: 'Purchase Price',
+                purchasedFrom: 'Purchased From',
+                purchaseDate: 'Purchase Date',
+                registrationExpiry: 'Registration Expiry',
+                insuranceExpiry: 'Insurance Expiry',
+                assignedDriver: 'Assigned Driver',
+                vehicleStatus: 'Vehicle Status',
+                // Table
+                plate: 'Plate',
+                makeModel: 'Make / Model',
+                // Reports
+                odometer: 'Odometer',
+                submitFirstReport: 'Submit Your First Report',
+                noMyReports: 'No reports yet',
+                // User form
+                userEmail: 'Email',
+                userRole: 'Role',
+                userStatus: 'Status',
+                // Misc
+                unknown: 'Unknown',
+                // Report fields
+                reportType: 'Report Type',
+                vehicleNumber: 'Vehicle Number',
+                route: 'Route / Location',
+                notes: 'Notes',
+                reportId: 'Report ID',
+                submittedDate: 'Submitted',
+                reviewedDate: 'Reviewed',
+                // Financial
+                financialOverview: 'Financial Overview',
+                monthlyFinancialOverview: 'Monthly Financial Overview',
+                allTypes: 'All Types',
+                // Tickets steps
+                ticketStep3Title: 'Step 3: Review & Submit',
+                ticketApprovalNote: '⚠️ This request will be sent to Admin for approval. You will see the status in "My Requests".',
+                ticketBack: '← Edit',
+                ticketSendRequest: 'Send Request',
             },
             ar: {
                 // App
@@ -6078,10 +6196,123 @@ service cloud.firestore {
                 monthlyOverview: 'نظرة شهرية',
                 // Analytics
                 analyticsDashboard: 'لوحة التحليلات',
+                // Financial
+                pendingFinancialItems: 'عناصر مالية معلقة',
+                totalAwaitingApproval: 'إجمالي المبالغ في انتظار الموافقة',
+                maintenance: 'الصيانة',
+                expenseReports: 'تقارير المصروفات',
+                noFinancialItems: 'لا توجد عناصر مالية معلقة',
+                sendReportToAdmin: '📤 إرسال تقرير للمدير',
+                description: 'الوصف',
+                amount: 'المبلغ',
+                from: 'من',
+                driver: 'السائق',
+                // Tickets Admin
+                accessDenied: 'وصول مرفوض',
+                noPermissionRequests: 'ليس لديك صلاحية لإدارة الطلبات',
+                noRequestsFound: 'لا توجد طلبات',
+                requestsAppearHere: 'ستظهر طلبات المستخدمين هنا',
+                viewRequests: '← عرض الطلبات',
+                pendingRequestsLabel: 'طلبات قيد الانتظار',
+                // Permissions
+                totalUsers: 'إجمالي المستخدمين',
+                customPermissionsLabel: 'صلاحيات مخصصة',
+                roleDefaults: 'إعدادات الدور',
+                noUsersFound: 'لا يوجد مستخدمون',
+                resetToRoleDefaults: 'إعادة تعيين لإعدادات الدور',
+                noPermissionsGranted: 'لا توجد صلاحيات ممنوحة',
+                editPermissions: 'تعديل الصلاحيات',
+                customBadge: 'مخصص',
+                // Sales / Campaigns
+                totalCampaignBudget: 'إجمالي ميزانية الحملات',
+                acrossCampaigns: (n) => `عبر ${n} حملة`,
+                pendingCampaignsLabel: 'حملات معلقة',
+                awaitingApproval: 'في انتظار الموافقة',
+                approvedCampaignsLabel: 'حملات موافق عليها',
+                readyForExecution: 'جاهزة للتنفيذ',
+                avgExpectedRoi: 'متوسط العائد المتوقع',
+                returnOnInvestment: 'العائد على الاستثمار',
+                noCampaigns: 'لا توجد حملات بعد',
+                newCampaignRequest: 'طلب حملة جديدة',
+                campaignName: 'اسم الحملة',
+                budget: 'الميزانية',
+                period: 'الفترة',
+                expectedRoi: 'العائد المتوقع',
+                // Settings
+                settingsTitle: '⚙️ الإعدادات',
+                languageSettings: 'إعدادات اللغة',
+                appLanguage: 'لغة التطبيق',
+                backupRestore: '💾 النسخ الاحتياطي والاستعادة',
+                backupData: '⬇️ نسخ احتياطي',
+                restoreData: '⬆️ استعادة البيانات',
+                lastBackup: 'آخر نسخة احتياطية',
+                noBackupYet: 'لم يتم إنشاء نسخة احتياطية بعد',
+                firebaseSettings: 'إعدادات Firebase',
+                firebaseConfig: 'إعداد Firebase',
+                // Vehicles form
+                plateNumber: 'رقم اللوحة',
+                make: 'الشركة المصنعة',
+                model: 'الطراز',
+                year: 'السنة',
+                purchasePrice: 'سعر الشراء',
+                purchasedFrom: 'تم الشراء من',
+                purchaseDate: 'تاريخ الشراء',
+                registrationExpiry: 'انتهاء التسجيل',
+                insuranceExpiry: 'انتهاء التأمين',
+                assignedDriver: 'السائق المعين',
+                vehicleStatus: 'حالة المركبة',
+                // Table
+                plate: 'اللوحة',
+                makeModel: 'الشركة / الطراز',
+                // Reports
+                odometer: 'عداد الكيلومتر',
+                submitFirstReport: 'أرسل تقريرك الأول',
+                noMyReports: 'لا توجد تقارير بعد',
+                // User form
+                userEmail: 'البريد الإلكتروني',
+                userRole: 'الدور الوظيفي',
+                userStatus: 'الحالة',
+                // Misc
+                unknown: 'غير معروف',
+                // Report fields
+                reportType: 'نوع التقرير',
+                vehicleNumber: 'رقم المركبة',
+                route: 'المسار / الموقع',
+                notes: 'الملاحظات',
+                odometer: 'عداد الكيلومتر',
+                reportId: 'رقم التقرير',
+                submittedDate: 'تاريخ الإرسال',
+                reviewedDate: 'تاريخ المراجعة',
+                // Financial
+                financialOverview: 'نظرة مالية عامة',
+                monthlyFinancialOverview: 'النظرة الشهرية المالية',
+                allTypes: 'جميع الأنواع',
+                // Tickets steps
+                ticketStep3Title: 'الخطوة 3: مراجعة وإرسال',
+                ticketApprovalNote: '⚠️ سيتم إرسال هذا الطلب للمسؤول للموافقة. ستجد الحالة في "طلباتي".',
+                ticketBack: '← تعديل',
+                ticketSendRequest: 'إرسال الطلب',
             }
         };
 
-        let currentLang = localStorage.getItem('rihlatiLang') || 'en';
+        let currentLang = localStorage.getItem('rihlatiLang') || 'ar';
+
+        function getReportTypeLabel(type) {
+            if (currentLang !== 'ar') return type;
+            const labels = {
+                daily: 'يومي', incident: 'حادثة', fuel: 'وقود',
+                maintenance: 'صيانة', oil_change: 'تغيير زيت', tire_change: 'تغيير إطارات',
+                brake_service: 'فرامل', engine_repair: 'محرك', ac_repair: 'مكيف',
+                electrical: 'كهرباء', body_repair: 'هيكل', periodic_service: 'دورية',
+                routine: 'دوري', safety: 'أمان', pre_trip: 'قبل الرحلة',
+                post_trip: 'بعد الرحلة', annual: 'سنوي', weekly: 'أسبوعي', monthly: 'شهري',
+                headcount: 'قوى عاملة', attendance: 'حضور', recruitment: 'توظيف',
+                training: 'تدريب', performance: 'أداء', expense: 'مصروفات',
+                revenue: 'إيرادات', budget: 'ميزانية', audit: 'مراجعة',
+                campaign: 'حملة', event: 'فعالية', roi: 'عائد استثمار', other: 'أخرى', report: 'تقرير'
+            };
+            return labels[type] || type;
+        }
 
         function t(key, ...args) {
             const val = i18n[currentLang][key];
@@ -6191,6 +6422,10 @@ service cloud.firestore {
             const logoutLabel = document.getElementById('logoutLabel');
             if (logoutLabel) logoutLabel.textContent = t('logout');
 
+            // ── Settings modal ───────────────────────────────────────────
+            const settingsModalTitle = document.getElementById('settingsModalTitle');
+            if (settingsModalTitle) settingsModalTitle.textContent = t('settingsTitle');
+
             // ── Sync status ──────────────────────────────────────────────
             const syncText = document.getElementById('syncStatusText');
             if (syncText) {
@@ -6212,6 +6447,130 @@ service cloud.firestore {
                 if (val) el.placeholder = val;
             });
 
+            // ── Update ticket section static labels ──────────────────────
+            const ar = isRTL;
+            const ticketTitle = document.querySelector('#submitTicket h2');
+            if (ticketTitle) ticketTitle.textContent = ar ? '🎫 رفع طلب جديد' : '🎫 Raise New Request';
+            const ticketSubtitle = document.querySelector('#submitTicket > .form-card > p');
+            if (ticketSubtitle) ticketSubtitle.textContent = ar ? 'اختر نوع الطلب للبدء. سيتم إرساله للمسؤول للموافقة.' : 'Select a request type to get started. It will be sent to Admin for approval.';
+            const step1Title = document.querySelector('#ticketStep1 h3');
+            if (step1Title) step1Title.textContent = ar ? 'الخطوة 1: اختر نوع الطلب' : 'Step 1: Choose Request Type';
+            const maintLabel = document.querySelector('#ttype-maintenance .ticket-label');
+            if (maintLabel) maintLabel.textContent = ar ? 'طلب صيانة' : 'Maintenance Request';
+            const maintSub = document.querySelector('#ttype-maintenance div:last-child');
+            if (maintSub && maintSub.style.fontSize === '11px') maintSub.textContent = ar ? 'إصلاح وصيانة المركبة' : 'Vehicle repair & service';
+            const fuelLabel = document.querySelector('#ttype-fuel .ticket-label');
+            if (fuelLabel) fuelLabel.textContent = ar ? 'طلب وقود' : 'Fuel Request';
+            const fuelSub = document.querySelector('#ttype-fuel div:last-child');
+            if (fuelSub && fuelSub.style.fontSize === '11px') fuelSub.textContent = ar ? 'الموافقة على كمية الوقود' : 'Fuel amount approval';
+            const leaveLabel = document.querySelector('#ttype-leave .ticket-label');
+            if (leaveLabel) leaveLabel.textContent = ar ? 'طلب إجازة' : 'Leave Request';
+            const leaveSub = document.querySelector('#ttype-leave div:last-child');
+            if (leaveSub && leaveSub.style.fontSize === '11px') leaveSub.textContent = ar ? 'إجازة السائق / الغياب' : 'Driver leave / absence';
+            const step1Btn = document.getElementById('ticketStep1Btn');
+            if (step1Btn) step1Btn.textContent = ar ? 'التالي ←' : 'Next →';
+            // My Requests header
+            const myReqHeader = document.querySelector('#myTickets .table-header h3');
+            if (myReqHeader) myReqHeader.textContent = ar ? '🎫 طلباتي' : '🎫 My Requests';
+            // My Requests search placeholder
+            const myReqSearch = document.querySelector('#myTickets .search-box');
+            if (myReqSearch) myReqSearch.placeholder = ar ? 'بحث في الطلبات...' : 'Search tickets...';
+            // My Reports header + search
+            const myRptsHeader = document.getElementById('myReportsHeader');
+            if (myRptsHeader) myRptsHeader.textContent = ar ? '📋 تقاريري' : '📋 My Reports';
+            const myRptsSearch = document.getElementById('myReportsSearch');
+            if (myRptsSearch) myRptsSearch.placeholder = ar ? 'بحث في تقاريري...' : 'Search my reports...';
+
+            // ── Step 2 form labels & placeholders ───────────────────────
+            // Helper: set label text (first text node before any <span>)
+            function setLbl(id, text) {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const lbl = el.closest('.form-group')?.querySelector('label');
+                if (!lbl) return;
+                // preserve the <span class="required"> child
+                const req = lbl.querySelector('.required');
+                lbl.firstChild.textContent = text + ' ';
+                if (!req) lbl.firstChild.textContent = text;
+            }
+            // Step 2 back/preview buttons
+            const step2Back = document.querySelector('#ticketStep2 button.btn-secondary');
+            if (step2Back) step2Back.textContent = ar ? '→ رجوع' : '← Back';
+            const step2Next = document.querySelector('#ticketStep2 button.btn-primary');
+            if (step2Next) step2Next.textContent = ar ? '← معاينة' : 'Preview →';
+
+            // ── Maintenance form ─────────────────────────────────────────
+            setLbl('t-maint-driver', ar ? 'اسم السائق' : 'Driver Name');
+            const maintDriverInput = document.getElementById('t-maint-driver');
+            if (maintDriverInput) maintDriverInput.placeholder = ar ? 'الاسم الكامل للسائق' : 'Driver full name';
+            setLbl('t-maint-vehicle', ar ? 'رقم المركبة' : 'Vehicle Number');
+            const maintVehicleInput = document.getElementById('t-maint-vehicle');
+            if (maintVehicleInput) maintVehicleInput.placeholder = ar ? 'مثال: ABC-1234' : 'e.g. ABC-1234';
+            setLbl('t-maint-type', ar ? 'نوع الصيانة' : 'Maintenance Type');
+            const maintTypeSelect = document.getElementById('t-maint-type');
+            if (maintTypeSelect) {
+                const maintTypeOpts = ar
+                    ? ['اختر النوع','تغيير الزيت','تغيير الإطارات','خدمة الفرامل','إصلاح المحرك','إصلاح المكيف','مشكلة كهربائية','إصلاح الهيكل','خدمة دورية','أخرى']
+                    : ['Select type','Oil Change','Tire Change','Brake Service','Engine Repair','A/C Repair','Electrical Issue','Body Repair','Periodic Service','Other'];
+                [...maintTypeSelect.options].forEach((opt, i) => { if (maintTypeOpts[i]) opt.text = maintTypeOpts[i]; });
+            }
+            setLbl('t-maint-cost', ar ? 'التكلفة المقدرة (ريال)' : 'Estimated Cost (SAR)');
+            const maintCostInput = document.getElementById('t-maint-cost');
+            if (maintCostInput) maintCostInput.placeholder = ar ? '0.00' : '0.00';
+            setLbl('t-maint-priority', ar ? 'الأولوية' : 'Priority');
+            const maintPrioSelect = document.getElementById('t-maint-priority');
+            if (maintPrioSelect) {
+                const prioOpts = ar
+                    ? ['🟢 منخفضة','🟡 متوسطة','🟠 عالية','🔴 عاجلة']
+                    : ['🟢 Low','🟡 Medium','🟠 High','🔴 Urgent'];
+                [...maintPrioSelect.options].forEach((opt, i) => { if (prioOpts[i]) opt.text = prioOpts[i]; });
+            }
+            setLbl('t-maint-date', ar ? 'التاريخ المطلوب' : 'Requested Date');
+            setLbl('t-maint-notes', ar ? 'الوصف / الملاحظات' : 'Description / Notes');
+            const maintNotesTA = document.getElementById('t-maint-notes');
+            if (maintNotesTA) maintNotesTA.placeholder = ar ? 'صف المشكلة بالتفصيل...' : 'Describe the issue in detail...';
+
+            // ── Fuel form ────────────────────────────────────────────────
+            setLbl('t-fuel-driver', ar ? 'اسم السائق' : 'Driver Name');
+            const fuelDriverInput = document.getElementById('t-fuel-driver');
+            if (fuelDriverInput) fuelDriverInput.placeholder = ar ? 'الاسم الكامل للسائق' : 'Driver full name';
+            setLbl('t-fuel-vehicle', ar ? 'رقم المركبة' : 'Vehicle Number');
+            const fuelVehicleInput = document.getElementById('t-fuel-vehicle');
+            if (fuelVehicleInput) fuelVehicleInput.placeholder = ar ? 'مثال: ABC-1234' : 'e.g. ABC-1234';
+            setLbl('t-fuel-liters', ar ? 'كمية الوقود (لتر)' : 'Fuel Amount (Liters)');
+            setLbl('t-fuel-cost', ar ? 'التكلفة المقدرة (ريال)' : 'Estimated Cost (SAR)');
+            setLbl('t-fuel-station', ar ? 'محطة الوقود' : 'Fuel Station');
+            const fuelStationInput = document.getElementById('t-fuel-station');
+            if (fuelStationInput) fuelStationInput.placeholder = ar ? 'اسم المحطة / الموقع' : 'Station name / location';
+            setLbl('t-fuel-date', ar ? 'التاريخ المطلوب' : 'Required Date');
+            setLbl('t-fuel-notes', ar ? 'السبب / الملاحظات' : 'Reason / Notes');
+            const fuelNotesTA = document.getElementById('t-fuel-notes');
+            if (fuelNotesTA) fuelNotesTA.placeholder = ar ? 'سبب طلب الوقود...' : 'Reason for fuel request...';
+
+            // ── Leave form ───────────────────────────────────────────────
+            setLbl('t-leave-driver', ar ? 'اسم السائق' : 'Driver Name');
+            const leaveDriverInput = document.getElementById('t-leave-driver');
+            if (leaveDriverInput) leaveDriverInput.placeholder = ar ? 'الاسم الكامل للسائق' : 'Driver full name';
+            setLbl('t-leave-type', ar ? 'نوع الإجازة' : 'Leave Type');
+            const leaveTypeSelect = document.getElementById('t-leave-type');
+            if (leaveTypeSelect) {
+                const leaveTypeOpts = ar
+                    ? ['اختر النوع','إجازة سنوية','إجازة مرضية','إجازة طارئة','إجازة بدون راتب','إجازة الحج','أخرى']
+                    : ['Select type','Annual Leave','Sick Leave','Emergency Leave','Unpaid Leave','Hajj Leave','Other'];
+                [...leaveTypeSelect.options].forEach((opt, i) => { if (leaveTypeOpts[i]) opt.text = leaveTypeOpts[i]; });
+            }
+            setLbl('t-leave-from', ar ? 'من تاريخ' : 'From Date');
+            setLbl('t-leave-to', ar ? 'إلى تاريخ' : 'To Date');
+            setLbl('t-leave-days', ar ? 'عدد الأيام' : 'Number of Days');
+            const leaveDaysInput = document.getElementById('t-leave-days');
+            if (leaveDaysInput) leaveDaysInput.placeholder = ar ? 'يحسب تلقائياً' : 'Auto calculated';
+            setLbl('t-leave-replacement', ar ? 'السائق البديل' : 'Replacement Driver');
+            const leaveRepInput = document.getElementById('t-leave-replacement');
+            if (leaveRepInput) leaveRepInput.placeholder = ar ? 'اسم السائق البديل (إن وجد)' : 'Replacement driver name (if any)';
+            setLbl('t-leave-notes', ar ? 'السبب / الملاحظات' : 'Reason / Notes');
+            const leaveNotesTA = document.getElementById('t-leave-notes');
+            if (leaveNotesTA) leaveNotesTA.placeholder = ar ? 'سبب طلب الإجازة...' : 'Reason for leave request...';
+
             // ── Re-render nav + all dynamic sections ────────────────────
             if (AppState.currentUser) {
                 try { loadInterface(); } catch(e) { console.warn('loadInterface error', e); }
@@ -6222,7 +6581,7 @@ service cloud.firestore {
 
         // Apply language on load
         (function() {
-            currentLang = localStorage.getItem('rihlatiLang') || 'en';
+            currentLang = localStorage.getItem('rihlatiLang') || 'ar';
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.documentElement.lang = currentLang;
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
@@ -6262,7 +6621,9 @@ service cloud.firestore {
                     document.getElementById(`ticketFields-${t}`).style.display = t === currentTicketType ? 'block' : 'none';
                 });
                 document.getElementById('ticketFormTitle').textContent =
-                    `Step 2: ${currentTicketType === 'maintenance' ? '🔧 Maintenance' : currentTicketType === 'fuel' ? '⛽ Fuel' : '🏖️ Leave'} Request Details`;
+                    currentLang === 'ar'
+                        ? `الخطوة 2: ${currentTicketType === 'maintenance' ? '🔧 تفاصيل طلب الصيانة' : currentTicketType === 'fuel' ? '⛽ تفاصيل طلب الوقود' : '🏖️ تفاصيل طلب الإجازة'}`
+                        : `Step 2: ${currentTicketType === 'maintenance' ? '🔧 Maintenance' : currentTicketType === 'fuel' ? '⛽ Fuel' : '🏖️ Leave'} Request Details`;
             }
 
             if (step === 3) {
@@ -6271,65 +6632,67 @@ service cloud.firestore {
         }
 
         function validateTicketForm() {
-            const t = currentTicketType;
-            if (t === 'maintenance') {
-                if (!document.getElementById('t-maint-driver').value.trim()) { Utils.showToast('Driver name is required', true); return false; }
-                if (!document.getElementById('t-maint-type').value) { Utils.showToast('Maintenance type is required', true); return false; }
-                if (!document.getElementById('t-maint-cost').value) { Utils.showToast('Estimated cost is required', true); return false; }
-                if (!document.getElementById('t-maint-notes').value.trim()) { Utils.showToast('Description is required', true); return false; }
-            } else if (t === 'fuel') {
-                if (!document.getElementById('t-fuel-driver').value.trim()) { Utils.showToast('Driver name is required', true); return false; }
-                if (!document.getElementById('t-fuel-liters').value) { Utils.showToast('Fuel amount is required', true); return false; }
-                if (!document.getElementById('t-fuel-cost').value) { Utils.showToast('Estimated cost is required', true); return false; }
-                if (!document.getElementById('t-fuel-date').value) { Utils.showToast('Required date is required', true); return false; }
-                if (!document.getElementById('t-fuel-notes').value.trim()) { Utils.showToast('Reason is required', true); return false; }
-            } else if (t === 'leave') {
-                if (!document.getElementById('t-leave-driver').value.trim()) { Utils.showToast('Driver name is required', true); return false; }
-                if (!document.getElementById('t-leave-type').value) { Utils.showToast('Leave type is required', true); return false; }
-                if (!document.getElementById('t-leave-from').value) { Utils.showToast('From date is required', true); return false; }
-                if (!document.getElementById('t-leave-to').value) { Utils.showToast('To date is required', true); return false; }
-                if (!document.getElementById('t-leave-notes').value.trim()) { Utils.showToast('Reason is required', true); return false; }
+            const tp = currentTicketType;
+            const ar = currentLang === 'ar';
+            if (tp === 'maintenance') {
+                if (!document.getElementById('t-maint-driver').value.trim()) { Utils.showToast(ar ? 'اسم السائق مطلوب' : 'Driver name is required', true); return false; }
+                if (!document.getElementById('t-maint-type').value) { Utils.showToast(ar ? 'نوع الصيانة مطلوب' : 'Maintenance type is required', true); return false; }
+                if (!document.getElementById('t-maint-cost').value) { Utils.showToast(ar ? 'التكلفة المقدرة مطلوبة' : 'Estimated cost is required', true); return false; }
+                if (!document.getElementById('t-maint-notes').value.trim()) { Utils.showToast(ar ? 'الوصف مطلوب' : 'Description is required', true); return false; }
+            } else if (tp === 'fuel') {
+                if (!document.getElementById('t-fuel-driver').value.trim()) { Utils.showToast(ar ? 'اسم السائق مطلوب' : 'Driver name is required', true); return false; }
+                if (!document.getElementById('t-fuel-liters').value) { Utils.showToast(ar ? 'كمية الوقود مطلوبة' : 'Fuel amount is required', true); return false; }
+                if (!document.getElementById('t-fuel-cost').value) { Utils.showToast(ar ? 'التكلفة المقدرة مطلوبة' : 'Estimated cost is required', true); return false; }
+                if (!document.getElementById('t-fuel-date').value) { Utils.showToast(ar ? 'التاريخ المطلوب مطلوب' : 'Required date is required', true); return false; }
+                if (!document.getElementById('t-fuel-notes').value.trim()) { Utils.showToast(ar ? 'السبب مطلوب' : 'Reason is required', true); return false; }
+            } else if (tp === 'leave') {
+                if (!document.getElementById('t-leave-driver').value.trim()) { Utils.showToast(ar ? 'اسم السائق مطلوب' : 'Driver name is required', true); return false; }
+                if (!document.getElementById('t-leave-type').value) { Utils.showToast(ar ? 'نوع الإجازة مطلوب' : 'Leave type is required', true); return false; }
+                if (!document.getElementById('t-leave-from').value) { Utils.showToast(ar ? 'تاريخ البداية مطلوب' : 'From date is required', true); return false; }
+                if (!document.getElementById('t-leave-to').value) { Utils.showToast(ar ? 'تاريخ النهاية مطلوب' : 'To date is required', true); return false; }
+                if (!document.getElementById('t-leave-notes').value.trim()) { Utils.showToast(ar ? 'السبب مطلوب' : 'Reason is required', true); return false; }
             }
             return true;
         }
 
         function buildTicketPreview() {
-            const t = currentTicketType;
+            const tp = currentTicketType;
+            const ar = currentLang === 'ar';
             let rows = '';
-            if (t === 'maintenance') {
+            if (tp === 'maintenance') {
                 rows = [
-                    ['Type', '🔧 Maintenance Request'],
-                    ['Driver', document.getElementById('t-maint-driver').value],
-                    ['Vehicle', document.getElementById('t-maint-vehicle').value || 'N/A'],
-                    ['Maintenance Type', document.getElementById('t-maint-type').value.replace('_',' ')],
-                    ['Estimated Cost', `SAR ${document.getElementById('t-maint-cost').value || '0'}`],
-                    ['Priority', document.getElementById('t-maint-priority').value.toUpperCase()],
-                    ['Requested Date', document.getElementById('t-maint-date').value || 'ASAP'],
-                    ['Description', document.getElementById('t-maint-notes').value],
+                    [ar?'النوع':'Type', ar?'🔧 طلب صيانة':'🔧 Maintenance Request'],
+                    [ar?'السائق':'Driver', document.getElementById('t-maint-driver').value],
+                    [ar?'المركبة':'Vehicle', document.getElementById('t-maint-vehicle').value || (ar?'غير محدد':'N/A')],
+                    [ar?'نوع الصيانة':'Maintenance Type', document.getElementById('t-maint-type').value.replace('_',' ')],
+                    [ar?'التكلفة المقدرة':'Estimated Cost', `SAR ${document.getElementById('t-maint-cost').value || '0'}`],
+                    [ar?'الأولوية':'Priority', document.getElementById('t-maint-priority').value.toUpperCase()],
+                    [ar?'التاريخ المطلوب':'Requested Date', document.getElementById('t-maint-date').value || (ar?'في أقرب وقت':'ASAP')],
+                    [ar?'الوصف':'Description', document.getElementById('t-maint-notes').value],
                 ].map(([l,v]) => `<div class="ticket-detail-row"><span class="ticket-detail-label">${l}</span><span class="ticket-detail-value">${Utils.escapeHTML(String(v))}</span></div>`).join('');
-            } else if (t === 'fuel') {
+            } else if (tp === 'fuel') {
                 rows = [
-                    ['Type', '⛽ Fuel Request'],
-                    ['Driver', document.getElementById('t-fuel-driver').value],
-                    ['Vehicle', document.getElementById('t-fuel-vehicle').value || 'N/A'],
-                    ['Fuel Amount', `${document.getElementById('t-fuel-liters').value} Liters`],
-                    ['Est. Cost', `SAR ${document.getElementById('t-fuel-cost').value || '0'}`],
-                    ['Station', document.getElementById('t-fuel-station').value || 'N/A'],
-                    ['Required Date', document.getElementById('t-fuel-date').value],
-                    ['Reason', document.getElementById('t-fuel-notes').value],
+                    [ar?'النوع':'Type', ar?'⛽ طلب وقود':'⛽ Fuel Request'],
+                    [ar?'السائق':'Driver', document.getElementById('t-fuel-driver').value],
+                    [ar?'المركبة':'Vehicle', document.getElementById('t-fuel-vehicle').value || (ar?'غير محدد':'N/A')],
+                    [ar?'كمية الوقود':'Fuel Amount', `${document.getElementById('t-fuel-liters').value} ${ar?'لتر':'Liters'}`],
+                    [ar?'التكلفة التقديرية':'Est. Cost', `SAR ${document.getElementById('t-fuel-cost').value || '0'}`],
+                    [ar?'المحطة':'Station', document.getElementById('t-fuel-station').value || (ar?'غير محدد':'N/A')],
+                    [ar?'التاريخ المطلوب':'Required Date', document.getElementById('t-fuel-date').value],
+                    [ar?'السبب':'Reason', document.getElementById('t-fuel-notes').value],
                 ].map(([l,v]) => `<div class="ticket-detail-row"><span class="ticket-detail-label">${l}</span><span class="ticket-detail-value">${Utils.escapeHTML(String(v))}</span></div>`).join('');
             } else {
                 const from = document.getElementById('t-leave-from').value;
                 const to   = document.getElementById('t-leave-to').value;
                 rows = [
-                    ['Type', '🏖️ Leave Request'],
-                    ['Driver', document.getElementById('t-leave-driver').value],
-                    ['Leave Type', document.getElementById('t-leave-type').value],
-                    ['From', from],
-                    ['To', to],
-                    ['Days', document.getElementById('t-leave-days').value || calcLeaveDays(from, to)],
-                    ['Replacement', document.getElementById('t-leave-replacement').value || 'None'],
-                    ['Reason', document.getElementById('t-leave-notes').value],
+                    [ar?'النوع':'Type', ar?'🏖️ طلب إجازة':'🏖️ Leave Request'],
+                    [ar?'السائق':'Driver', document.getElementById('t-leave-driver').value],
+                    [ar?'نوع الإجازة':'Leave Type', document.getElementById('t-leave-type').value],
+                    [ar?'من':'From', from],
+                    [ar?'إلى':'To', to],
+                    [ar?'الأيام':'Days', document.getElementById('t-leave-days').value || calcLeaveDays(from, to)],
+                    [ar?'البديل':'Replacement', document.getElementById('t-leave-replacement').value || (ar?'لا يوجد':'None')],
+                    [ar?'السبب':'Reason', document.getElementById('t-leave-notes').value],
                 ].map(([l,v]) => `<div class="ticket-detail-row"><span class="ticket-detail-label">${l}</span><span class="ticket-detail-value">${Utils.escapeHTML(String(v))}</span></div>`).join('');
             }
             document.getElementById('ticketPreview').innerHTML = rows;
@@ -6448,20 +6811,20 @@ service cloud.firestore {
 
             container.innerHTML = `<table>
                 <thead><tr>
-                    <th>${t('id')}</th><th>${t('type')}</th><th>${currentLang === 'ar' ? 'السائق' : 'Driver'}</th><th>${t('details')}</th>
+                    <th>${t('id')}</th><th>${t('type')}</th><th>${t('driver')}</th><th>${t('details')}</th>
                     <th>${t('priority')}</th><th>${t('submittedAt')}</th><th>${t('statusCol')}</th><th>${t('actions')}</th>
                 </tr></thead>
                 <tbody>
                 ${myTickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
                         <td data-label="${t('id')}">${("#"+tk.id)}</td>
-                        <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
-                        <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
-                        <td data-label="Details">${ticketSummary(tk)}</td>
-                        <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
-                        <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
+                        <td data-label="${t('type')}">${ticketTypeBadge(tk.type)}</td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(tk.driverName)}</td>
+                        <td data-label="${t('details')}">${ticketSummary(tk)}</td>
+                        <td data-label="${t('priority')}">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
+                        <td data-label="${t('submittedAt')}">${Utils.formatDate(tk.submittedAt)}</td>
                         <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
-                        <td data-label="Actions">
+                        <td data-label="${t('actions')}">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                         </td>
                     </tr>`).join('')}
@@ -6471,7 +6834,7 @@ service cloud.firestore {
         function loadAdminTickets() {
             if (!Utils.canManageTickets()) {
                 document.getElementById('adminTicketsTableContainer').innerHTML = 
-                    `<div class="empty-state"><div class="empty-state-icon">🔒</div><h3>Access Denied</h3><p>You don't have permission to manage requests</p></div>`;
+                    `<div class="empty-state"><div class="empty-state-icon">🔒</div><h3>${t('accessDenied')}</h3><p>${t('noPermissionRequests')}</p></div>`;
                 return;
             }
             
@@ -6486,28 +6849,28 @@ service cloud.firestore {
             if (tickets.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">📥</div>
-                    <h3>No requests found</h3>
-                    <p>Requests from users will appear here</p></div>`;
+                    <h3>${t('noRequestsFound')}</h3>
+                    <p>${t('requestsAppearHere')}</p></div>`;
                 return;
             }
 
             container.innerHTML = `<table>
                 <thead><tr>
-                    <th>ID</th><th>Type</th><th>From</th><th>Driver</th><th>Details</th>
-                    <th>Priority</th><th>Submitted</th><th>Status</th><th>Actions</th>
+                    <th>${t('id')}</th><th>${t('type')}</th><th>${t('from')}</th><th>${t('driver')}</th><th>${t('details')}</th>
+                    <th>${t('priority')}</th><th>${t('submittedAt')}</th><th>${t('statusCol')}</th><th>${t('actions')}</th>
                 </tr></thead>
                 <tbody>
                 ${tickets.map(tk => `
                     <tr class="ticket-row-${tk.type}">
                         <td data-label="${t('id')}">${("#"+tk.id)}</td>
-                        <td data-label="Type">${ticketTypeBadge(tk.type)}</td>
-                        <td data-label="From">${Utils.escapeHTML(tk.submitterName)}<br><small style="color:#888">${getRoleInfo(tk.submitterRole).label}</small></td>
-                        <td data-label="Driver">${Utils.escapeHTML(tk.driverName)}</td>
-                        <td data-label="Details">${ticketSummary(tk)}</td>
-                        <td data-label="Priority">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
-                        <td data-label="Submitted">${Utils.formatDate(tk.submittedAt)}</td>
+                        <td data-label="${t('type')}">${ticketTypeBadge(tk.type)}</td>
+                        <td data-label="${t('from')}">${Utils.escapeHTML(tk.submitterName)}<br><small style="color:#888">${getRoleInfo(tk.submitterRole)[currentLang === 'ar' ? 'labelAr' : 'label']}</small></td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(tk.driverName)}</td>
+                        <td data-label="${t('details')}">${ticketSummary(tk)}</td>
+                        <td data-label="${t('priority')}">${tk.priority ? `<span class="priority-badge priority-${tk.priority}">${tk.priority}</span>` : '—'}</td>
+                        <td data-label="${t('submittedAt')}">${Utils.formatDate(tk.submittedAt)}</td>
                         <td data-label="Status"><span class="badge badge-${tk.status}">${currentLang === 'ar' ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[tk.status] || tk.status) : tk.status.toUpperCase()}</span></td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewTicket(${tk.id})">👁️</button>
                             ${tk.status === 'pending' && Utils.canManageTickets() ? `
                             <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveTicket(${tk.id}, true)" title="Approve">✓</button>
@@ -6665,8 +7028,8 @@ service cloud.firestore {
             const bar = document.getElementById('financialActionBar');
             if (bar) {
                 bar.innerHTML = Utils.canManageFinancial() ? `
-                    <button class="btn btn-success" onclick="exportFinancialCSV()" style="font-size:13px;">📥 Export CSV</button>
-                    <button class="btn btn-primary"  onclick="showSendFinancialReportModal()" style="font-size:13px;">📤 Send Report to Admin</button>
+                    <button class="btn btn-success" onclick="exportFinancialCSV()" style="font-size:13px;">${t('exportCSV')}</button>
+                    <button class="btn btn-primary"  onclick="showSendFinancialReportModal()" style="font-size:13px;">${t('sendReportToAdmin')}</button>
                 ` : '';
             }
 
@@ -6683,26 +7046,27 @@ service cloud.firestore {
             const pendingFuel = tickets.filter(t => t.type === 'fuel').reduce((sum, t) => sum + (t.cost || 0), 0);
             const pendingExpenses = reports.reduce((sum, r) => sum + (r.expenses || 0), 0);
             
+            const ar = currentLang === 'ar';
             document.getElementById('financialSummary').innerHTML = `
                 <div class="summary-card">
-                    <h4>Pending Financial Items</h4>
+                    <h4>${t('pendingFinancialItems')}</h4>
                     <div class="amount">${Utils.formatCurrency(totalPendingAmount)}</div>
-                    <div class="sub">Total amount awaiting approval</div>
+                    <div class="sub">${t('totalAwaitingApproval')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Maintenance</h4>
+                    <h4>${t('maintenance')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingMaintenance)}</div>
-                    <div class="sub">${tickets.filter(t => t.type === 'maintenance').length} requests</div>
+                    <div class="sub">${tickets.filter(t => t.type === 'maintenance').length} ${ar ? 'طلب' : 'requests'}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Fuel</h4>
+                    <h4>${t('fuelReq').replace('⛽ ','')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingFuel)}</div>
-                    <div class="sub">${tickets.filter(t => t.type === 'fuel').length} requests</div>
+                    <div class="sub">${tickets.filter(t => t.type === 'fuel').length} ${ar ? 'طلب' : 'requests'}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Expense Reports</h4>
+                    <h4>${t('expenseReports')}</h4>
                     <div class="amount">${Utils.formatCurrency(pendingExpenses)}</div>
-                    <div class="sub">${reports.length} reports</div>
+                    <div class="sub">${reports.length} ${ar ? 'تقرير' : 'reports'}</div>
                 </div>
             `;
             
@@ -6731,7 +7095,7 @@ service cloud.firestore {
                 financialItems.push({
                     id: `R${r.id}`,
                     type: 'report',
-                    title: `${r.type} Report`,
+                    title: currentLang === 'ar' ? `تقرير ${getReportTypeLabel(r.type)}` : `${r.type} Report`,
                     driver: r.driverName,
                     amount: r.expenses || 0,
                     date: r.submittedAt,
@@ -6754,35 +7118,35 @@ service cloud.firestore {
             if (financialItems.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">💰</div>
-                    <h3>No pending financial items</h3>
-                    <p>All financial requests have been processed</p></div>`;
+                    <h3>${t('noFinancialItems')}</h3>
+                    <p>${currentLang === 'ar' ? 'تمت معالجة جميع الطلبات المالية' : 'All financial requests have been processed'}</p></div>`;
                 return;
             }
             
             container.innerHTML = `<table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Type</th>
-                        <th>Driver</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Priority</th>
-                        <th>Actions</th>
+                        <th>${t('id')}</th>
+                        <th>${t('type')}</th>
+                        <th>${t('driver')}</th>
+                        <th>${t('description')}</th>
+                        <th>${t('amount')}</th>
+                        <th>${t('date')}</th>
+                        <th>${t('priority')}</th>
+                        <th>${t('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                 ${financialItems.map(item => `
                     <tr class="financial-row">
-                        <td data-label="ID">${item.id}</td>
-                        <td data-label="Type">${item.type === 'maintenance' ? '🔧 Maintenance' : item.type === 'fuel' ? '⛽ Fuel' : '📋 Expense'}</td>
-                        <td data-label="Driver">${Utils.escapeHTML(item.driver)}</td>
-                        <td data-label="Description">${Utils.escapeHTML(item.title)}</td>
-                        <td data-label="Amount" class="amount-pending">${Utils.formatCurrency(item.amount)}</td>
-                        <td data-label="Date">${Utils.formatDate(item.date)}</td>
-                        <td data-label="Priority">${item.priority ? `<span class="priority-badge priority-${item.priority}">${item.priority}</span>` : '—'}</td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('id')}">${item.id}</td>
+                        <td data-label="${t('type')}">${item.type === 'maintenance' ? `🔧 ${ar?'صيانة':'Maintenance'}` : item.type === 'fuel' ? `⛽ ${ar?'وقود':'Fuel'}` : `📋 ${ar?'مصروفات':'Expense'}`}</td>
+                        <td data-label="${t('driver')}">${Utils.escapeHTML(item.driver)}</td>
+                        <td data-label="${t('description')}">${Utils.escapeHTML(item.title)}</td>
+                        <td data-label="${t('amount')}" class="amount-pending">${Utils.formatCurrency(item.amount)}</td>
+                        <td data-label="${t('date')}">${Utils.formatDate(item.date)}</td>
+                        <td data-label="${t('priority')}">${item.priority ? `<span class="priority-badge priority-${item.priority}">${item.priority}</span>` : '—'}</td>
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewFinancialItem('${item.source}', ${item.original.id})">👁️</button>
                             ${Utils.canManageFinancial() ? `
                                 <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveFinancialItem('${item.source}', ${item.original.id})" title="Approve">✓</button>
@@ -6877,33 +7241,34 @@ service cloud.firestore {
             const modal = document.createElement('div');
             modal.id = 'sendFinReportModal';
             modal.className = 'modal show';
+            const ar = currentLang === 'ar';
             modal.innerHTML = `
-            <div class="modal-content" style="max-width:520px;">
+            <div class="modal-content" style="max-width:520px; direction:${ar?'rtl':'ltr'};">
                 <div class="modal-header">
-                    <h3>📤 Send Financial Report to Admin</h3>
+                    <h3>📤 ${ar ? 'إرسال تقرير مالي للمسؤول' : 'Send Financial Report to Admin'}</h3>
                     <button class="close-btn" onclick="document.getElementById('sendFinReportModal').remove()">&times;</button>
                 </div>
                 <div style="padding:4px 0 16px;">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
                         <div style="background:#fff3e0;border-radius:12px;padding:14px;text-align:center;">
                             <div style="font-size:22px;font-weight:800;color:#e65100;">${pending.length}</div>
-                            <div style="font-size:12px;color:#888;margin-bottom:4px;">Pending Items</div>
+                            <div style="font-size:12px;color:#888;margin-bottom:4px;">${ar ? 'عناصر معلقة' : 'Pending Items'}</div>
                             <div style="font-size:13px;font-weight:700;color:#e65100;">${Utils.formatCurrency(pendingAmt)}</div>
                         </div>
                         <div style="background:#e8f5e9;border-radius:12px;padding:14px;text-align:center;">
                             <div style="font-size:22px;font-weight:800;color:#2e7d32;">${approved.length}</div>
-                            <div style="font-size:12px;color:#888;margin-bottom:4px;">Approved Items</div>
+                            <div style="font-size:12px;color:#888;margin-bottom:4px;">${ar ? 'عناصر موافق عليها' : 'Approved Items'}</div>
                             <div style="font-size:13px;font-weight:700;color:#2e7d32;">${Utils.formatCurrency(approvedAmt)}</div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label style="font-weight:600;font-size:13px;color:var(--primary-color);">Note for admin (optional)</label>
-                        <textarea id="finReportNote" placeholder="Summarize findings, flag anomalies, or add recommendations..." style="font-family:inherit;resize:vertical;min-height:80px;width:100%;padding:10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;box-sizing:border-box;margin-top:6px;"></textarea>
+                        <label style="font-weight:600;font-size:13px;color:var(--primary-color);">${ar ? 'ملاحظة للمسؤول (اختياري)' : 'Note for admin (optional)'}</label>
+                        <textarea id="finReportNote" placeholder="${ar ? 'لخص النتائج أو أضف توصيات...' : 'Summarize findings, flag anomalies, or add recommendations...'}" style="font-family:inherit;resize:vertical;min-height:80px;width:100%;padding:10px;border:1.5px solid #e0e0e0;border-radius:8px;font-size:13px;box-sizing:border-box;margin-top:6px;text-align:${ar?'right':'left'};"></textarea>
                     </div>
                 </div>
                 <div style="display:flex;gap:10px;">
-                    <button class="btn btn-primary" style="flex:1;min-height:46px;" onclick="submitFinancialReport()">📤 Send to Admin</button>
-                    <button class="btn btn-secondary" style="min-height:46px;" onclick="document.getElementById('sendFinReportModal').remove()">Cancel</button>
+                    <button class="btn btn-primary" style="flex:1;min-height:46px;" onclick="submitFinancialReport()">📤 ${ar ? 'إرسال للمسؤول' : 'Send to Admin'}</button>
+                    <button class="btn btn-secondary" style="min-height:46px;" onclick="document.getElementById('sendFinReportModal').remove()">${ar ? 'إلغاء' : 'Cancel'}</button>
                 </div>
             </div>`;
             document.body.appendChild(modal);
@@ -6936,7 +7301,7 @@ service cloud.firestore {
             };
             AppState.reports = [finReport, ...AppState.reports];
             document.getElementById('sendFinReportModal')?.remove();
-            Utils.showToast('✅ Financial report sent to admin!');
+            Utils.showToast(currentLang === 'ar' ? '✅ تم إرسال التقرير المالي للمسؤول!' : '✅ Financial report sent to admin!');
             triggerSyncAfterChange();
         }
 
@@ -6952,24 +7317,24 @@ service cloud.firestore {
             
             document.getElementById('salesSummary').innerHTML = `
                 <div class="summary-card">
-                    <h4>Total Campaign Budget</h4>
+                    <h4>${t('totalCampaignBudget')}</h4>
                     <div class="amount">${Utils.formatCurrency(totalBudget)}</div>
-                    <div class="sub">Across ${campaigns.length} campaigns</div>
+                    <div class="sub">${t('acrossCampaigns')(campaigns.length)}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Pending Campaigns</h4>
+                    <h4>${t('pendingCampaignsLabel')}</h4>
                     <div class="amount">${pendingCampaigns}</div>
-                    <div class="sub">Awaiting approval</div>
+                    <div class="sub">${t('awaitingApproval')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Approved Campaigns</h4>
+                    <h4>${t('approvedCampaignsLabel')}</h4>
                     <div class="amount">${approvedCampaigns}</div>
-                    <div class="sub">Ready for execution</div>
+                    <div class="sub">${t('readyForExecution')}</div>
                 </div>
                 <div class="summary-card">
-                    <h4>Avg. Expected ROI</h4>
+                    <h4>${t('avgExpectedRoi')}</h4>
                     <div class="amount">${avgRoi.toFixed(1)}%</div>
-                    <div class="sub">Return on investment</div>
+                    <div class="sub">${t('returnOnInvestment')}</div>
                 </div>
             `;
             
@@ -6980,35 +7345,35 @@ service cloud.firestore {
             if (sortedCampaigns.length === 0) {
                 container.innerHTML = `<div class="empty-state">
                     <div class="empty-state-icon">📊</div>
-                    <h3>No campaigns yet</h3>
-                    <p>Click "New Campaign Request" to create your first campaign</p></div>`;
+                    <h3>${t('noCampaigns')}</h3>
+                    <p>${currentLang === 'ar' ? 'انقر على "طلب حملة جديدة" لإنشاء أول حملة' : 'Click "New Campaign Request" to create your first campaign'}</p></div>`;
                 return;
             }
             
             container.innerHTML = `<table>
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Campaign Name</th>
-                        <th>Type</th>
-                        <th>Budget</th>
-                        <th>Period</th>
-                        <th>Expected ROI</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>${t('id')}</th>
+                        <th>${t('campaignName')}</th>
+                        <th>${t('type')}</th>
+                        <th>${t('budget')}</th>
+                        <th>${t('period')}</th>
+                        <th>${t('expectedRoi')}</th>
+                        <th>${t('statusCol')}</th>
+                        <th>${t('actions')}</th>
                     </tr>
                 </thead>
                 <tbody>
                 ${sortedCampaigns.map(c => `
                     <tr>
-                        <td data-label="ID">#${c.id}</td>
-                        <td data-label="Name">${Utils.escapeHTML(c.name)}</td>
-                        <td data-label="Type">${c.type}</td>
-                        <td data-label="Budget">${Utils.formatCurrency(c.budget || 0)}</td>
-                        <td data-label="Period">${Utils.formatDate(c.startDate)} - ${Utils.formatDate(c.endDate)}</td>
+                        <td data-label="${t('id')}">#${c.id}</td>
+                        <td data-label="${t('name')}">${Utils.escapeHTML(c.name)}</td>
+                        <td data-label="${t('type')}">${c.type}</td>
+                        <td data-label="${t('budget')}">${Utils.formatCurrency(c.budget || 0)}</td>
+                        <td data-label="${t('period')}">${Utils.formatDate(c.startDate)} - ${Utils.formatDate(c.endDate)}</td>
                         <td data-label="ROI">${c.expectedRoi ? c.expectedRoi + '%' : '—'}</td>
                         <td data-label="Status"><span class="badge badge-${c.status || 'pending'}">${(c.status || 'pending').toUpperCase()}</span></td>
-                        <td data-label="Actions" class="action-buttons">
+                        <td data-label="${t('actions')}" class="action-buttons">
                             <button class="btn-icon" style="background:#e3f2fd;color:#1976d2;" onclick="viewCampaign(${c.id})">👁️</button>
                             ${Utils.isAdmin() && c.status === 'pending' ? `
                             <button class="btn-icon" style="background:#e8f5e9;color:#388e3c;" onclick="approveCampaign(${c.id})">✓</button>
@@ -7680,19 +8045,19 @@ function json(obj) {
             document.getElementById('permStatsBar').innerHTML = `
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">👥</span>
-                    <div><div style="font-size:18px;font-weight:700;color:var(--primary-color);">${nonAdmins.length}</div><div style="font-size:11px;color:#888;">Total Users</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:var(--primary-color);">${nonAdmins.length}</div><div style="font-size:11px;color:#888;">${t('totalUsers')}</div></div>
                 </div>
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">🔧</span>
-                    <div><div style="font-size:18px;font-weight:700;color:#e65100;">${customCount}</div><div style="font-size:11px;color:#888;">Custom Permissions</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:#e65100;">${customCount}</div><div style="font-size:11px;color:#888;">${t('customPermissionsLabel')}</div></div>
                 </div>
                 <div style="background:white;border-radius:10px;padding:10px 16px;box-shadow:var(--shadow);display:flex;gap:8px;align-items:center;">
                     <span style="font-size:22px;">✅</span>
-                    <div><div style="font-size:18px;font-weight:700;color:#2e7d32;">${nonAdmins.length - customCount}</div><div style="font-size:11px;color:#888;">Role Defaults</div></div>
+                    <div><div style="font-size:18px;font-weight:700;color:#2e7d32;">${nonAdmins.length - customCount}</div><div style="font-size:11px;color:#888;">${t('roleDefaults')}</div></div>
                 </div>`;
 
             if (!nonAdmins.length) {
-                document.getElementById('permUsersGrid').innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div><h3>No users found</h3></div>`;
+                document.getElementById('permUsersGrid').innerHTML = `<div class="empty-state"><div class="empty-state-icon">👥</div><h3>${t('noUsersFound')}</h3></div>`;
                 return;
             }
 
@@ -7714,7 +8079,7 @@ function json(obj) {
                     <div class="perm-card-header">
                         <div class="perm-avatar" style="background:linear-gradient(135deg,${role.color},${role.color}99);">${u.name.charAt(0).toUpperCase()}</div>
                         <div style="flex:1;min-width:0;">
-                            <div class="perm-user-name">${Utils.escapeHTML(u.name)}${hasCustom ? ' <span class="custom-badge">CUSTOM</span>' : ''}</div>
+                            <div class="perm-user-name">${Utils.escapeHTML(u.name)}${hasCustom ? ` <span class="custom-badge">${t('customBadge')}</span>` : ''}</div>
                             <div class="perm-user-meta">
                                 @${Utils.escapeHTML(u.username)} ·
                                 <span style="background:${role.bg};color:${role.color};padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700;">${role.icon} ${Utils.escapeHTML(role.label)}</span>
@@ -7722,12 +8087,12 @@ function json(obj) {
                             </div>
                         </div>
                         <div class="perm-card-actions">
-                            <button class="btn btn-primary" style="padding:9px 16px;font-size:13px;min-height:40px;" onclick="showPermissionsModal(${u.id})">🔐 Manage</button>
-                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions('${u.id}')" title="Reset to role defaults">↺ Reset</button>` : ''}
+                            <button class="btn btn-primary" style="padding:9px 16px;font-size:13px;min-height:40px;" onclick="showPermissionsModal(${u.id})">🔐 ${t('editPermissions')}</button>
+                            ${hasCustom ? `<button class="btn btn-secondary" style="padding:9px 14px;font-size:13px;min-height:40px;" onclick="confirmResetPermissions('${u.id}')" title="Reset to role defaults">↺ ${t('resetToRoleDefaults')}</button>` : ''}
                         </div>
                     </div>
                     <div class="perm-chips-row">
-                        ${chips || '<span style="font-size:12px;color:#aaa;font-style:italic;">No permissions granted</span>'}
+                        ${chips || `<span style="font-size:12px;color:#aaa;font-style:italic;">${t('noPermissionsGranted')}</span>`}
                     </div>
                 </div>`;
             }).join('');
@@ -7892,9 +8257,10 @@ function json(obj) {
 
         const ROLE_FORM_SCHEMAS = {
             driver: {
-                title: '🚗 Driver Daily Report',
+                title: { en: '🚗 Driver Daily Report', ar: '🚗 تقرير السائق اليومي' },
                 color: '#f57f17', bg: '#fffde7',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Type <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select Type</option><option value="daily">Daily Report</option><option value="incident">Incident</option><option value="fuel">Fuel Report</option></select>
@@ -7905,12 +8271,26 @@ function json(obj) {
                 <div class="form-group"><label>Fuel Amount (liters)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="Fuel consumed"></div>
                 <div class="form-group"><label>Expenses (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="Total expenses"></div>
                 <div class="form-group full-width"><label>Route / Location</label><input type="text" id="rf-route" placeholder="e.g. Riyadh → Jeddah"></div>
-                <div class="form-group full-width"><label>Notes <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe your trip details..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                <div class="form-group full-width"><label>Notes <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe your trip details..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر النوع</option><option value="daily">تقرير يومي</option><option value="incident">حادثة</option><option value="fuel">تقرير وقود</option></select>
+                    <div class="error-message" id="err-rf-type"></div>
+                </div>
+                <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
+                <div class="form-group"><label>عداد الكيلومتر (كم) <span class="required">*</span></label><input type="number" id="rf-odometer" min="0" placeholder="القراءة الحالية" required><div class="error-message" id="err-rf-odometer"></div></div>
+                <div class="form-group"><label>كمية الوقود (لتر)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="الوقود المستهلك"></div>
+                <div class="form-group"><label>المصروفات (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="إجمالي المصروفات"></div>
+                <div class="form-group full-width"><label>المسار / الموقع</label><input type="text" id="rf-route" placeholder="مثال: الرياض ← جدة"></div>
+                <div class="form-group full-width"><label>الملاحظات <span class="required">*</span></label><textarea id="rf-notes" placeholder="اوصف تفاصيل رحلتك..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                }
             },
             maintenance_supervisor: {
-                title: '🔩 Maintenance Report',
+                title: { en: '🔩 Maintenance Report', ar: '🔩 تقرير الصيانة' },
                 color: '#4e342e', bg: '#efebe9',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Vehicle Number <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="e.g. ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
                 <div class="form-section-divider">Maintenance Details</div>
@@ -7925,12 +8305,30 @@ function json(obj) {
                 <div class="form-group"><label>Next Service Date</label><input type="date" id="rf-next-service"></div>
                 <div class="form-group"><label>Odometer Reading (km)</label><input type="number" id="rf-odometer" min="0" placeholder="Current reading"></div>
                 <div class="form-group full-width"><label>Work Performed <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe maintenance work done, parts replaced..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Any additional recommendations or observations..."></textarea></div>`
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Any additional recommendations or observations..."></textarea></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
+                <div class="form-section-divider">تفاصيل الصيانة</div>
+                <div class="form-group"><label>نوع الصيانة <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="oil_change">تغيير زيت</option><option value="tire_change">تغيير إطارات</option><option value="brake_service">صيانة فرامل</option><option value="engine_repair">إصلاح محرك</option><option value="ac_repair">إصلاح مكيف</option><option value="electrical">كهرباء</option><option value="body_repair">إصلاح هيكل</option><option value="periodic_service">صيانة دورية</option><option value="other">أخرى</option></select>
+                </div>
+                <div class="form-group"><label>الفني المكلف</label><input type="text" id="rf-tech" placeholder="اسم الفني"></div>
+                <div class="form-group"><label>التكلفة التقديرية (ريال) <span class="required">*</span></label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00" required></div>
+                <div class="form-group"><label>الأولوية</label>
+                    <select id="rf-priority"><option value="low">🟢 منخفضة</option><option value="medium" selected>🟡 متوسطة</option><option value="high">🟠 عالية</option><option value="urgent">🔴 عاجلة</option></select>
+                </div>
+                <div class="form-group"><label>تاريخ الصيانة القادمة</label><input type="date" id="rf-next-service"></div>
+                <div class="form-group"><label>عداد الكيلومتر (كم)</label><input type="number" id="rf-odometer" min="0" placeholder="القراءة الحالية"></div>
+                <div class="form-group full-width"><label>الأعمال المنفذة <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف أعمال الصيانة والقطع المستبدلة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="أي توصيات أو ملاحظات إضافية..."></textarea></div>`
+                }
             },
             vehicle_engineer: {
-                title: '🔧 Vehicle Inspection Report',
+                title: { en: '🔧 Vehicle Inspection Report', ar: '🔧 تقرير فحص المركبة' },
                 color: '#37474f', bg: '#eceff1',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Vehicle Number <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="e.g. ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
                 <div class="form-section-divider">Inspection Details</div>
@@ -7941,12 +8339,26 @@ function json(obj) {
                 <div class="form-group"><label>Estimated Repair Cost (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>Fuel Level (%)</label><input type="number" id="rf-fuel" min="0" max="100" placeholder="e.g. 75"></div>
                 <div class="form-group full-width"><label>Issues Found <span class="required">*</span></label><textarea id="rf-notes" placeholder="List all faults and defects found..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Actions required, parts to order, next inspection date..."></textarea></div>`
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Actions required, parts to order, next inspection date..."></textarea></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
+                <div class="form-section-divider">تفاصيل الفحص</div>
+                <div class="form-group"><label>نوع الفحص <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="routine">فحص دوري</option><option value="safety">فحص أمان</option><option value="pre_trip">قبل الرحلة</option><option value="post_trip">بعد الرحلة</option><option value="annual">فحص سنوي</option></select>
+                </div>
+                <div class="form-group"><label>الحالة العامة (1-10) <span class="required">*</span></label><input type="number" id="rf-odometer" min="1" max="10" placeholder="تقييم 1-10" required></div>
+                <div class="form-group"><label>تكلفة الإصلاح التقديرية (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>مستوى الوقود (%)</label><input type="number" id="rf-fuel" min="0" max="100" placeholder="مثال: 75"></div>
+                <div class="form-group full-width"><label>المشكلات المكتشفة <span class="required">*</span></label><textarea id="rf-notes" placeholder="اذكر جميع الأعطال والعيوب المكتشفة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="الإجراءات المطلوبة، قطع الغيار، تاريخ الفحص القادم..."></textarea></div>`
+                }
             },
             driver_supervisor: {
-                title: '🚦 Driver Supervisor Report',
+                title: { en: '🚦 Driver Supervisor Report', ar: '🚦 تقرير مشرف السائقين' },
                 color: '#1565c0', bg: '#e3f2fd',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Period <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
@@ -7957,12 +8369,26 @@ function json(obj) {
                 <div class="form-group"><label>Total Expenses (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group full-width"><label>Routes Covered</label><input type="text" id="rf-vehicle" placeholder="e.g. Riyadh Hub, Jeddah Zone, Dammam Route"></div>
                 <div class="form-group full-width"><label>Incidents / Issues <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe any incidents, driver issues, or notable events..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Actions Taken / Recommendations</label><textarea id="rf-route" placeholder="What actions were taken or are recommended..."></textarea></div>`
+                <div class="form-group full-width"><label>Actions Taken / Recommendations</label><textarea id="rf-route" placeholder="What actions were taken or are recommended..."></textarea></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>فترة التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="daily">يومي</option><option value="weekly">أسبوعي</option><option value="monthly">شهري</option></select>
+                </div>
+                <div class="form-section-divider">نظرة عامة على الفريق</div>
+                <div class="form-group"><label>السائقون المناوبون</label><input type="number" id="rf-odometer" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>إجمالي الوقود المستخدم (لتر)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="0.0"></div>
+                <div class="form-group"><label>إجمالي المصروفات (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group full-width"><label>المسارات المغطاة</label><input type="text" id="rf-vehicle" placeholder="مثال: مركز الرياض، منطقة جدة، مسار الدمام"></div>
+                <div class="form-group full-width"><label>الحوادث / المشكلات <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف أي حوادث أو مشكلات أو أحداث بارزة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
+                <div class="form-group full-width"><label>الإجراءات المتخذة / التوصيات</label><textarea id="rf-route" placeholder="ما الإجراءات المتخذة أو الموصى بها..."></textarea></div>`
+                }
             },
             hr: {
-                title: '🧑‍💼 HR Report',
+                title: { en: '🧑‍💼 HR Report', ar: '🧑‍💼 تقرير الموارد البشرية' },
                 color: '#00695c', bg: '#e0f2f1',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Type <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select</option><option value="headcount">Headcount Report</option><option value="attendance">Attendance Summary</option><option value="recruitment">Recruitment Update</option><option value="training">Training Report</option><option value="performance">Performance Summary</option></select>
@@ -7972,13 +8398,25 @@ function json(obj) {
                 <div class="form-group"><label>Department</label><input type="text" id="rf-vehicle" placeholder="e.g. Operations, Fleet, Admin"></div>
                 <div class="form-group"><label>New Joiners</label><input type="number" id="rf-fuel" min="0" placeholder="This period"></div>
                 <div class="form-group"><label>Departures</label><input type="number" id="rf-expenses" min="0" placeholder="This period"></div>
-                <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Key HR activities, challenges, and highlights..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Action Items / Recommendations</label><textarea id="rf-route" placeholder="Planned actions or recommendations..."></textarea></div>`
+                <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Key HR activities, challenges, and highlights..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="headcount">تقرير القوى العاملة</option><option value="attendance">ملخص الحضور</option><option value="recruitment">تحديث التوظيف</option><option value="training">تقرير تدريب</option><option value="performance">ملخص الأداء</option></select>
+                </div>
+                <div class="form-section-divider">بيانات القوى العاملة</div>
+                <div class="form-group"><label>إجمالي الموظفين</label><input type="number" id="rf-odometer" min="0" placeholder="العدد الكلي"></div>
+                <div class="form-group"><label>القسم</label><input type="text" id="rf-vehicle" placeholder="مثال: العمليات، الأسطول، الإدارة"></div>
+                <div class="form-group"><label>الموظفون الجدد</label><input type="number" id="rf-fuel" min="0" placeholder="هذه الفترة"></div>
+                <div class="form-group"><label>المغادرون</label><input type="number" id="rf-expenses" min="0" placeholder="هذه الفترة"></div>
+                <div class="form-group full-width"><label>الملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="الأنشطة الرئيسية والتحديات والأبرز..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                }
             },
             accountant: {
-                title: '🧾 Financial Report',
+                title: { en: '🧾 Financial Report', ar: '🧾 التقرير المالي' },
                 color: '#2e7d32', bg: '#e8f5e9',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Type <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select</option><option value="expense">Expense Report</option><option value="revenue">Revenue Report</option><option value="budget">Budget Review</option><option value="audit">Audit Summary</option><option value="monthly">Monthly Close</option></select>
@@ -7988,12 +8426,25 @@ function json(obj) {
                 <div class="form-group"><label>Total Amount (SAR) <span class="required">*</span></label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00" required></div>
                 <div class="form-group"><label>Department / Cost Center</label><input type="text" id="rf-route" placeholder="Department name"></div>
                 <div class="form-group"><label>Period Covered</label><input type="text" id="rf-odometer" placeholder="e.g. Jan 2026 – Mar 2026"></div>
-                <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Financial summary, key variances, and observations..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Financial summary, key variances, and observations..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="expense">تقرير مصروفات</option><option value="revenue">تقرير إيرادات</option><option value="budget">مراجعة الميزانية</option><option value="audit">ملخص المراجعة</option><option value="monthly">الإقفال الشهري</option></select>
+                </div>
+                <div class="form-section-divider">الملخص المالي</div>
+                <div class="form-group"><label>الرقم المرجعي</label><input type="text" id="rf-vehicle" placeholder="مثال: INV-2026-001"></div>
+                <div class="form-group"><label>المبلغ الإجمالي (ريال) <span class="required">*</span></label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00" required></div>
+                <div class="form-group"><label>القسم / مركز التكلفة</label><input type="text" id="rf-route" placeholder="اسم القسم"></div>
+                <div class="form-group"><label>الفترة المشمولة</label><input type="text" id="rf-odometer" placeholder="مثال: يناير 2026 – مارس 2026"></div>
+                <div class="form-group full-width"><label>الملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="الملخص المالي والانحرافات الرئيسية والملاحظات..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                }
             },
             sales_marketing: {
-                title: '📣 Marketing Report',
+                title: { en: '📣 Marketing Report', ar: '📣 تقرير التسويق' },
                 color: '#ad1457', bg: '#fce4ec',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Type <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select</option><option value="campaign">Campaign Report</option><option value="event">Event Report</option><option value="monthly">Monthly Sales</option><option value="roi">ROI Analysis</option></select>
@@ -8004,12 +8455,26 @@ function json(obj) {
                 <div class="form-group"><label>Budget Used (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>Expected Revenue (SAR)</label><input type="number" id="rf-fuel" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>ROI (%)</label><input type="number" id="rf-odometer" min="0" step="0.1" placeholder="e.g. 150"></div>
-                <div class="form-group full-width"><label>Results & Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe campaign results, KPIs achieved, and learnings..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                <div class="form-group full-width"><label>Results & Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe campaign results, KPIs achieved, and learnings..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="campaign">تقرير حملة</option><option value="event">تقرير فعالية</option><option value="monthly">مبيعات شهرية</option><option value="roi">تحليل العائد</option></select>
+                </div>
+                <div class="form-section-divider">تفاصيل الحملة / النشاط</div>
+                <div class="form-group full-width"><label>اسم الحملة / الفعالية <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="اسم الحملة أو الفعالية" required></div>
+                <div class="form-group"><label>الجمهور المستهدف</label><input type="text" id="rf-route" placeholder="مثال: شركات، منشآت صغيرة، تجزئة"></div>
+                <div class="form-group"><label>الميزانية المستخدمة (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>الإيرادات المتوقعة (ريال)</label><input type="number" id="rf-fuel" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>العائد على الاستثمار (%)</label><input type="number" id="rf-odometer" min="0" step="0.1" placeholder="مثال: 150"></div>
+                <div class="form-group full-width"><label>النتائج والملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف نتائج الحملة ومؤشرات الأداء والدروس المستفادة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
+                }
             },
             supervisor: {
-                title: '👷 Supervisor Report',
+                title: { en: '👷 Supervisor Report', ar: '👷 تقرير المشرف' },
                 color: '#e65100', bg: '#fff3e0',
-                fields: `
+                fields: {
+                    en: `
                 <div class="form-group"><label>Report Date <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>Report Type <span class="required">*</span></label>
                     <select id="rf-type" required><option value="">Select</option><option value="daily">Daily Summary</option><option value="incident">Incident Report</option><option value="weekly">Weekly Overview</option></select>
@@ -8020,7 +8485,20 @@ function json(obj) {
                 <div class="form-group"><label>Vehicles Supervised</label><input type="number" id="rf-fuel" min="0" placeholder="Count"></div>
                 <div class="form-group"><label>Operational Cost (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group full-width"><label>Incidents / Key Events <span class="required">*</span></label><textarea id="rf-notes" placeholder="Report any incidents, achievements, or observations..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Suggestions or actions required..."></textarea></div>`
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Suggestions or actions required..."></textarea></div>`,
+                    ar: `
+                <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
+                <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
+                    <select id="rf-type" required><option value="">اختر</option><option value="daily">ملخص يومي</option><option value="incident">تقرير حادثة</option><option value="weekly">نظرة أسبوعية</option></select>
+                </div>
+                <div class="form-section-divider">تفاصيل العمليات</div>
+                <div class="form-group full-width"><label>المنطقة / الزون المغطاة</label><input type="text" id="rf-vehicle" placeholder="مثال: المنطقة الشمالية، مستودع ب"></div>
+                <div class="form-group"><label>أعضاء الفريق الحاضرون</label><input type="number" id="rf-odometer" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>المركبات تحت الإشراف</label><input type="number" id="rf-fuel" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>التكاليف التشغيلية (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group full-width"><label>الحوادث / الأحداث الرئيسية <span class="required">*</span></label><textarea id="rf-notes" placeholder="أبلغ عن أي حوادث أو إنجازات أو ملاحظات..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="الاقتراحات أو الإجراءات المطلوبة..."></textarea></div>`
+                }
             }
         };
 
@@ -8036,12 +8514,12 @@ function json(obj) {
                 <div class="role-form-header" style="background:${schema.bg}; color:${schema.color}; border-left:4px solid ${schema.color};">
                     <span style="font-size:22px;">${role.icon}</span>
                     <div>
-                        <div>${schema.title}</div>
+                        <div>${typeof schema.title === 'object' ? (schema.title[currentLang] || schema.title.en) : schema.title}</div>
                         <div style="font-size:12px; font-weight:400; opacity:0.8;">${currentLang === 'ar' ? 'أرسل تقريرك لمراجعة الإدارة' : 'Submit your report for admin review'}</div>
                     </div>
                 </div>
                 <form id="reportForm" onsubmit="return false;">
-                    <div class="form-grid">${schema.fields}</div>
+                    <div class="form-grid">${typeof schema.fields === 'object' ? (schema.fields[currentLang] || schema.fields.en) : schema.fields}</div>
                     <div style="display:flex; gap:15px; margin-top:25px;">
                         <button type="button" class="btn btn-primary" style="flex:1;" onclick="submitRoleReport()">${t('submitReportBtn')}</button>
                         <button type="button" class="btn btn-secondary" onclick="loadRoleReportForm()">${t('resetForm')}</button>
@@ -8064,7 +8542,7 @@ function json(obj) {
                 const errEl = document.getElementById(errId);
                 if (!el.value.trim()) {
                     el.classList.add('error');
-                    if (errEl) { errEl.textContent = 'This field is required'; errEl.classList.add('show'); }
+                    if (errEl) { errEl.textContent = currentLang === 'ar' ? 'هذا الحقل مطلوب' : 'This field is required'; errEl.classList.add('show'); }
                     valid = false;
                 } else {
                     el.classList.remove('error');
@@ -8153,13 +8631,13 @@ function json(obj) {
             container.innerHTML = `
                 <table id="vehiclesTable">
                     <thead><tr>
-                        <th>${ar ? 'رقم اللوحة' : 'Plate'}</th>
-                        <th>${ar ? 'الصانع / الموديل' : 'Make / Model'}</th>
-                        <th>${ar ? 'السنة' : 'Year'}</th>
-                        <th>${ar ? 'سعر الشراء' : 'Purchase Price'}</th>
-                        <th>${ar ? 'المورد / البائع' : 'Purchased From'}</th>
-                        <th>${ar ? 'تاريخ الشراء' : 'Purchase Date'}</th>
-                        <th>${ar ? 'الحالة' : 'Status'}</th>
+                        <th>${t('plate')}</th>
+                        <th>${t('makeModel')}</th>
+                        <th>${t('year')}</th>
+                        <th>${t('purchasePrice')}</th>
+                        <th>${t('purchasedFrom')}</th>
+                        <th>${t('purchaseDate')}</th>
+                        <th>${t('statusCol')}</th>
                         <th>${ar ? 'الإجراءات' : 'Actions'}</th>
                     </tr></thead>
                     <tbody id="vehiclesTableBody">
@@ -8626,6 +9104,26 @@ ${counts}`),
                                     user = AppState.data.users.find(u => u.email === firebaseUser.email);
                                 }
 
+                                // If user profile not found, auto-create one (handles signup race condition)
+                                if (!user) {
+                                    const signupName = document.getElementById('signupName') ?
+                                        document.getElementById('signupName').value.trim() : '';
+                                    const newUser = {
+                                        id: firebaseUser.uid,
+                                        uid: firebaseUser.uid,
+                                        email: firebaseUser.email,
+                                        name: signupName || firebaseUser.email.split('@')[0],
+                                        role: 'driver',
+                                        status: 'active',
+                                        createdAt: new Date().toISOString(),
+                                        customPermissions: null
+                                    };
+                                    const updatedUsers = [...AppState.data.users, newUser];
+                                    await DataService.saveCollection('users', updatedUsers);
+                                    AppState.data.users = updatedUsers;
+                                    user = newUser;
+                                }
+
                                 if (user && user.status === 'active') {
                                     AppState.currentUser = user;
                                     document.getElementById('loginPage').style.display = 'none';
@@ -8649,11 +9147,7 @@ ${counts}`),
                                     Utils.showToast(t('welcomeBack', user.name));
                                 } else if (user && user.status === 'inactive') {
                                     if (window.firebaseFns) await window.firebaseFns.signOut(window.auth);
-                                    Utils.showToast('Your account is inactive. Contact admin.', true);
-                                } else {
-                                    // New Firebase user not yet in system — show login
-                                    Utils.showToast('Account not found. Please sign up first.', true);
-                                    if (window.firebaseFns) await window.firebaseFns.signOut(window.auth);
+                                    Utils.showToast(currentLang === 'ar' ? 'حسابك غير نشط. تواصل مع المدير.' : 'Your account is inactive. Contact admin.', true);
                                 }
                             } catch(e) {
                                 console.error('Auth load error:', e);

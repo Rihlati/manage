@@ -976,9 +976,42 @@
         .lf-eye:hover { opacity: 0.8; }
 
         /* ── Forgot password row ── */
-        .lf-forgot-row {
-            text-align: right;
-            margin: -6px 0 20px;
+        .lf-forgot-row { text-align: right; margin: -6px 0 20px; }
+        .lf-options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: -4px 0 20px;
+        }
+        .lf-remember {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            user-select: none;
+        }
+        .lf-remember input[type="checkbox"] { display: none; }
+        .lf-remember-box {
+            width: 18px; height: 18px;
+            border: 2px solid #c5cae9;
+            border-radius: 5px;
+            background: white;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .lf-remember input:checked + .lf-remember-box {
+            background: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        .lf-remember input:checked + .lf-remember-box::after {
+            content: "✓";
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
         }
         .lf-forgot-btn {
             background: none;
@@ -992,6 +1025,35 @@
             transition: color 0.2s;
         }
         .lf-forgot-btn:hover { color: var(--primary-color); text-decoration: underline; }
+
+        /* Auto-logout warning banner */
+        #sessionWarningBanner {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 14px;
+            padding: 14px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #795548;
+            z-index: 9999;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+        #sessionWarningBanner.show { display: flex; }
+        #sessionWarningCountdown { font-size: 18px; font-weight: 800; color: #e65100; min-width: 28px; text-align: center; }
+        #sessionWarningBanner button {
+            background: var(--secondary-color); color: white;
+            border: none; border-radius: 8px; padding: 7px 16px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+        }
 
         /* ── Submit button ── */
         .lf-submit {
@@ -1054,9 +1116,9 @@
             right: auto;
             left: 14px;
         }
-        body.lang-ar .lf-forgot-row {
-            text-align: left;
-        }
+        body.lang-ar .lf-forgot-row { text-align: left; }
+        body.lang-ar .lf-options-row { flex-direction: row-reverse; }
+        body.lang-ar #sessionWarningBanner { direction: rtl; }
         body.lang-ar .login-welcome h2,
         body.lang-ar .login-welcome p {
             text-align: right;
@@ -2736,8 +2798,13 @@
                                    required autocomplete="current-password" aria-label="Password">
                             <button type="button" class="lf-eye" onclick="togglePassVis('loginPassword', this)" aria-label="Show password">👁️</button>
                         </div>
-                        <!-- Forgot password sits cleanly below the password field -->
-                        <div class="lf-forgot-row">
+                        <!-- Remember Me + Forgot Password row -->
+                        <div class="lf-options-row">
+                            <label class="lf-remember" id="rememberMeLabel">
+                                <input type="checkbox" id="rememberMe">
+                                <span class="lf-remember-box"></span>
+                                <span id="rememberMeText">Remember me</span>
+                            </label>
                             <button type="button" class="lf-forgot-btn" onclick="openForgotPassword()" id="forgotPassBtn">
                                 Forgot password?
                             </button>
@@ -2945,6 +3012,16 @@ service cloud.firestore {
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- Session Warning Banner -->
+    <div id="sessionWarningBanner" role="alert">
+        <span>⏱️</span>
+        <span id="sessionWarningMsg">You will be logged out in</span>
+        <span id="sessionWarningCountdown">60</span>
+        <span id="sessionWarningUnit">s</span>
+        <button onclick="AppState.extendSession()">Stay Logged In</button>
+        <button onclick="logout()" style="background:#e53935;margin-right:0;">Logout Now</button>
     </div>
 
     <!-- Main App Container -->
@@ -4496,15 +4573,105 @@ service cloud.firestore {
                 DataService.saveCollection('campaigns', value);
             },
 
+            // ── Session: Remember Me ────────────────────────────────────────
+            rememberMe: false,
+            loginTime: null,           // absolute 4-hour wall-clock limit
+            warningTimer: null,
+            countdownInterval: null,
+            WARNING_BEFORE: 60 * 1000, // show warning 60s before logout
+
             updateActivity() {
                 this.lastActivity = Date.now();
+                // If warning is showing, dismiss it (user is active)
+                if (document.getElementById('sessionWarningBanner')?.classList.contains('show')) {
+                    this.hideWarning();
+                }
+            },
+
+            extendSession() {
+                this.lastActivity = Date.now();
+                // For non-remember-me: also reset the 4-hour wall clock
+                if (!this.rememberMe) this.loginTime = Date.now();
+                this.hideWarning();
+                const ar = currentLang === 'ar';
+                Utils.showToast(ar ? '✅ تم تمديد الجلسة' : '✅ Session extended');
+            },
+
+            hideWarning() {
+                const banner = document.getElementById('sessionWarningBanner');
+                if (banner) banner.classList.remove('show');
+                if (this.countdownInterval) { clearInterval(this.countdownInterval); this.countdownInterval = null; }
+            },
+
+            showWarning(secondsLeft) {
+                const ar = currentLang === 'ar';
+                const banner  = document.getElementById('sessionWarningBanner');
+                const msg     = document.getElementById('sessionWarningMsg');
+                const unit    = document.getElementById('sessionWarningUnit');
+                const cdEl    = document.getElementById('sessionWarningCountdown');
+                const stayBtn = banner?.querySelectorAll('button')[0];
+                const outBtn  = banner?.querySelectorAll('button')[1];
+                if (!banner) return;
+                if (msg)     msg.textContent  = ar ? 'سيتم تسجيل خروجك خلال' : 'You will be logged out in';
+                if (unit)    unit.textContent = ar ? 'ث' : 's';
+                if (stayBtn) stayBtn.textContent = ar ? 'ابقَ متصلاً' : 'Stay Logged In';
+                if (outBtn)  outBtn.textContent  = ar ? 'تسجيل الخروج' : 'Logout Now';
+                banner.dir = ar ? 'rtl' : 'ltr';
+                banner.classList.add('show');
+                let secs = secondsLeft;
+                if (cdEl) cdEl.textContent = secs;
+                if (this.countdownInterval) clearInterval(this.countdownInterval);
+                this.countdownInterval = setInterval(() => {
+                    secs--;
+                    if (cdEl) cdEl.textContent = Math.max(0, secs);
+                    if (secs <= 0) {
+                        clearInterval(this.countdownInterval);
+                        this.countdownInterval = null;
+                    }
+                }, 1000);
             },
 
             checkSession() {
-                if (this.currentUser && Date.now() - this.lastActivity > this.sessionTimeout) {
-                    logout();
-                    Utils.showToast(t('sessionExpired'), true);
-                    return false;
+                if (!this.currentUser) return true;
+                const now = Date.now();
+                const idleMs   = now - this.lastActivity;
+                const loginMs  = this.loginTime ? (now - this.loginTime) : 0;
+
+                // Determine which limit applies
+                let timeoutMs;
+                if (this.rememberMe) {
+                    // Remember Me: only apply the 4-hour absolute wall-clock limit
+                    timeoutMs = 4 * 60 * 60 * 1000;
+                    const remaining = timeoutMs - loginMs;
+                    if (remaining <= 0) {
+                        this.hideWarning();
+                        logout();
+                        Utils.showToast(currentLang === 'ar' ? '⏱️ انتهت الجلسة (4 ساعات). يرجى تسجيل الدخول مجدداً.' : '⏱️ Session expired after 4 hours. Please log in again.', true);
+                        return false;
+                    }
+                    if (remaining <= this.WARNING_BEFORE && !document.getElementById('sessionWarningBanner')?.classList.contains('show')) {
+                        this.showWarning(Math.ceil(remaining / 1000));
+                    }
+                } else {
+                    // No Remember Me: idle timeout (30 min) AND 4-hour absolute limit
+                    const idleTimeout  = this.sessionTimeout;      // 30 min idle
+                    const absoluteLimit = 4 * 60 * 60 * 1000;     // 4 hours absolute
+                    const idleRemaining     = idleTimeout    - idleMs;
+                    const absoluteRemaining = absoluteLimit  - loginMs;
+                    const remaining = Math.min(idleRemaining, absoluteRemaining);
+
+                    if (remaining <= 0) {
+                        this.hideWarning();
+                        logout();
+                        const reason = idleRemaining <= 0
+                            ? (currentLang === 'ar' ? '⏱️ تم تسجيل خروجك بسبب عدم النشاط.' : '⏱️ Logged out due to inactivity.')
+                            : (currentLang === 'ar' ? '⏱️ انتهت الجلسة (4 ساعات).' : '⏱️ Session expired after 4 hours.');
+                        Utils.showToast(reason, true);
+                        return false;
+                    }
+                    if (remaining <= this.WARNING_BEFORE && !document.getElementById('sessionWarningBanner')?.classList.contains('show')) {
+                        this.showWarning(Math.ceil(remaining / 1000));
+                    }
                 }
                 return true;
             }
@@ -4685,14 +4852,25 @@ service cloud.firestore {
             loginBtn.disabled = true;
             loginBtn.innerHTML = `<span>${t('signingIn')}</span>`;
             
+            // Read Remember Me before Firebase call
+            const rememberMeChecked = document.getElementById('rememberMe')?.checked || false;
+
             try {
                 if (!window.firebaseFns || !window.auth) {
                     Utils.showToast(currentLang === 'ar' ? 'Firebase غير جاهز. يرجى الانتظار…' : 'Firebase not ready. Please wait…', true);
                     return;
                 }
-                const { signInWithEmailAndPassword } = window.firebaseFns;
+                // Set Firebase persistence based on Remember Me
+                const { signInWithEmailAndPassword, setPersistence, browserLocalPersistence, browserSessionPersistence } = window.firebaseFns;
+                if (setPersistence) {
+                    await setPersistence(window.auth, rememberMeChecked ? browserLocalPersistence : browserSessionPersistence).catch(() => {});
+                }
                 const cred = await signInWithEmailAndPassword(window.auth, email, password);
-                // onAuthStateChanged will handle the rest
+                // Store rememberMe choice; onAuthStateChanged handles the rest
+                AppState.rememberMe = rememberMeChecked;
+                AppState.loginTime  = Date.now();
+                localStorage.setItem('rihlatiRememberMe', rememberMeChecked ? '1' : '0');
+                localStorage.setItem('rihlatiLoginTime',  String(AppState.loginTime));
                 Utils.showToast(t('signingIn'));
             } catch (error) {
                 let msg = currentLang === 'ar' ? 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى.' : 'Login failed. Please try again.';
@@ -5059,39 +5237,62 @@ service cloud.firestore {
             const reports = AppState.reports.slice().reverse();
             
             if (reports.length > 0) {
+                const ar = currentLang === 'ar';
                 container.innerHTML = `
                     <table>
                         <thead>
                             <tr>
                                 <th>${t('id')}</th>
                                 <th>${t('date')}</th>
-                                <th>${t('driver')}</th>
+                                <th>${ar ? 'مقدم التقرير' : 'Submitted By'}</th>
                                 <th>${t('vehicle')}</th>
                                 <th>${t('type')}</th>
-                                <th>${t('fuel')}</th>
                                 <th>${t('expenses')}</th>
                                 <th>${t('statusCol')}</th>
+                                <th>${ar ? 'المراجع' : 'Reviewed By'}</th>
                                 <th>${t('actions')}</th>
                             </tr>
                         </thead>
                         <tbody id="reportsTableBody">
                             ${reports.map(r => {
-                                const driverName   = r.driverName   || r.name || 'Unknown';
+                                // Look up real user record by userId first, fallback to driverName
+                                const userRecord   = AppState.data.users.find(u => u.id === r.userId || u.uid === r.userId);
+                                const displayName  = (userRecord && userRecord.name) ? userRecord.name : (r.driverName || r.name || 'Unknown');
+                                const userRole     = userRecord ? getRoleInfo(userRecord.role) : null;
+                                const roleLabel    = userRole ? (ar ? (userRole.labelAr || userRole.label) : userRole.label) : '';
                                 const vehicleNum   = r.vehicleNumber || 'N/A';
                                 const reportType   = r.type          || 'report';
                                 const reportStatus = r.status        || 'pending';
-                                const statusLabel = currentLang === 'ar' 
+                                const statusLabel  = ar
                                     ? ({pending:'انتظار',approved:'موافق',rejected:'مرفوض'}[reportStatus] || reportStatus)
                                     : reportStatus.toUpperCase();
+                                const reviewerHtml = r.reviewedBy
+                                    ? `<span style="display:flex;flex-direction:column;gap:2px;">
+                                        <span style="font-weight:600;font-size:12px;color:#333;">${Utils.escapeHTML(r.reviewedBy)}</span>
+                                        <span style="font-size:10px;color:#888;">${Utils.formatDate(r.reviewedAt)}</span>
+                                       </span>`
+                                    : `<span style="color:#bbb;font-size:12px;">${ar ? '—' : '—'}</span>`;
+                                const statusBadgeExtra = reportStatus !== 'pending' && r.reviewedBy
+                                    ? `<br><small style="font-size:10px;color:#888;">${ar ? 'بواسطة' : 'by'} ${Utils.escapeHTML(r.reviewedBy)}</small>`
+                                    : '';
                                 return `
-                                <tr data-search="${Utils.escapeHTML(driverName.toLowerCase())} ${Utils.escapeHTML(vehicleNum.toLowerCase())} ${Utils.escapeHTML(reportType.toLowerCase())} ${Utils.escapeHTML(reportStatus.toLowerCase())}">
+                                <tr data-search="${Utils.escapeHTML(displayName.toLowerCase())} ${Utils.escapeHTML(vehicleNum.toLowerCase())} ${Utils.escapeHTML(reportType.toLowerCase())} ${Utils.escapeHTML(reportStatus.toLowerCase())}">
                                     <td data-label="${t('id')}">${("#"+r.id)}</td>
                                     <td data-label="${t('date')}">${Utils.formatDate(r.date)}</td>
-                                    <td data-label="${currentLang === 'ar' ? 'السائق' : 'Driver'}">${Utils.escapeHTML(driverName)}</td>
+                                    <td data-label="${ar ? 'مقدم التقرير' : 'Submitted By'}">
+                                        <span style="display:flex;flex-direction:column;gap:2px;">
+                                            <span style="font-weight:600;font-size:13px;">${Utils.escapeHTML(displayName)}</span>
+                                            ${roleLabel ? `<span style="font-size:10px;color:#888;background:#f0f4ff;padding:1px 6px;border-radius:8px;display:inline-block;">${Utils.escapeHTML(roleLabel)}</span>` : ''}
+                                        </span>
+                                    </td>
                                     <td data-label="${t('vehicle')}">${Utils.escapeHTML(vehicleNum)}</td>
                                     <td data-label="${t('type')}">${Utils.escapeHTML(getReportTypeLabel(reportType))}</td>
                                     <td data-label="${t('expenses')}">${Utils.formatCurrency(r.expenses || 0)}</td>
-                                    <td data-label="${t('statusCol')}"><span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span></td>
+                                    <td data-label="${t('statusCol')}">
+                                        <span class="badge badge-${Utils.escapeHTML(reportStatus)}">${statusLabel}</span>
+                                        ${statusBadgeExtra}
+                                    </td>
+                                    <td data-label="${ar ? 'المراجع' : 'Reviewed By'}">${reviewerHtml}</td>
                                     <td data-label="${t('actions')}" class="action-buttons">
                                         <button class="btn-icon" style="background: #e3f2fd; color: #1976d2;" onclick="viewReport('${r.id}')" title="${t('viewDetails')}">
                                             👁️
@@ -5390,24 +5591,76 @@ service cloud.firestore {
             const typeDisplay = ar ? (reportTypeLabels[report.type] || report.type) : report.type;
             const statusDisplay = ar ? (statusLabels[report.status] || report.status.toUpperCase()) : report.status.toUpperCase();
 
+            // Look up real user record
+            const reportUserRecord = AppState.data.users.find(u => u.id === report.userId || u.uid === report.userId);
+            const submitterName    = (reportUserRecord && reportUserRecord.name) ? reportUserRecord.name : (report.driverName || 'Unknown');
+            const submitterRoleInfo = reportUserRecord ? getRoleInfo(reportUserRecord.role) : null;
+            const submitterRoleLabel = submitterRoleInfo ? (ar ? (submitterRoleInfo.labelAr || submitterRoleInfo.label) : submitterRoleInfo.label) : '';
+
             const details = document.getElementById('reportDetails');
             details.innerHTML = `
-                <div style="line-height: 1.8; direction:${ar?'rtl':'ltr'}; text-align:${ar?'right':'left'};">
-                    <p><strong>${ar?'رقم التقرير':'Report ID'}:</strong> #${report.id}</p>
-                    <p><strong>${ar?'التاريخ':'Date'}:</strong> ${Utils.formatDate(report.date, 'long')}</p>
-                    <p><strong>${ar?'السائق':'Driver'}:</strong> ${Utils.escapeHTML(report.driverName)}</p>
-                    <p><strong>${ar?'رقم المركبة':'Vehicle Number'}:</strong> ${Utils.escapeHTML(report.vehicleNumber)}</p>
-                    <p><strong>${ar?'نوع التقرير':'Report Type'}:</strong> ${Utils.escapeHTML(typeDisplay)}</p>
-                    <p><strong>${ar?'عداد الكيلومتر':'Odometer'}:</strong> ${report.odometer} km</p>
-                    <p><strong>${ar?'الوقود':'Fuel'}:</strong> ${report.fuel || 0} ${ar?'لتر':'liters'}</p>
-                    <p><strong>${ar?'المصروفات':'Expenses'}:</strong> ${Utils.formatCurrency(report.expenses || 0)}</p>
-                    <p><strong>${ar?'المسار / الموقع':'Route / Location'}:</strong> ${Utils.escapeHTML(report.route || (ar?'غير محدد':'N/A'))}</p>
-                    <p><strong>${ar?'الحالة':'Status'}:</strong> <span class="badge badge-${Utils.escapeHTML(report.status)}">${statusDisplay}</span></p>
-                    <hr style="margin: 15px 0;">
+                <div style="line-height:1.9;direction:${ar?'rtl':'ltr'};text-align:${ar?'right':'left'};">
+
+                    <!-- Submitter info banner -->
+                    <div style="background:linear-gradient(135deg,#e8eaf6,#f3e5f5);border-radius:12px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:14px;">
+                        <div style="width:44px;height:44px;border-radius:50%;background:var(--secondary-color);color:white;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:700;flex-shrink:0;">
+                            ${Utils.escapeHTML(submitterName.charAt(0).toUpperCase())}
+                        </div>
+                        <div>
+                            <div style="font-weight:700;font-size:15px;color:#1a237e;">${Utils.escapeHTML(submitterName)}</div>
+                            <div style="font-size:12px;color:#666;">${submitterRoleLabel ? Utils.escapeHTML(submitterRoleLabel) : ''}</div>
+                        </div>
+                        <div style="margin-${ar?'right':'left'}:auto;">
+                            <span class="badge badge-${Utils.escapeHTML(report.status)}" style="font-size:13px;padding:5px 14px;">${statusDisplay}</span>
+                        </div>
+                    </div>
+
+                    <!-- Core fields -->
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-bottom:16px;">
+                        <p><strong>${ar?'رقم التقرير':'Report ID'}:</strong> #${report.id}</p>
+                        <p><strong>${ar?'التاريخ':'Date'}:</strong> ${Utils.formatDate(report.date, 'long')}</p>
+                        <p><strong>${ar?'رقم المركبة':'Vehicle'}:</strong> ${Utils.escapeHTML(report.vehicleNumber || 'N/A')}</p>
+                        <p><strong>${ar?'نوع التقرير':'Report Type'}:</strong> ${Utils.escapeHTML(typeDisplay)}</p>
+                        ${report.odometer ? `<p><strong>${ar?'عداد الكيلومتر':'Odometer'}:</strong> ${report.odometer} km</p>` : ''}
+                        ${report.fuel ? `<p><strong>${ar?'الوقود':'Fuel'}:</strong> ${report.fuel} ${ar?'لتر':'L'}</p>` : ''}
+                        ${report.expenses ? `<p><strong>${ar?'المصروفات':'Expenses'}:</strong> ${Utils.formatCurrency(report.expenses)}</p>` : ''}
+                        ${report.route ? `<p style="grid-column:1/-1"><strong>${ar?'المسار / الموقع':'Route / Location'}:</strong> ${Utils.escapeHTML(report.route)}</p>` : ''}
+                        ${report.priority ? `<p><strong>${ar?'الأولوية':'Priority'}:</strong> ${Utils.escapeHTML(report.priority)}</p>` : ''}
+                        ${report.tech ? `<p><strong>${ar?'الفني':'Technician'}:</strong> ${Utils.escapeHTML(report.tech)}</p>` : ''}
+                        ${report.nextService ? `<p><strong>${ar?'الصيانة القادمة':'Next Service'}:</strong> ${Utils.escapeHTML(report.nextService)}</p>` : ''}
+                        ${report.completionStatus ? `<p><strong>${ar?'حالة الإنجاز':'Completion'}:</strong> ${Utils.escapeHTML(report.completionStatus)}</p>` : ''}
+                        ${report.partsCost != null && report.partsCost !== '' ? `<p><strong>${ar?'تكلفة القطع':'Parts Cost'}:</strong> ${Utils.formatCurrency(report.partsCost)}</p>` : ''}
+                        ${report.laborHours ? `<p><strong>${ar?'ساعات العمل':'Labour Hours'}:</strong> ${report.laborHours} ${ar?'ساعة':'hrs'}</p>` : ''}
+                        ${report.downtime ? `<p><strong>${ar?'وقت التوقف':'Downtime'}:</strong> ${report.downtime} ${ar?'ساعة':'hrs'}</p>` : ''}
+                        ${report.startTime ? `<p><strong>${ar?'وقت البداية':'Start Time'}:</strong> ${Utils.escapeHTML(report.startTime)}</p>` : ''}
+                        ${report.endTime ? `<p><strong>${ar?'وقت النهاية':'End Time'}:</strong> ${Utils.escapeHTML(report.endTime)}</p>` : ''}
+                        ${report.roadCondition ? `<p><strong>${ar?'حالة الطريق':'Road Condition'}:</strong> ${Utils.escapeHTML(report.roadCondition)}</p>` : ''}
+                        ${report.vehicleStatus ? `<p><strong>${ar?'حالة المركبة':'Vehicle Status'}:</strong> ${Utils.escapeHTML(report.vehicleStatus)}</p>` : ''}
+                        ${report.absentDrivers ? `<p><strong>${ar?'السائقون الغائبون':'Absent Drivers'}:</strong> ${report.absentDrivers}</p>` : ''}
+                        ${report.completedTrips ? `<p><strong>${ar?'الرحلات المكتملة':'Completed Trips'}:</strong> ${report.completedTrips}</p>` : ''}
+                        ${report.attendanceRate ? `<p><strong>${ar?'نسبة الحضور':'Attendance Rate'}:</strong> ${report.attendanceRate}%</p>` : ''}
+                        ${report.invoiceNumber ? `<p><strong>${ar?'رقم الفاتورة':'Invoice No.'}:</strong> ${Utils.escapeHTML(report.invoiceNumber)}</p>` : ''}
+                        ${report.vatAmount ? `<p><strong>${ar?'ضريبة القيمة المضافة':'VAT'}:</strong> ${Utils.formatCurrency(report.vatAmount)}</p>` : ''}
+                        ${report.leadsGenerated ? `<p><strong>${ar?'العملاء المحتملون':'Leads'}:</strong> ${report.leadsGenerated}</p>` : ''}
+                        ${report.conversions ? `<p><strong>${ar?'التحويلات':'Conversions'}:</strong> ${report.conversions}</p>` : ''}
+                    </div>
+
+                    <hr style="margin:12px 0;border:none;border-top:1px solid #e0e0e0;">
                     <p><strong>${ar?'الملاحظات':'Notes'}:</strong></p>
-                    <p style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin-top: 10px;">${Utils.escapeHTML(report.notes)}</p>
-                    <p style="margin-top: 15px; font-size: 12px; color: #999;">${ar?'تاريخ الإرسال':'Submitted'}: ${Utils.formatDate(report.submittedAt, 'long')}</p>
-                    ${report.reviewedAt ? `<p style="font-size: 12px; color: #999;">${ar?'تاريخ المراجعة':'Reviewed'}: ${Utils.formatDate(report.reviewedAt, 'long')}</p>` : ''}
+                    <p style="background:#f8f9ff;padding:14px;border-radius:10px;margin-top:8px;border-left:3px solid var(--secondary-color);white-space:pre-wrap;">${Utils.escapeHTML(report.notes || '')}</p>
+                    ${report.recommendations ? `
+                    <p style="margin-top:12px;"><strong>${ar?'التوصيات':'Recommendations'}:</strong></p>
+                    <p style="background:#f0fff4;padding:14px;border-radius:10px;margin-top:8px;border-left:3px solid var(--success-color);white-space:pre-wrap;">${Utils.escapeHTML(report.recommendations)}</p>` : ''}
+
+                    <!-- Timeline footer -->
+                    <div style="margin-top:16px;padding:12px 14px;background:#f5f5f5;border-radius:10px;font-size:12px;color:#666;display:flex;flex-direction:column;gap:5px;">
+                        <span>📤 ${ar?'أُرسل':'Submitted'}: ${Utils.formatDate(report.submittedAt, 'long')}</span>
+                        ${report.reviewedAt ? `
+                        <span style="color:${report.status==='approved'?'#2e7d32':'#c62828'};">
+                            ${report.status==='approved'?'✅':'❌'} ${ar?'تمت المراجعة':'Reviewed'}: ${Utils.formatDate(report.reviewedAt, 'long')}
+                            ${report.reviewedBy ? ` — <strong>${ar?'بواسطة':'by'} ${Utils.escapeHTML(report.reviewedBy)}</strong>` : ''}
+                        </span>` : ''}
+                    </div>
                 </div>
             `;
             
@@ -5794,6 +6047,10 @@ service cloud.firestore {
 
         // ==================== LOGOUT ====================
         async function logout() {
+            // Clear session warning
+            AppState.hideWarning();
+            localStorage.removeItem('rihlatiLoginTime');
+            // Keep rememberMe preference but clear login time
             if (confirm(currentLang === 'ar' ? 'هل أنت متأكد من تسجيل الخروج؟' : 'Are you sure you want to logout?')) {
                 try {
                     // Detach Firestore listeners
@@ -6472,6 +6729,11 @@ service cloud.firestore {
             // My Requests header
             const myReqHeader = document.querySelector('#myTickets .table-header h3');
             if (myReqHeader) myReqHeader.textContent = ar ? '🎫 طلباتي' : '🎫 My Requests';
+            // Remember Me label
+            const rememberMeText = document.getElementById('rememberMeText');
+            if (rememberMeText) rememberMeText.textContent = ar ? 'تذكرني' : 'Remember me';
+            const forgotBtnEl = document.getElementById('forgotPassBtn');
+            if (forgotBtnEl) forgotBtnEl.textContent = ar ? 'نسيت كلمة المرور؟' : 'Forgot password?';
             // My Requests search placeholder
             const myReqSearch = document.querySelector('#myTickets .search-box');
             if (myReqSearch) myReqSearch.placeholder = ar ? 'بحث في الطلبات...' : 'Search tickets...';
@@ -6586,6 +6848,10 @@ service cloud.firestore {
             document.documentElement.lang = currentLang;
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.body.classList.toggle('lang-ar', currentLang === 'ar');
+            // Restore Remember Me checkbox
+            const savedRemember = localStorage.getItem('rihlatiRememberMe') === '1';
+            const rememberCb = document.getElementById('rememberMe');
+            if (rememberCb) rememberCb.checked = savedRemember;
         })();
 
         // ==================== TICKET SYSTEM ====================
@@ -8267,9 +8533,23 @@ function json(obj) {
                     <div class="error-message" id="err-rf-type"></div>
                 </div>
                 <div class="form-group"><label>Vehicle Number <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="e.g. ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
-                <div class="form-group"><label>Odometer Reading (km) <span class="required">*</span></label><input type="number" id="rf-odometer" min="0" placeholder="Current reading" required><div class="error-message" id="err-rf-odometer"></div></div>
+                <div class="form-section-divider">Trip Details</div>
+                <div class="form-group"><label>Trip Start Time</label><input type="time" id="rf-start-time" placeholder="HH:MM"></div>
+                <div class="form-group"><label>Trip End Time</label><input type="time" id="rf-end-time" placeholder="HH:MM"></div>
+                <div class="form-group"><label>Start Odometer (km)</label><input type="number" id="rf-start-odometer" min="0" placeholder="Reading at start"></div>
+                <div class="form-group"><label>End Odometer (km) <span class="required">*</span></label><input type="number" id="rf-odometer" min="0" placeholder="Reading at end" required><div class="error-message" id="err-rf-odometer"></div></div>
+                <div class="form-group"><label>Passengers / Cargo Count</label><input type="number" id="rf-passengers" min="0" placeholder="0"></div>
                 <div class="form-group"><label>Fuel Amount (liters)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="Fuel consumed"></div>
                 <div class="form-group"><label>Expenses (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="Total expenses"></div>
+                <div class="form-group"><label>Traffic / Road Condition</label>
+                    <select id="rf-road-condition"><option value="">Select</option><option value="clear">🟢 Clear</option><option value="moderate">🟡 Moderate</option><option value="heavy">🟠 Heavy Traffic</option><option value="roadwork">🚧 Roadwork</option></select>
+                </div>
+                <div class="form-group"><label>Vehicle Status</label>
+                    <select id="rf-vehicle-status"><option value="normal">✅ Normal</option><option value="needs_attention">⚠️ Needs Attention</option><option value="breakdown">🔴 Breakdown</option></select>
+                </div>
+                <div class="form-group"><label>Pre-Trip Safety Check</label>
+                    <select id="rf-safety-check"><option value="passed">✅ Passed</option><option value="minor_issues">⚠️ Minor Issues</option><option value="failed">❌ Failed</option></select>
+                </div>
                 <div class="form-group full-width"><label>Route / Location</label><input type="text" id="rf-route" placeholder="e.g. Riyadh → Jeddah"></div>
                 <div class="form-group full-width"><label>Notes <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe your trip details..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
                     ar: `
@@ -8279,9 +8559,23 @@ function json(obj) {
                     <div class="error-message" id="err-rf-type"></div>
                 </div>
                 <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
-                <div class="form-group"><label>عداد الكيلومتر (كم) <span class="required">*</span></label><input type="number" id="rf-odometer" min="0" placeholder="القراءة الحالية" required><div class="error-message" id="err-rf-odometer"></div></div>
+                <div class="form-section-divider">تفاصيل الرحلة</div>
+                <div class="form-group"><label>وقت بداية الرحلة</label><input type="time" id="rf-start-time"></div>
+                <div class="form-group"><label>وقت نهاية الرحلة</label><input type="time" id="rf-end-time"></div>
+                <div class="form-group"><label>عداد البداية (كم)</label><input type="number" id="rf-start-odometer" min="0" placeholder="قراءة بداية الرحلة"></div>
+                <div class="form-group"><label>عداد النهاية (كم) <span class="required">*</span></label><input type="number" id="rf-odometer" min="0" placeholder="قراءة نهاية الرحلة" required><div class="error-message" id="err-rf-odometer"></div></div>
+                <div class="form-group"><label>عدد الركاب / الحمولة</label><input type="number" id="rf-passengers" min="0" placeholder="0"></div>
                 <div class="form-group"><label>كمية الوقود (لتر)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="الوقود المستهلك"></div>
                 <div class="form-group"><label>المصروفات (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="إجمالي المصروفات"></div>
+                <div class="form-group"><label>حالة الطريق / الازدحام</label>
+                    <select id="rf-road-condition"><option value="">اختر</option><option value="clear">🟢 خالٍ</option><option value="moderate">🟡 متوسط</option><option value="heavy">🟠 ازدحام شديد</option><option value="roadwork">🚧 أعمال طريق</option></select>
+                </div>
+                <div class="form-group"><label>حالة المركبة</label>
+                    <select id="rf-vehicle-status"><option value="normal">✅ طبيعية</option><option value="needs_attention">⚠️ تحتاج متابعة</option><option value="breakdown">🔴 عطل</option></select>
+                </div>
+                <div class="form-group"><label>فحص السلامة قبل الرحلة</label>
+                    <select id="rf-safety-check"><option value="passed">✅ اجتاز</option><option value="minor_issues">⚠️ مشكلات طفيفة</option><option value="failed">❌ فشل</option></select>
+                </div>
                 <div class="form-group full-width"><label>المسار / الموقع</label><input type="text" id="rf-route" placeholder="مثال: الرياض ← جدة"></div>
                 <div class="form-group full-width"><label>الملاحظات <span class="required">*</span></label><textarea id="rf-notes" placeholder="اوصف تفاصيل رحلتك..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
                 }
@@ -8304,8 +8598,14 @@ function json(obj) {
                 </div>
                 <div class="form-group"><label>Next Service Date</label><input type="date" id="rf-next-service"></div>
                 <div class="form-group"><label>Odometer Reading (km)</label><input type="number" id="rf-odometer" min="0" placeholder="Current reading"></div>
+                <div class="form-group"><label>Labour Hours</label><input type="number" id="rf-labor-hours" min="0" step="0.5" placeholder="Hours spent"></div>
+                <div class="form-group"><label>Parts Cost (SAR)</label><input type="number" id="rf-parts-cost" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>Vehicle Downtime (hours)</label><input type="number" id="rf-downtime" min="0" step="0.5" placeholder="Hours out of service"></div>
+                <div class="form-group"><label>Completion Status</label>
+                    <select id="rf-completion"><option value="completed">✅ Completed</option><option value="in_progress">🔄 In Progress</option><option value="pending_parts">⏳ Pending Parts</option></select>
+                </div>
                 <div class="form-group full-width"><label>Work Performed <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe maintenance work done, parts replaced..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Any additional recommendations or observations..."></textarea></div>`,
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-recommendations" placeholder="Any additional recommendations or observations..."></textarea></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
@@ -8320,8 +8620,14 @@ function json(obj) {
                 </div>
                 <div class="form-group"><label>تاريخ الصيانة القادمة</label><input type="date" id="rf-next-service"></div>
                 <div class="form-group"><label>عداد الكيلومتر (كم)</label><input type="number" id="rf-odometer" min="0" placeholder="القراءة الحالية"></div>
+                <div class="form-group"><label>ساعات العمل</label><input type="number" id="rf-labor-hours" min="0" step="0.5" placeholder="الساعات المستغرقة"></div>
+                <div class="form-group"><label>تكلفة قطع الغيار (ريال)</label><input type="number" id="rf-parts-cost" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>وقت توقف المركبة (ساعات)</label><input type="number" id="rf-downtime" min="0" step="0.5" placeholder="ساعات خروج المركبة عن الخدمة"></div>
+                <div class="form-group"><label>حالة الإنجاز</label>
+                    <select id="rf-completion"><option value="completed">✅ مكتمل</option><option value="in_progress">🔄 قيد التنفيذ</option><option value="pending_parts">⏳ في انتظار قطع</option></select>
+                </div>
                 <div class="form-group full-width"><label>الأعمال المنفذة <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف أعمال الصيانة والقطع المستبدلة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="أي توصيات أو ملاحظات إضافية..."></textarea></div>`
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-recommendations" placeholder="أي توصيات أو ملاحظات إضافية..."></textarea></div>`
                 }
             },
             vehicle_engineer: {
@@ -8338,8 +8644,14 @@ function json(obj) {
                 <div class="form-group"><label>Overall Condition (1-10) <span class="required">*</span></label><input type="number" id="rf-odometer" min="1" max="10" placeholder="Rate 1-10" required></div>
                 <div class="form-group"><label>Estimated Repair Cost (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>Fuel Level (%)</label><input type="number" id="rf-fuel" min="0" max="100" placeholder="e.g. 75"></div>
+                <div class="form-group"><label>Battery Condition</label>
+                    <select id="rf-vehicle-status"><option value="good">✅ Good</option><option value="weak">⚠️ Weak</option><option value="replace">🔴 Replace</option></select>
+                </div>
+                <div class="form-group"><label>Roadworthy Status</label>
+                    <select id="rf-safety-check"><option value="pass">✅ Pass</option><option value="conditional">⚠️ Conditional</option><option value="fail">❌ Fail</option></select>
+                </div>
                 <div class="form-group full-width"><label>Issues Found <span class="required">*</span></label><textarea id="rf-notes" placeholder="List all faults and defects found..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Actions required, parts to order, next inspection date..."></textarea></div>`,
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-recommendations" placeholder="Actions required, parts to order, next inspection date..."></textarea></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>رقم المركبة <span class="required">*</span></label><input type="text" id="rf-vehicle" placeholder="مثال: ABC-1234" required><div class="error-message" id="err-rf-vehicle"></div></div>
@@ -8350,8 +8662,14 @@ function json(obj) {
                 <div class="form-group"><label>الحالة العامة (1-10) <span class="required">*</span></label><input type="number" id="rf-odometer" min="1" max="10" placeholder="تقييم 1-10" required></div>
                 <div class="form-group"><label>تكلفة الإصلاح التقديرية (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>مستوى الوقود (%)</label><input type="number" id="rf-fuel" min="0" max="100" placeholder="مثال: 75"></div>
+                <div class="form-group"><label>حالة البطارية</label>
+                    <select id="rf-vehicle-status"><option value="good">✅ جيدة</option><option value="weak">⚠️ ضعيفة</option><option value="replace">🔴 تحتاج استبدال</option></select>
+                </div>
+                <div class="form-group"><label>صلاحية السير</label>
+                    <select id="rf-safety-check"><option value="pass">✅ مقبولة</option><option value="conditional">⚠️ مشروطة</option><option value="fail">❌ مرفوضة</option></select>
+                </div>
                 <div class="form-group full-width"><label>المشكلات المكتشفة <span class="required">*</span></label><textarea id="rf-notes" placeholder="اذكر جميع الأعطال والعيوب المكتشفة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="الإجراءات المطلوبة، قطع الغيار، تاريخ الفحص القادم..."></textarea></div>`
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-recommendations" placeholder="الإجراءات المطلوبة، قطع الغيار، تاريخ الفحص القادم..."></textarea></div>`
                 }
             },
             driver_supervisor: {
@@ -8368,8 +8686,12 @@ function json(obj) {
                 <div class="form-group"><label>Total Fuel Used (liters)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="0.0"></div>
                 <div class="form-group"><label>Total Expenses (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group full-width"><label>Routes Covered</label><input type="text" id="rf-vehicle" placeholder="e.g. Riyadh Hub, Jeddah Zone, Dammam Route"></div>
+                <div class="form-group"><label>Absent Drivers</label><input type="number" id="rf-absent-drivers" min="0" placeholder="Count"></div>
+                <div class="form-group"><label>Completed Trips</label><input type="number" id="rf-completed-trips" min="0" placeholder="Total trips completed"></div>
+                <div class="form-group"><label>Traffic Violations / Fines</label><input type="number" id="rf-violations" min="0" placeholder="Count"></div>
+                <div class="form-group"><label>Team Performance Score (1-5)</label><input type="number" id="rf-performance-score" min="1" max="5" step="0.5" placeholder="e.g. 4.0"></div>
                 <div class="form-group full-width"><label>Incidents / Issues <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe any incidents, driver issues, or notable events..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Actions Taken / Recommendations</label><textarea id="rf-route" placeholder="What actions were taken or are recommended..."></textarea></div>`,
+                <div class="form-group full-width"><label>Actions Taken / Recommendations</label><textarea id="rf-recommendations" placeholder="What actions were taken or are recommended..."></textarea></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>فترة التقرير <span class="required">*</span></label>
@@ -8380,7 +8702,16 @@ function json(obj) {
                 <div class="form-group"><label>إجمالي الوقود المستخدم (لتر)</label><input type="number" id="rf-fuel" min="0" step="0.1" placeholder="0.0"></div>
                 <div class="form-group"><label>إجمالي المصروفات (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group full-width"><label>المسارات المغطاة</label><input type="text" id="rf-vehicle" placeholder="مثال: مركز الرياض، منطقة جدة، مسار الدمام"></div>
+                <div class="form-group"><label>السائقون الغائبون</label><input type="number" id="rf-absent-drivers" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>الرحلات المكتملة</label><input type="number" id="rf-completed-trips" min="0" placeholder="إجمالي الرحلات المنجزة"></div>
+                <div class="form-group"><label>المخالفات / الغرامات</label><input type="number" id="rf-violations" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>تقييم أداء الفريق (1-5)</label><input type="number" id="rf-performance-score" min="1" max="5" step="0.5" placeholder="مثال: 4.0"></div>
+                <div class="form-group"><label>السائقون الغائبون</label><input type="number" id="rf-absent-drivers" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>الرحلات المكتملة</label><input type="number" id="rf-completed-trips" min="0" placeholder="إجمالي الرحلات المنجزة"></div>
+                <div class="form-group"><label>المخالفات / الغرامات</label><input type="number" id="rf-violations" min="0" placeholder="العدد"></div>
+                <div class="form-group"><label>تقييم أداء الفريق (1-5)</label><input type="number" id="rf-performance-score" min="1" max="5" step="0.5" placeholder="مثال: 4.0"></div>
                 <div class="form-group full-width"><label>الحوادث / المشكلات <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف أي حوادث أو مشكلات أو أحداث بارزة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
+                <div class="form-group full-width"><label>الإجراءات المتخذة / التوصيات</label><textarea id="rf-recommendations" placeholder="ما الإجراءات التي تمت أو يُوصى بها..."></textarea></div>
                 <div class="form-group full-width"><label>الإجراءات المتخذة / التوصيات</label><textarea id="rf-route" placeholder="ما الإجراءات المتخذة أو الموصى بها..."></textarea></div>`
                 }
             },
@@ -8398,6 +8729,10 @@ function json(obj) {
                 <div class="form-group"><label>Department</label><input type="text" id="rf-vehicle" placeholder="e.g. Operations, Fleet, Admin"></div>
                 <div class="form-group"><label>New Joiners</label><input type="number" id="rf-fuel" min="0" placeholder="This period"></div>
                 <div class="form-group"><label>Departures</label><input type="number" id="rf-expenses" min="0" placeholder="This period"></div>
+                <div class="form-group"><label>Attendance Rate (%)</label><input type="number" id="rf-attendance-rate" min="0" max="100" step="0.1" placeholder="e.g. 95.5"></div>
+                <div class="form-group"><label>Sick Leave Days (this period)</label><input type="number" id="rf-sick-days" min="0" placeholder="Total sick days"></div>
+                <div class="form-group"><label>Open Vacancies</label><input type="number" id="rf-open-vacancies" min="0" placeholder="Unfilled positions"></div>
+                <div class="form-group"><label>Training Hours Delivered</label><input type="number" id="rf-training-hours" min="0" step="0.5" placeholder="Total hours"></div>
                 <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Key HR activities, challenges, and highlights..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
@@ -8409,6 +8744,10 @@ function json(obj) {
                 <div class="form-group"><label>القسم</label><input type="text" id="rf-vehicle" placeholder="مثال: العمليات، الأسطول، الإدارة"></div>
                 <div class="form-group"><label>الموظفون الجدد</label><input type="number" id="rf-fuel" min="0" placeholder="هذه الفترة"></div>
                 <div class="form-group"><label>المغادرون</label><input type="number" id="rf-expenses" min="0" placeholder="هذه الفترة"></div>
+                <div class="form-group"><label>نسبة الحضور (%)</label><input type="number" id="rf-attendance-rate" min="0" max="100" step="0.1" placeholder="مثال: 95.5"></div>
+                <div class="form-group"><label>أيام الإجازة المرضية (هذه الفترة)</label><input type="number" id="rf-sick-days" min="0" placeholder="إجمالي الأيام"></div>
+                <div class="form-group"><label>الوظائف الشاغرة</label><input type="number" id="rf-open-vacancies" min="0" placeholder="المناصب غير المشغولة"></div>
+                <div class="form-group"><label>ساعات التدريب المقدمة</label><input type="number" id="rf-training-hours" min="0" step="0.5" placeholder="إجمالي الساعات"></div>
                 <div class="form-group full-width"><label>الملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="الأنشطة الرئيسية والتحديات والأبرز..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
                 }
             },
@@ -8426,6 +8765,12 @@ function json(obj) {
                 <div class="form-group"><label>Total Amount (SAR) <span class="required">*</span></label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00" required></div>
                 <div class="form-group"><label>Department / Cost Center</label><input type="text" id="rf-route" placeholder="Department name"></div>
                 <div class="form-group"><label>Period Covered</label><input type="text" id="rf-odometer" placeholder="e.g. Jan 2026 – Mar 2026"></div>
+                <div class="form-group"><label>Vendor / Supplier</label><input type="text" id="rf-vendor" placeholder="Vendor or supplier name"></div>
+                <div class="form-group"><label>Invoice Number</label><input type="text" id="rf-invoice" placeholder="e.g. INV-2026-042"></div>
+                <div class="form-group"><label>VAT Amount (SAR)</label><input type="number" id="rf-vat" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>Payment Method</label>
+                    <select id="rf-payment-method"><option value="">Select</option><option value="bank_transfer">🏦 Bank Transfer</option><option value="cash">💵 Cash</option><option value="cheque">📄 Cheque</option><option value="credit_card">💳 Credit Card</option></select>
+                </div>
                 <div class="form-group full-width"><label>Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Financial summary, key variances, and observations..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
@@ -8437,6 +8782,12 @@ function json(obj) {
                 <div class="form-group"><label>المبلغ الإجمالي (ريال) <span class="required">*</span></label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00" required></div>
                 <div class="form-group"><label>القسم / مركز التكلفة</label><input type="text" id="rf-route" placeholder="اسم القسم"></div>
                 <div class="form-group"><label>الفترة المشمولة</label><input type="text" id="rf-odometer" placeholder="مثال: يناير 2026 – مارس 2026"></div>
+                <div class="form-group"><label>المورد / المتعامل</label><input type="text" id="rf-vendor" placeholder="اسم المورد أو المتعامل"></div>
+                <div class="form-group"><label>رقم الفاتورة</label><input type="text" id="rf-invoice" placeholder="مثال: INV-2026-042"></div>
+                <div class="form-group"><label>مبلغ ضريبة القيمة المضافة (ريال)</label><input type="number" id="rf-vat" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>طريقة الدفع</label>
+                    <select id="rf-payment-method"><option value="">اختر</option><option value="bank_transfer">🏦 تحويل بنكي</option><option value="cash">💵 نقداً</option><option value="cheque">📄 شيك</option><option value="credit_card">💳 بطاقة ائتمان</option></select>
+                </div>
                 <div class="form-group full-width"><label>الملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="الملخص المالي والانحرافات الرئيسية والملاحظات..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
                 }
             },
@@ -8455,6 +8806,9 @@ function json(obj) {
                 <div class="form-group"><label>Budget Used (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>Expected Revenue (SAR)</label><input type="number" id="rf-fuel" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>ROI (%)</label><input type="number" id="rf-odometer" min="0" step="0.1" placeholder="e.g. 150"></div>
+                <div class="form-group"><label>Leads Generated</label><input type="number" id="rf-leads" min="0" placeholder="New leads count"></div>
+                <div class="form-group"><label>Conversions (Closed)</label><input type="number" id="rf-conversions" min="0" placeholder="Leads converted"></div>
+                <div class="form-group"><label>Social Media Reach</label><input type="number" id="rf-social-reach" min="0" placeholder="Impressions / views"></div>
                 <div class="form-group full-width"><label>Results & Summary <span class="required">*</span></label><textarea id="rf-notes" placeholder="Describe campaign results, KPIs achieved, and learnings..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
@@ -8467,6 +8821,9 @@ function json(obj) {
                 <div class="form-group"><label>الميزانية المستخدمة (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>الإيرادات المتوقعة (ريال)</label><input type="number" id="rf-fuel" min="0" step="0.01" placeholder="0.00"></div>
                 <div class="form-group"><label>العائد على الاستثمار (%)</label><input type="number" id="rf-odometer" min="0" step="0.1" placeholder="مثال: 150"></div>
+                <div class="form-group"><label>العملاء المحتملون (Leads)</label><input type="number" id="rf-leads" min="0" placeholder="عدد العملاء الجدد"></div>
+                <div class="form-group"><label>التحويلات (المُغلقة)</label><input type="number" id="rf-conversions" min="0" placeholder="عدد التحويلات"></div>
+                <div class="form-group"><label>الوصول على وسائل التواصل</label><input type="number" id="rf-social-reach" min="0" placeholder="المشاهدات / الانطباعات"></div>
                 <div class="form-group full-width"><label>النتائج والملخص <span class="required">*</span></label><textarea id="rf-notes" placeholder="صف نتائج الحملة ومؤشرات الأداء والدروس المستفادة..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>`
                 }
             },
@@ -8484,8 +8841,13 @@ function json(obj) {
                 <div class="form-group"><label>Team Members Present</label><input type="number" id="rf-odometer" min="0" placeholder="Count"></div>
                 <div class="form-group"><label>Vehicles Supervised</label><input type="number" id="rf-fuel" min="0" placeholder="Count"></div>
                 <div class="form-group"><label>Operational Cost (SAR)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>Shift</label>
+                    <select id="rf-shift"><option value="">Select</option><option value="morning">🌅 Morning</option><option value="evening">🌆 Evening</option><option value="night">🌙 Night</option></select>
+                </div>
+                <div class="form-group"><label>Tasks Completed</label><input type="number" id="rf-tasks-completed" min="0" placeholder="Count of completed tasks"></div>
+                <div class="form-group"><label>KPI Score (%)</label><input type="number" id="rf-kpi-score" min="0" max="100" step="0.1" placeholder="Performance vs target"></div>
                 <div class="form-group full-width"><label>Incidents / Key Events <span class="required">*</span></label><textarea id="rf-notes" placeholder="Report any incidents, achievements, or observations..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-route" placeholder="Suggestions or actions required..."></textarea></div>`,
+                <div class="form-group full-width"><label>Recommendations</label><textarea id="rf-recommendations" placeholder="Suggestions or actions required..."></textarea></div>`,
                     ar: `
                 <div class="form-group"><label>تاريخ التقرير <span class="required">*</span></label><input type="date" id="rf-date" required><div class="error-message" id="err-rf-date"></div></div>
                 <div class="form-group"><label>نوع التقرير <span class="required">*</span></label>
@@ -8496,8 +8858,13 @@ function json(obj) {
                 <div class="form-group"><label>أعضاء الفريق الحاضرون</label><input type="number" id="rf-odometer" min="0" placeholder="العدد"></div>
                 <div class="form-group"><label>المركبات تحت الإشراف</label><input type="number" id="rf-fuel" min="0" placeholder="العدد"></div>
                 <div class="form-group"><label>التكاليف التشغيلية (ريال)</label><input type="number" id="rf-expenses" min="0" step="0.01" placeholder="0.00"></div>
+                <div class="form-group"><label>المناوبة</label>
+                    <select id="rf-shift"><option value="">اختر</option><option value="morning">🌅 صباحية</option><option value="evening">🌆 مسائية</option><option value="night">🌙 ليلية</option></select>
+                </div>
+                <div class="form-group"><label>المهام المنجزة</label><input type="number" id="rf-tasks-completed" min="0" placeholder="عدد المهام المنجزة"></div>
+                <div class="form-group"><label>نسبة تحقيق المؤشرات (%)</label><input type="number" id="rf-kpi-score" min="0" max="100" step="0.1" placeholder="الأداء مقابل الهدف"></div>
                 <div class="form-group full-width"><label>الحوادث / الأحداث الرئيسية <span class="required">*</span></label><textarea id="rf-notes" placeholder="أبلغ عن أي حوادث أو إنجازات أو ملاحظات..." required></textarea><div class="error-message" id="err-rf-notes"></div></div>
-                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-route" placeholder="الاقتراحات أو الإجراءات المطلوبة..."></textarea></div>`
+                <div class="form-group full-width"><label>التوصيات</label><textarea id="rf-recommendations" placeholder="الاقتراحات أو الإجراءات المطلوبة..."></textarea></div>`
                 }
             }
         };
@@ -8553,6 +8920,7 @@ function json(obj) {
             
             // Build report object from available fields
             const getVal = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+            const getNum = id => { const v = getVal(id); return v !== '' ? parseFloat(v) : null; };
             const newReport = {
                 id: Utils.generateId(AppState.reports),
                 userId: user.id,
@@ -8565,10 +8933,44 @@ function json(obj) {
                 expenses: parseFloat(getVal('rf-expenses')) || 0,
                 route: getVal('rf-route') || '',
                 notes: getVal('rf-notes'),
+                recommendations: getVal('rf-recommendations') || '',
                 roleType: user.role,
                 status: 'pending',
                 submittedAt: new Date().toISOString(),
-                reviewedAt: null
+                reviewedAt: null,
+                // Extended fields – present only when role form includes them
+                priority:          getVal('rf-priority') || null,
+                tech:              getVal('rf-tech') || null,
+                nextService:       getVal('rf-next-service') || null,
+                completionStatus:  getVal('rf-completion') || null,
+                partsCost:         getNum('rf-parts-cost'),
+                laborHours:        getNum('rf-labor-hours'),
+                downtime:          getNum('rf-downtime'),
+                startTime:         getVal('rf-start-time') || null,
+                endTime:           getVal('rf-end-time') || null,
+                roadCondition:     getVal('rf-road-condition') || null,
+                vehicleStatus:     getVal('rf-vehicle-status') || null,
+                startOdometer:     getNum('rf-start-odometer'),
+                passengers:        getNum('rf-passengers'),
+                safetyCheck:       getVal('rf-safety-check') || null,
+                absentDrivers:     getNum('rf-absent-drivers'),
+                completedTrips:    getNum('rf-completed-trips'),
+                violations:        getNum('rf-violations'),
+                performanceScore:  getNum('rf-performance-score'),
+                attendanceRate:    getNum('rf-attendance-rate'),
+                sickDays:          getNum('rf-sick-days'),
+                openVacancies:     getNum('rf-open-vacancies'),
+                trainingHours:     getNum('rf-training-hours'),
+                invoiceNumber:     getVal('rf-invoice') || null,
+                vatAmount:         getNum('rf-vat'),
+                vendor:            getVal('rf-vendor') || null,
+                paymentMethod:     getVal('rf-payment-method') || null,
+                leadsGenerated:    getNum('rf-leads'),
+                conversions:       getNum('rf-conversions'),
+                socialReach:       getNum('rf-social-reach'),
+                shift:             getVal('rf-shift') || null,
+                tasksCompleted:    getNum('rf-tasks-completed'),
+                kpiScore:          getNum('rf-kpi-score'),
             };
             
             AppState.reports = [...AppState.reports, newReport];
@@ -9065,6 +9467,11 @@ ${counts}`),
                     onAuthStateChanged(window.auth, async (firebaseUser) => {
                         if (firebaseUser) {
                             Utils.showLoading(true);
+                            // Restore session metadata
+                            const storedRemember = localStorage.getItem('rihlatiRememberMe') === '1';
+                            const storedLoginTime = parseInt(localStorage.getItem('rihlatiLoginTime') || '0');
+                            AppState.rememberMe = storedRemember;
+                            AppState.loginTime  = storedLoginTime || Date.now();
                             try {
                                 // Load all data from Firestore first
                                 const [users, reports, tickets, vehicles, campaigns] = await Promise.all([
@@ -9176,7 +9583,10 @@ ${counts}`),
     signInWithEmailAndPassword, 
     createUserWithEmailAndPassword,
     onAuthStateChanged,
-    signOut
+    signOut,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
   } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
   import { 
     getFirestore, 
@@ -9209,6 +9619,9 @@ ${counts}`),
     createUserWithEmailAndPassword,
     onAuthStateChanged,
     signOut,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence,
     doc,
     getDoc,
     setDoc,

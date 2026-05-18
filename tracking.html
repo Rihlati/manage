@@ -343,9 +343,20 @@ const db   = getFirestore(app);
 
 function setLoadMsg(m){ const el=document.getElementById('loadMsg'); if(el)el.textContent=m; }
 
+// Bug 3 fix: safety timeout — never hang on loading screen more than 8 seconds
+const loadTimeout = setTimeout(() => {
+  const ls = document.getElementById('loadScreen');
+  if (ls && ls.style.display !== 'none') {
+    ls.style.display = 'none';
+    initTracking([], [], { name: 'User', role: 'admin' }, {}, db);
+  }
+}, 8000);
+
 onAuthStateChanged(auth, async (user) => {
+  clearTimeout(loadTimeout);
+
   if (!user) {
-    document.getElementById('loadScreen').style.display='none';
+    document.getElementById('loadScreen').style.display = 'none';
     document.getElementById('loginWall').classList.add('show');
     return;
   }
@@ -357,26 +368,25 @@ onAuthStateChanged(auth, async (user) => {
   let users = [];
   let telemetry = {};
 
+  // Bug 2 fix: correct Firestore paths — index.html saves each collection separately
   try {
-    const allDoc = await getDoc(doc(db, 'rihlati_data', 'all'));
-    if (allDoc.exists()) {
-      const data = allDoc.data();
-      users    = data.users    || [];
-      vehicles = data.vehicles || [];
-      userProfile = users.find(u => u.uid === user.uid || u.email === user.email) || userProfile;
-    }
+    const [usersSnap, vehiclesSnap] = await Promise.all([
+      getDoc(doc(db, 'rihlati_data', 'users')),
+      getDoc(doc(db, 'rihlati_data', 'vehicles')),
+    ]);
+    if (usersSnap.exists())    users    = usersSnap.data().data    || usersSnap.data()    || [];
+    if (vehiclesSnap.exists()) vehicles = vehiclesSnap.data().data || vehiclesSnap.data() || [];
+    // Normalize: Firestore may store as { data: [...] } or directly as array-like object
+    if (!Array.isArray(users))    users    = Object.values(users).filter(x => x && x.id);
+    if (!Array.isArray(vehicles)) vehicles = Object.values(vehicles).filter(x => x && x.id);
+    userProfile = users.find(u => u.uid === user.uid || u.email === user.email) || userProfile;
   } catch(e) { console.warn('Firestore fleet load:', e); }
 
-  // Load current telemetry snapshot (from driver-gps.html writes)
+  // Load real GPS telemetry written by driver-gps.html
   try {
-    const snap = await getDoc(doc(db, 'telemetry', '_all'));
-    // Individual vehicle docs: telemetry/{vehicleId}
-    // Try to batch-read all vehicle telemetry
     for (const v of vehicles) {
-      try {
-        const tDoc = await getDoc(doc(db, 'telemetry', String(v.id)));
-        if (tDoc.exists()) telemetry[v.id] = tDoc.data();
-      } catch(_) {}
+      const tDoc = await getDoc(doc(db, 'telemetry', String(v.id)));
+      if (tDoc.exists()) telemetry[v.id] = tDoc.data();
     }
   } catch(e) { console.warn('Telemetry load:', e); }
 
@@ -464,28 +474,25 @@ function initTracking(vehicles, users, currentUser, telemetry, db) {
 
   let liveFleet = buildFleet(telemetry);
 
-  // ── Real-time Firestore listener: update map whenever driver sends a position ──
-  // Each driver-gps.html write goes to telemetry/{vehicleId}
-  // We use onSnapshot on the whole telemetry collection
+  // Real-time Firestore listener — uses onSnapshot imported at top of script
+  // Bug 1 fix: was using await import() inside non-async function which crashes the whole script
   const liveTelemCache = { ...telemetry };
   try {
-    const { collection: fsCol } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     onSnapshot(
-      fsCol(db, 'telemetry'),
+      collection(db, 'telemetry'),
       (snap) => {
         snap.docChanges().forEach(change => {
           if (change.type === 'added' || change.type === 'modified') {
-            const data = change.doc.data();
-            liveTelemCache[change.doc.id] = data;
+            liveTelemCache[change.doc.id] = change.doc.data();
           }
         });
         liveFleet = buildFleet(liveTelemCache);
-        if (typeof renderList === 'function') { renderList(); renderMap(); updateStats(); }
+        renderList(); renderMap(); updateStats();
       },
-      (err) => console.warn('Telemetry listener error:', err)
+      (err) => console.warn('Telemetry listener:', err)
     );
   } catch(e) {
-    console.warn('Could not start live telemetry listener:', e);
+    console.warn('onSnapshot setup failed:', e);
   }
 
   // If no vehicles registered yet, use demo data so map isn't empty

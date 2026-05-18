@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1a237e">
+<title>Rihlati — Live Tracking</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1a237e;--secondary:#3949ab;--accent:#ff5722;
+  --success:#4caf50;--warning:#ff9800;--danger:#f44336;--info:#2196f3;
+  --bg:#f0f4f8;--card:#fff;--border:#e0e0e0;--text:#333;--muted:#888;
+  --sidebar:300px;--topbar:60px;
+}
+body{font-family:'Segoe UI',Tahoma,sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden}
+body.ar,body.ar *{font-family:'Cairo','Tajawal',sans-serif!important;letter-spacing:0!important}
+
+/* ── TOP BAR ── */
+#topBar{
+  position:fixed;top:0;left:0;right:0;height:var(--topbar);
+  background:linear-gradient(135deg,#0d1b4b,#1a237e);
+  display:flex;align-items:center;padding:0 16px;gap:12px;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.25);
+}
+#topBar h1{color:#fff;font-size:18px;font-weight:700;flex:1}
+.tb-badge{background:rgba(255,255,255,.15);color:#fff;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600}
+#liveIndicator{display:flex;align-items:center;gap:6px;color:#fff;font-size:12px}
+#liveDot{width:8px;height:8px;border-radius:50%;background:#4caf50;animation:livepulse 1.2s ease-in-out infinite}
+@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.tb-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;transition:background .15s}
+.tb-btn:hover{background:rgba(255,255,255,.25)}
+.tb-btn.danger{background:rgba(244,67,54,.3)}
+#backBtn{text-decoration:none;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 14px;border-radius:8px;font-size:12px}
+#backBtn:hover{background:rgba(255,255,255,.25)}
+
+/* ── LAYOUT ── */
+#layout{display:flex;height:calc(100vh - var(--topbar));margin-top:var(--topbar)}
+
+/* ── SIDEBAR ── */
+#sidebar{
+  width:var(--sidebar);flex-shrink:0;background:var(--card);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  transition:width .3s;overflow:hidden;
+}
+#sidebar.collapsed{width:0}
+
+.s-search{padding:12px 12px 0;flex-shrink:0}
+.s-search input{width:100%;padding:8px 12px;font-size:13px;border:1px solid var(--border);border-radius:8px;outline:none;background:var(--bg)}
+.s-search input:focus{border-color:var(--primary)}
+
+.s-alert{background:#ffebee;border-bottom:1px solid #ef9a9a;color:#c62828;padding:8px 12px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.s-alert:hover{background:#ffcdd2}
+
+.s-tabs{display:flex;padding:8px 10px;gap:4px;border-bottom:1px solid var(--border);flex-shrink:0}
+.s-tab{flex:1;padding:5px 0;font-size:11px;font-weight:600;border:1px solid var(--border);border-radius:6px;background:transparent;color:var(--muted);cursor:pointer}
+.s-tab.on{background:#e3f2fd;color:#1565c0;border-color:#90caf9}
+
+.s-list{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px}
+
+.vcard{padding:10px;border-radius:10px;border:1px solid var(--border);cursor:pointer;background:var(--card);transition:all .15s}
+.vcard:hover,.vcard.sel{border-color:var(--primary);background:#e8eaf6}
+.vc-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.st-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.d-moving{background:#4CAF50}.d-idle{background:#FF9800}.d-stopped{background:#9E9E9E}
+.d-alert{background:#F44336;animation:livepulse 1s ease-in-out infinite}
+.vc-plate{font-size:13px;font-weight:700;flex:1;color:var(--text)}
+.vc-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+.bm{background:#E8F5E9;color:#1B5E20}.bi{background:#FFF3E0;color:#BF360C}
+.bs{background:#F5F5F5;color:#424242}.ba{background:#FFEBEE;color:#B71C1C}
+.vc-meta{display:flex;gap:8px;flex-wrap:wrap}
+.vc-m{font-size:11px;color:var(--muted)}
+.fuel-low{color:#c62828!important;font-weight:700}
+
+.s-footer{padding:8px 12px;border-top:1px solid var(--border);font-size:11px;color:var(--muted);text-align:center;flex-shrink:0}
+
+/* ── MAP AREA ── */
+#mapArea{flex:1;position:relative;background:#dce8f0;overflow:hidden}
+#mapSvg{width:100%;height:100%;cursor:grab;transition:transform .2s}
+#mapSvg:active{cursor:grabbing}
+
+/* ── MAP CONTROLS ── */
+#mapCtrls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:5px;z-index:10}
+.mc{width:34px;height:34px;border:1px solid var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.1)}
+.mc:hover{background:#e8eaf6}
+.mc.active{background:#e3f2fd;color:#1565c0;border-color:#90caf9}
+
+/* ── VEHICLE DETAIL POPUP ── */
+#detailPanel{
+  position:absolute;top:12px;left:12px;width:220px;
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:14px;z-index:10;display:none;
+  box-shadow:0 4px 20px rgba(0,0,0,.15);
+}
+#detailPanel.show{display:block}
+.dp-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.dp-plate{font-size:14px;font-weight:700;color:var(--primary)}
+.dp-close{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);line-height:1}
+.dp-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
+.dp-row:last-child{border:none}
+.dp-lbl{color:var(--muted)}.dp-val{font-weight:700;color:var(--text)}
+.dp-action{margin-top:10px;display:flex;gap:6px}
+.dp-btn{flex:1;padding:6px;font-size:11px;border-radius:7px;border:none;cursor:pointer;font-weight:600}
+.dp-btn.primary{background:#e3f2fd;color:#1565c0}
+.dp-btn.warn{background:#fff3e0;color:#e65100}
+
+/* ── STATS BAR ── */
+#statsBar{
+  position:absolute;bottom:0;left:0;right:0;
+  background:rgba(255,255,255,.96);border-top:1px solid var(--border);
+  display:flex;padding:8px 20px;gap:20px;align-items:center;flex-wrap:wrap;
+  backdrop-filter:blur(4px);
+}
+.sb-item{text-align:center}
+.sb-val{font-size:18px;font-weight:700;color:var(--primary)}
+.sb-lbl{font-size:10px;color:var(--muted)}
+
+/* ── ALERT BANNER ── */
+#alertBanner{
+  position:absolute;top:12px;left:50%;transform:translateX(-50%);
+  background:#c62828;color:#fff;padding:8px 20px;border-radius:20px;
+  font-size:12px;font-weight:700;z-index:20;display:none;cursor:pointer;
+  box-shadow:0 4px 16px rgba(198,40,40,.4);animation:slidedown .3s ease;
+}
+#alertBanner.show{display:flex;align-items:center;gap:8px}
+@keyframes slidedown{from{opacity:0;transform:translateX(-50%) translateY(-10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── TOAST ── */
+#toast{
+  position:absolute;bottom:70px;left:50%;transform:translateX(-50%);
+  background:rgba(26,35,126,.9);color:#fff;padding:8px 18px;border-radius:20px;
+  font-size:12px;font-weight:600;display:none;white-space:nowrap;z-index:30;
+}
+#toast.show{display:block}
+
+/* ── FILTER CHIPS ── */
+#filterChips{
+  position:absolute;bottom:62px;left:0;right:0;
+  padding:0 16px;display:flex;gap:8px;
+  pointer-events:none;justify-content:center;
+}
+.chip{pointer-events:all;background:var(--card);border:1px solid var(--border);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer}
+.chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── LOADING SCREEN ── */
+#loadScreen{
+  position:fixed;inset:0;background:linear-gradient(135deg,#0d1b4b,#1a237e);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:20px;
+}
+#loadScreen h2{color:#fff;font-size:22px;font-weight:800}
+#loadScreen p{color:rgba(255,255,255,.6);font-size:13px}
+.spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── LOGIN CHECK ── */
+#loginWall{
+  position:fixed;inset:0;background:linear-gradient(135deg,#0d1b4b,#1a237e);
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:20px;
+}
+#loginWall.show{display:flex}
+#loginWall h2{color:#fff;font-size:24px;font-weight:800}
+#loginWall p{color:rgba(255,255,255,.7);font-size:14px;text-align:center}
+.lw-btn{background:#ff5722;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block}
+
+/* ── RTL ── */
+body.ar #sidebar{border-right:none;border-left:1px solid var(--border);order:1}
+body.ar #mapArea{order:0}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  :root{--sidebar:260px}
+  #sidebar{position:fixed;top:var(--topbar);bottom:0;left:0;z-index:50;transform:translateX(-100%);transition:transform .3s}
+  #sidebar.mob-open{transform:translateX(0)}
+  body.ar #sidebar{left:auto;right:0;transform:translateX(100%)}
+  body.ar #sidebar.mob-open{transform:translateX(0)}
+  #mapArea{width:100%}
+  #menuBtn{display:flex!important}
+}
+#menuBtn{display:none;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);color:#fff;padding:6px 10px;border-radius:8px;font-size:18px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loadScreen">
+  <div class="spinner"></div>
+  <h2>🚗 Rihlati</h2>
+  <p id="loadMsg">Checking session…</p>
+</div>
+
+<!-- Login wall (if not authenticated) -->
+<div id="loginWall">
+  <div style="font-size:64px">🔒</div>
+  <h2>Login Required</h2>
+  <p>Please log in to access the Live Tracking dashboard.</p>
+  <a href="index.html" class="lw-btn">← Go to Login</a>
+</div>
+
+<!-- TOP BAR -->
+<div id="topBar">
+  <button id="menuBtn" onclick="toggleSidebar()">☰</button>
+  <h1 id="topTitle">📡 Rihlati — Live Tracking</h1>
+  <div id="liveIndicator"><div id="liveDot"></div><span id="liveText">Live</span></div>
+  <span class="tb-badge" id="tb-fleet">0 vehicles</span>
+  <span class="tb-badge" id="tb-moving" style="background:rgba(76,175,80,.35)">0 moving</span>
+  <span class="tb-badge" id="tb-alerts" style="background:rgba(244,67,54,.35);display:none">0 alerts</span>
+  <button class="tb-btn" id="pauseBtn" onclick="toggleLive()">⏸ Pause</button>
+  <button class="tb-btn" onclick="toggleLang()">عربي / EN</button>
+  <a href="index.html" id="backBtn">← Dashboard</a>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div class="s-search">
+      <input id="searchInput" type="text" placeholder="Search vehicle or driver…" oninput="filterList(this.value)">
+    </div>
+    <div id="alertBannerSide" class="s-alert" style="display:none" onclick="jumpToAlert()">
+      ⚠️ <span id="alertSideText">alerts</span>
+    </div>
+    <div class="s-tabs" id="sTabs">
+      <button class="s-tab on" onclick="setTab(this,'all')" id="tab-all">All</button>
+      <button class="s-tab" onclick="setTab(this,'moving')" id="tab-moving">Moving</button>
+      <button class="s-tab" onclick="setTab(this,'idle')" id="tab-idle">Idle</button>
+      <button class="s-tab" onclick="setTab(this,'stopped')" id="tab-stopped">Off</button>
+    </div>
+    <div class="s-list" id="vList"></div>
+    <div class="s-footer" id="sFooter">Last updated: <span id="lastUpdated">—</span></div>
+  </div>
+
+  <!-- MAP AREA -->
+  <div id="mapArea">
+    <svg id="mapSvg" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg">
+      <!-- Background -->
+      <rect width="800" height="560" fill="#dce8f0"/>
+      <!-- Parks -->
+      <rect x="20" y="20" width="130" height="90" rx="6" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="0.8"/>
+      <text x="85" y="68" text-anchor="middle" font-size="11" fill="#388E3C" font-family="inherit">🌳 Park</text>
+      <rect x="640" y="30" width="140" height="100" rx="8" fill="#BBDEFB" stroke="#90CAF9" stroke-width="0.8"/>
+      <text x="710" y="83" text-anchor="middle" font-size="11" fill="#1565C0" font-family="inherit">💧 Lake</text>
+      <rect x="630" y="420" width="140" height="120" rx="6" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="0.8"/>
+      <!-- City blocks row 1 -->
+      <rect x="40" y="140" width="90" height="65" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="155" y="140" width="100" height="65" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="280" y="140" width="90" height="65" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="400" y="140" width="100" height="65" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="520" y="140" width="90" height="65" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <!-- City blocks row 2 -->
+      <rect x="40" y="280" width="110" height="75" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="175" y="280" width="85" height="75" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="410" y="280" width="110" height="75" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="545" y="280" width="70" height="75" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <!-- City blocks row 3 -->
+      <rect x="60" y="420" width="95" height="70" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="200" y="415" width="120" height="80" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <rect x="380" y="420" width="110" height="75" rx="3" fill="#cfd8dc" stroke="#b0bec5" stroke-width="0.5"/>
+      <!-- Main roads (horizontal) -->
+      <line x1="0" y1="120" x2="800" y2="120" stroke="#b0bec5" stroke-width="3"/>
+      <line x1="0" y1="260" x2="800" y2="260" stroke="#b0bec5" stroke-width="3"/>
+      <line x1="0" y1="400" x2="800" y2="400" stroke="#b0bec5" stroke-width="3"/>
+      <!-- Main roads (vertical) -->
+      <line x1="160" y1="0" x2="160" y2="560" stroke="#b0bec5" stroke-width="3"/>
+      <line x1="380" y1="0" x2="380" y2="560" stroke="#b0bec5" stroke-width="3"/>
+      <line x1="560" y1="0" x2="560" y2="560" stroke="#b0bec5" stroke-width="3"/>
+      <!-- Secondary roads -->
+      <line x1="0" y1="195" x2="800" y2="195" stroke="#cfd8dc" stroke-width="1.8"/>
+      <line x1="0" y1="340" x2="800" y2="340" stroke="#cfd8dc" stroke-width="1.8"/>
+      <line x1="70" y1="0" x2="70" y2="560" stroke="#cfd8dc" stroke-width="1.8"/>
+      <line x1="270" y1="0" x2="270" y2="560" stroke="#cfd8dc" stroke-width="1.8"/>
+      <line x1="470" y1="0" x2="470" y2="560" stroke="#cfd8dc" stroke-width="1.8"/>
+      <line x1="650" y1="0" x2="650" y2="560" stroke="#cfd8dc" stroke-width="1.8"/>
+      <!-- Route traces (dashed) -->
+      <path d="M100,350 Q160,260 270,220 T420,190" stroke="#4CAF50" stroke-width="2" fill="none" stroke-dasharray="6,5" opacity=".7"/>
+      <path d="M550,480 Q560,400 560,340 T560,190" stroke="#2196F3" stroke-width="2" fill="none" stroke-dasharray="6,5" opacity=".7"/>
+      <!-- Vehicle layer -->
+      <g id="vLayer"></g>
+    </svg>
+
+    <!-- Map controls -->
+    <div id="mapCtrls">
+      <button class="mc" onclick="mapZoom(1.15)" title="Zoom in">+</button>
+      <button class="mc" onclick="mapZoom(0.87)" title="Zoom out">−</button>
+      <button class="mc" onclick="mapFit()" title="Fit all">⊡</button>
+      <button class="mc" id="heatBtn" onclick="toggleHeat()" title="Toggle heat">🔥</button>
+      <button class="mc" id="routeBtn" onclick="toggleRoutes()" title="Toggle routes" style="color:#4caf50">⟺</button>
+    </div>
+
+    <!-- Vehicle detail popup -->
+    <div id="detailPanel">
+      <div class="dp-header">
+        <span class="dp-plate" id="dpPlate">—</span>
+        <button class="dp-close" onclick="closeDetail()">×</button>
+      </div>
+      <div id="dpRows"></div>
+      <div class="dp-action">
+        <button class="dp-btn primary" onclick="requestFuel()">⛽ Fuel</button>
+        <button class="dp-btn warn" onclick="reportIssue()">🔧 Report</button>
+      </div>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="statsBar">
+      <div class="sb-item"><div class="sb-val" id="st-total">0</div><div class="sb-lbl" id="st-total-lbl">Total</div></div>
+      <div class="sb-item"><div class="sb-val" id="st-mov" style="color:#4caf50">0</div><div class="sb-lbl" id="st-mov-lbl">Moving</div></div>
+      <div class="sb-item"><div class="sb-val" id="st-idl" style="color:#ff9800">0</div><div class="sb-lbl" id="st-idl-lbl">Idle</div></div>
+      <div class="sb-item"><div class="sb-val" id="st-stp" style="color:#9e9e9e">0</div><div class="sb-lbl" id="st-stp-lbl">Stopped</div></div>
+      <div class="sb-item"><div class="sb-val" id="st-km">—</div><div class="sb-lbl" id="st-km-lbl">Total km</div></div>
+      <div class="sb-item"><div class="sb-val" id="st-spd">—</div><div class="sb-lbl" id="st-spd-lbl">Avg speed</div></div>
+      <div style="margin-left:auto;font-size:11px;color:var(--muted)" id="st-user">—</div>
+    </div>
+
+    <!-- Floating alert banner -->
+    <div id="alertBanner" onclick="jumpToAlert()">
+      ⚠️ <span id="alertText">Alert!</span>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD_G8W1ORtcjZdnu0yz7F2GBN_dCofueRo",
+  authDomain: "mange-ab6e6.firebaseapp.com",
+  projectId: "mange-ab6e6",
+  storageBucket: "mange-ab6e6.firebasestorage.app",
+  messagingSenderId: "436486480522",
+  appId: "1:436486480522:web:4eaccb31804d95280c0373"
+};
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+function setLoadMsg(m){ const el=document.getElementById('loadMsg'); if(el)el.textContent=m; }
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    document.getElementById('loadScreen').style.display='none';
+    document.getElementById('loginWall').classList.add('show');
+    return;
+  }
+
+  setLoadMsg('Loading fleet data…');
+
+  let userProfile = { name: user.email, role: 'admin' };
+  let vehicles = [];
+  let users = [];
+  let telemetry = {};
+
+  try {
+    const allDoc = await getDoc(doc(db, 'rihlati_data', 'all'));
+    if (allDoc.exists()) {
+      const data = allDoc.data();
+      users    = data.users    || [];
+      vehicles = data.vehicles || [];
+      userProfile = users.find(u => u.uid === user.uid || u.email === user.email) || userProfile;
+    }
+  } catch(e) { console.warn('Firestore fleet load:', e); }
+
+  // Load current telemetry snapshot (from driver-gps.html writes)
+  try {
+    const snap = await getDoc(doc(db, 'telemetry', '_all'));
+    // Individual vehicle docs: telemetry/{vehicleId}
+    // Try to batch-read all vehicle telemetry
+    for (const v of vehicles) {
+      try {
+        const tDoc = await getDoc(doc(db, 'telemetry', String(v.id)));
+        if (tDoc.exists()) telemetry[v.id] = tDoc.data();
+      } catch(_) {}
+    }
+  } catch(e) { console.warn('Telemetry load:', e); }
+
+  document.getElementById('loadScreen').style.display = 'none';
+
+  const allowedRoles = ['admin','manager','supervisor','vehicle_engineer','driver_supervisor','maintenance_supervisor'];
+  if (!allowedRoles.includes(userProfile.role)) {
+    document.getElementById('loginWall').classList.add('show');
+    document.getElementById('loginWall').querySelector('p').textContent =
+      'You do not have permission to access Live Tracking.';
+    return;
+  }
+
+  initTracking(vehicles, users, userProfile, telemetry, db);
+});
+
+function initTracking(vehicles, users, currentUser, telemetry, db) {
+  // Build fleet: merge static vehicle records with real-time telemetry from driver phones
+  const statusPool = ['moving','moving','moving','idle','idle','stopped','alert'];
+  const areaPool   = ['King Fahd Rd','Industrial Zone','Ring Road','Al Balad','South District','Port Area','Depot'];
+
+  // ── Helper: map SVG coords from real GPS (crude linear mapping) ──────────
+  // In production replace with a proper map tile library (Leaflet.js)
+  // Mapping: lat 24.3–24.7 → SVG y 40–520,  lng 39.5–39.9 → SVG x 60–740
+  function latToY(lat) { return Math.min(520, Math.max(40, (24.7 - lat) / 0.4 * 480 + 40)); }
+  function lngToX(lng) { return Math.min(740, Math.max(60, (lng - 39.5) / 0.4 * 680 + 60)); }
+
+  function buildFleet(telem) {
+    return vehicles.map((v, i) => {
+      const driverUser = users.find(u => String(u.id) === String(v.assignedDriver));
+      const icon = v.make?.toLowerCase().includes('bus')   ? '🚌' :
+                   v.make?.toLowerCase().includes('truck') ? '🚛' :
+                   v.make?.toLowerCase().includes('van')   ? '🚐' :
+                   v.fuelType === 'electric'               ? '⚡' : '🚗';
+      const t = telem[v.id]; // real telemetry from driver phone
+      const hasRealGPS = t && t.lat && t.lng;
+
+      // Determine last-seen string
+      let lastSeen = 'Unknown';
+      if (t && t.updatedAt) {
+        const secs = Math.floor((Date.now() - (t.updatedAt.toMillis ? t.updatedAt.toMillis() : Date.now())) / 1000);
+        lastSeen = secs < 15 ? 'Now' : secs < 120 ? `${secs}s ago` : `${Math.floor(secs/60)}m ago`;
+      }
+
+      // Status: prefer real telemetry, fallback to vehicle record
+      let status;
+      if (v.status === 'maintenance') status = 'stopped';
+      else if (hasRealGPS) status = t.status || (t.speed > 5 ? 'moving' : 'idle');
+      else status = ['moving','moving','idle','stopped','alert'][i % 5];
+
+      // Fuel: real telemetry if available (GPS devices send this; phones don't)
+      const fuel = (t && t.fuelLevel != null) ? t.fuelLevel :
+                   (v.fuelLevel != null ? v.fuelLevel : (25 + (i * 31) % 70));
+
+      // Map position
+      let mapX, mapY;
+      if (hasRealGPS) {
+        mapX = lngToX(t.lng);
+        mapY = latToY(t.lat);
+      } else {
+        // Fallback: pseudo-random but stable positions
+        mapX = 80  + (i * 97) % 490;
+        mapY = 170 + (i * 83) % 270;
+      }
+
+      return {
+        id: v.id,
+        plate: v.plate || '???',
+        driver: driverUser ? driverUser.name : (t?.driverEmail || 'Unassigned'),
+        type: [v.make, v.model].filter(Boolean).join(' ') || 'Vehicle',
+        status,
+        speed: t?.speed || (status === 'moving' ? (40 + (i*19)%65) : 0),
+        fuel,
+        odometer: t?.distanceKm ? (v.odometer || 0) + t.distanceKm : (v.odometer || 0),
+        lat: mapY,
+        lng: mapX,
+        realGPS: hasRealGPS,
+        area: t ? (t.area || 'Live GPS') : areaPool[i % areaPool.length],
+        lastSeen: hasRealGPS ? lastSeen : (status === 'moving' ? 'Simulated' : 'No GPS'),
+        icon, regExpiry: v.regExpiry, insExpiry: v.insExpiry,
+        accuracy: t?.accuracy || null,
+      };
+    });
+  }
+
+  let liveFleet = buildFleet(telemetry);
+
+  // ── Real-time Firestore listener: update map whenever driver sends a position ──
+  // Each driver-gps.html write goes to telemetry/{vehicleId}
+  // We use onSnapshot on the whole telemetry collection
+  const liveTelemCache = { ...telemetry };
+  try {
+    const { collection: fsCol } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    onSnapshot(
+      fsCol(db, 'telemetry'),
+      (snap) => {
+        snap.docChanges().forEach(change => {
+          if (change.type === 'added' || change.type === 'modified') {
+            const data = change.doc.data();
+            liveTelemCache[change.doc.id] = data;
+          }
+        });
+        liveFleet = buildFleet(liveTelemCache);
+        if (typeof renderList === 'function') { renderList(); renderMap(); updateStats(); }
+      },
+      (err) => console.warn('Telemetry listener error:', err)
+    );
+  } catch(e) {
+    console.warn('Could not start live telemetry listener:', e);
+  }
+
+  // If no vehicles registered yet, use demo data so map isn't empty
+  if (liveFleet.length === 0) {
+    liveFleet = [
+      {id:1,plate:"ABC-1234",driver:"Ahmed Al-Otaibi",type:"Toyota Hilux",status:"moving",speed:68,fuel:72,odometer:45200,lat:195,lng:185,area:"Demo (no vehicles added)",lastSeen:"Simulated",icon:"🚗",realGPS:false},
+      {id:2,plate:"XYZ-5678",driver:"Mohammed Saeed",type:"Isuzu Truck",status:"moving",speed:52,fuel:44,odometer:98300,lat:260,lng:400,area:"Demo",lastSeen:"Simulated",icon:"🚛",realGPS:false},
+      {id:3,plate:"KLM-9012",driver:"Faisal Al-Harbi",type:"Toyota Camry",status:"idle",speed:0,fuel:88,odometer:31050,lat:160,lng:160,area:"Demo",lastSeen:"No GPS",icon:"🚗",realGPS:false},
+      {id:4,plate:"DEF-3456",driver:"Omar Al-Dosari",type:"Coaster Bus",status:"alert",speed:0,fuel:9,odometer:205000,lat:380,lng:300,area:"Demo",lastSeen:"Simulated",icon:"🚌",realGPS:false},
+      {id:5,plate:"GHI-7890",driver:"Khalid Mansour",type:"Toyota Camry",status:"moving",speed:84,fuel:61,odometer:31900,lat:120,lng:380,area:"Demo",lastSeen:"Simulated",icon:"🚗",realGPS:false},
+    ];
+  }
+
+  let lang = localStorage.getItem('rihlatiLang') || 'en';
+  let activeTab = 'all';
+  let selectedId = null;
+  let liveOn = true;
+  let zoom = 1;
+  let showHeat = false;
+  let showRoutes = true;
+  let toastTimer;
+
+  applyLang();
+
+  function applyLang() {
+    const ar = lang === 'ar';
+    document.body.classList.toggle('ar', ar);
+    document.documentElement.lang = ar ? 'ar' : 'en';
+    document.documentElement.dir = ar ? 'rtl' : 'ltr';
+    const L = (en, arStr) => ar ? arStr : en;
+    document.getElementById('topTitle').textContent = `📡 ${L('Rihlati — Live Tracking','رحلتي — التتبع المباشر')}`;
+    document.getElementById('liveText').textContent  = L('Live','مباشر');
+    document.getElementById('backBtn').textContent   = ar ? '← لوحة التحكم' : '← Dashboard';
+    document.getElementById('pauseBtn').textContent  = (liveOn ? '⏸ ' : '▶ ') + L('Pause','إيقاف مؤقت');
+    document.getElementById('searchInput').placeholder = L('Search vehicle or driver…','ابحث عن مركبة أو سائق...');
+    document.getElementById('tab-all').textContent    = L('All','الكل');
+    document.getElementById('tab-moving').textContent = L('Moving','يسير');
+    document.getElementById('tab-idle').textContent   = L('Idle','خامل');
+    document.getElementById('tab-stopped').textContent= L('Off','متوقف');
+    document.getElementById('st-total-lbl').textContent = L('Total','الإجمالي');
+    document.getElementById('st-mov-lbl').textContent   = L('Moving','يسير');
+    document.getElementById('st-idl-lbl').textContent   = L('Idle','خامل');
+    document.getElementById('st-stp-lbl').textContent   = L('Stopped','متوقف');
+    document.getElementById('st-km-lbl').textContent    = L('Total km','إجمالي كم');
+    document.getElementById('st-spd-lbl').textContent   = L('Avg speed','متوسط السرعة');
+    document.getElementById('st-user').textContent      = `${L('Logged in as','المستخدم')}: ${currentUser.name}`;
+    updateStats();
+    renderList();
+    renderMap();
+  }
+
+  function stColor(s){return{moving:'#4CAF50',idle:'#FF9800',stopped:'#9E9E9E',alert:'#F44336'}[s]||'#9E9E9E'}
+  function stLabel(s){
+    const ar = lang === 'ar';
+    return (ar?{moving:'يسير',idle:'خامل',stopped:'متوقف',alert:'⚠ تنبيه'}:{moving:'Moving',idle:'Idle',stopped:'Off',alert:'⚠ Alert'})[s]||s;
+  }
+  function stBcls(s){return{moving:'bm',idle:'bi',stopped:'bs',alert:'ba'}[s]||'bs'}
+
+  function renderList(q) {
+    q = q || document.getElementById('searchInput').value || '';
+    const list = document.getElementById('vList');
+    const filtered = liveFleet.filter(v => {
+      if (activeTab !== 'all' && v.status !== activeTab) return false;
+      if (q && !v.plate.toLowerCase().includes(q.toLowerCase()) && !v.driver.toLowerCase().includes(q.toLowerCase())) return false;
+      return true;
+    });
+    const ar = lang === 'ar';
+    list.innerHTML = filtered.map(v => `
+      <div class="vcard${selectedId===v.id?' sel':''}" onclick="selectVehicle(${v.id})" role="button">
+        <div class="vc-top">
+          <span class="st-dot d-${v.status}"></span>
+          <span class="vc-plate">${v.plate}</span>
+          <span class="vc-badge ${stBcls(v.status)}">${stLabel(v.status)}</span>
+        </div>
+        <div class="vc-meta">
+          <span class="vc-m">👤 ${v.driver.split(' ')[0]}</span>
+          <span class="vc-m">📍 ${v.area}</span>
+          ${v.speed>0?`<span class="vc-m">⚡ ${v.speed} km/h</span>`:''}
+          <span class="vc-m ${v.fuel<15?'fuel-low':''}">${v.fuel<15?'⚠️':'⛽'} ${v.fuel}%</span>
+        </div>
+      </div>`).join('');
+    updateStats();
+  }
+
+  function renderMap() {
+    const layer = document.getElementById('vLayer');
+    if (!layer) return;
+    layer.innerHTML = liveFleet.map(v => {
+      const cx=v.lng, cy=v.lat, col=stColor(v.status), sel=(selectedId===v.id);
+      return `<g onclick="selectVehicle(${v.id})" style="cursor:pointer">
+        ${sel ? `<circle cx="${cx}" cy="${cy}" r="26" fill="${col}" opacity="0.12"/>` : ''}
+        <circle cx="${cx}" cy="${cy}" r="${sel?16:12}" fill="${col}" stroke="white" stroke-width="2.5" opacity="0.95"/>
+        <text x="${cx}" y="${cy+1}" text-anchor="middle" dominant-baseline="central" font-size="${sel?14:11}" style="pointer-events:none;font-family:inherit">${v.icon}</text>
+        ${v.status==='alert'?`<circle cx="${cx}" cy="${cy}" r="20" fill="none" stroke="${col}" stroke-width="1.5" opacity="0.5" style="animation:livepulse 1s ease-in-out infinite"/>` : ''}
+        ${v.realGPS?`<circle cx="${cx+10}" cy="${cy-10}" r="5" fill="#4caf50" stroke="white" stroke-width="1.5"/>`:
+                    `<circle cx="${cx+10}" cy="${cy-10}" r="5" fill="#9e9e9e" stroke="white" stroke-width="1.5"/>`}
+        ${sel?`<rect x="${cx-26}" y="${cy-32}" width="52" height="18" rx="5" fill="rgba(26,35,126,.9)"/>
+               <text x="${cx}" y="${cy-23}" text-anchor="middle" dominant-baseline="central" font-size="10" fill="white" font-family="inherit" font-weight="700">${v.plate}</text>`:''}
+      </g>`;
+    }).join('');
+    // Map legend
+    layer.innerHTML += `<g>
+      <rect x="10" y="10" width="130" height="44" rx="6" fill="rgba(255,255,255,.85)"/>
+      <circle cx="26" cy="24" r="5" fill="#4caf50"/>
+      <text x="36" y="28" font-size="10" fill="#333" font-family="inherit">Real GPS (phone)</text>
+      <circle cx="26" cy="42" r="5" fill="#9e9e9e"/>
+      <text x="36" y="46" font-size="10" fill="#333" font-family="inherit">Simulated position</text>
+    </g>`;
+  }
+
+  function showDetail(v) {
+    const ar = lang === 'ar';
+    const L = (en, a) => ar ? a : en;
+    document.getElementById('dpPlate').textContent = `${v.plate} ${v.icon}`;
+    const rows = [
+      [L('Driver','السائق'), v.driver],
+      [L('Type','النوع'), v.type],
+      [L('Status','الحالة'), stLabel(v.status)],
+      [L('Speed','السرعة'), v.speed>0 ? v.speed+' km/h' : L('Stopped','متوقف')],
+      [L('Fuel','الوقود'), v.fuel+'%'+(v.fuel<15?' ⚠':'')],
+      [L('Odometer','عداد الكيلومتر'), Math.round(v.odometer).toLocaleString()+' km'],
+      [L('Area','المنطقة'), v.area],
+      [L('Last seen','آخر ظهور'), v.lastSeen],
+      [L('GPS Source','مصدر GPS'), v.realGPS ? '📱 '+L('Live Phone GPS','هاتف مباشر') : '⚫ '+L('No GPS / Simulated','بدون GPS')],
+      ...(v.accuracy ? [[L('Accuracy','الدقة'), Math.round(v.accuracy)+'m']] : []),
+    ].map(([l,val]) => `<div class="dp-row"><span class="dp-lbl">${l}</span><span class="dp-val">${val}</span></div>`).join('');
+    document.getElementById('dpRows').innerHTML = rows;
+    document.getElementById('detailPanel').classList.add('show');
+  }
+
+  function updateStats() {
+    const moving  = liveFleet.filter(v=>v.status==='moving').length;
+    const idle    = liveFleet.filter(v=>v.status==='idle').length;
+    const stopped = liveFleet.filter(v=>v.status==='stopped').length;
+    const alerts  = liveFleet.filter(v=>v.status==='alert'||v.fuel<15).length;
+    const totalKm = liveFleet.reduce((s,v)=>s+(v.odometer||0),0);
+    const movingV = liveFleet.filter(v=>v.status==='moving');
+    const avgSpd  = movingV.length ? Math.round(movingV.reduce((s,v)=>s+v.speed,0)/movingV.length) : 0;
+
+    document.getElementById('st-total').textContent = liveFleet.length;
+    document.getElementById('st-mov').textContent   = moving;
+    document.getElementById('st-idl').textContent   = idle;
+    document.getElementById('st-stp').textContent   = stopped;
+    document.getElementById('st-km').textContent    = totalKm.toLocaleString();
+    document.getElementById('st-spd').textContent   = movingV.length ? avgSpd+' km/h' : '—';
+    document.getElementById('tb-fleet').textContent = liveFleet.length + (lang==='ar'?' مركبة':' vehicles');
+    document.getElementById('tb-moving').textContent= moving + (lang==='ar'?' يسير':' moving');
+
+    const alertBadge = document.getElementById('tb-alerts');
+    alertBadge.textContent = alerts + (lang==='ar'?' تنبيه':' alerts');
+    alertBadge.style.display = alerts>0 ? '' : 'none';
+
+    // Sidebar alert
+    const sa = document.getElementById('alertBannerSide');
+    if (alerts > 0) {
+      sa.style.display = 'flex';
+      document.getElementById('alertSideText').textContent = alerts + (lang==='ar'?' تنبيه يحتاج انتباهاً':' alert(s) need attention');
+    } else {
+      sa.style.display = 'none';
+    }
+
+    // Floating alert banner (only low fuel)
+    const lowFuel = liveFleet.filter(v=>v.fuel<15);
+    if (lowFuel.length>0) {
+      document.getElementById('alertBanner').classList.add('show');
+      document.getElementById('alertText').textContent = lowFuel.map(v=>v.plate+' '+v.fuel+'%').join(' | ');
+    } else {
+      document.getElementById('alertBanner').classList.remove('show');
+    }
+
+    document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+  }
+
+  function toast(msg, dur=2800) {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), dur);
+  }
+
+  // EXPOSE TO WINDOW for onclick handlers
+  window.selectVehicle = function(id) {
+    selectedId = selectedId===id ? null : id;
+    renderList(); renderMap();
+    if (selectedId) { const v=liveFleet.find(x=>x.id==id); if(v) showDetail(v); }
+    else document.getElementById('detailPanel').classList.remove('show');
+  };
+  window.closeDetail = function() {
+    document.getElementById('detailPanel').classList.remove('show');
+    selectedId=null; renderList(); renderMap();
+  };
+  window.filterList = function(q){ renderList(q); };
+  window.setTab = function(btn, tab) {
+    document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('on'));
+    btn.classList.add('on'); activeTab=tab; renderList();
+  };
+  window.jumpToAlert = function() {
+    const v = liveFleet.find(x=>x.status==='alert'||x.fuel<15);
+    if(v) { selectedId=v.id; renderList(); renderMap(); showDetail(v); }
+  };
+  window.mapZoom = function(f) {
+    zoom*=f;
+    const svg=document.getElementById('mapSvg');
+    if(svg){svg.style.transform=`scale(${zoom})`;svg.style.transformOrigin='center center';}
+  };
+  window.mapFit = function() {
+    zoom=1;
+    const svg=document.getElementById('mapSvg');
+    if(svg)svg.style.transform='scale(1)';
+  };
+  window.toggleHeat = function() {
+    showHeat=!showHeat;
+    document.getElementById('heatBtn').classList.toggle('active', showHeat);
+    toast(showHeat ? '🔥 Heat map on' : '🔥 Heat map off');
+  };
+  window.toggleRoutes = function() {
+    showRoutes=!showRoutes;
+    document.getElementById('routeBtn').classList.toggle('active',!showRoutes);
+    document.querySelectorAll('#mapSvg path').forEach(p=>p.style.opacity=showRoutes?'.7':'0');
+  };
+  window.toggleLive = function() {
+    liveOn=!liveOn;
+    const btn=document.getElementById('pauseBtn');
+    const ar = lang==='ar';
+    btn.textContent = (liveOn ? '⏸ ' : '▶ ') + (ar ? 'إيقاف مؤقت' : 'Pause');
+    document.getElementById('liveDot').style.animationPlayState = liveOn ? 'running' : 'paused';
+    document.getElementById('liveDot').style.background = liveOn ? '#4caf50' : '#ff9800';
+    toast(liveOn ? '▶ Live resumed' : '⏸ Live paused');
+  };
+  window.toggleSidebar = function() {
+    document.getElementById('sidebar').classList.toggle('mob-open');
+  };
+  window.toggleLang = function() {
+    lang = lang==='ar' ? 'en' : 'ar';
+    localStorage.setItem('rihlatiLang', lang);
+    applyLang();
+  };
+  window.requestFuel = function() {
+    if(selectedId){ const v=liveFleet.find(x=>x.id==selectedId);
+      toast(`⛽ Fuel request for ${v?.plate} → opening tickets…`);
+      setTimeout(()=>{ window.location.href='index.html'; },1500);
+    }
+  };
+  window.reportIssue = function() {
+    if(selectedId){ const v=liveFleet.find(x=>x.id==selectedId);
+      toast(`🔧 Maintenance report for ${v?.plate} → opening tickets…`);
+      setTimeout(()=>{ window.location.href='index.html'; },1500);
+    }
+  };
+
+  // Simulate real-time position updates
+  setInterval(() => {
+    if (!liveOn) return;
+    liveFleet.forEach(v => {
+      if (v.status === 'moving') {
+        v.lng = Math.max(60, Math.min(730, v.lng + (Math.random()-.5)*8));
+        v.lat = Math.max(40, Math.min(520, v.lat + (Math.random()-.5)*8));
+        v.speed = Math.max(30, Math.min(120, v.speed + Math.round((Math.random()-.5)*10)));
+        v.odometer += 0.01; // ~0.01 km per tick
+        v.fuel = Math.max(1, v.fuel - 0.05);
+        if (v.fuel < 15 && v.fuel > 14.8) { toast(`⚠️ Low fuel alert: ${v.plate} at ${Math.round(v.fuel)}%`, 4000); }
+      }
+    });
+    renderMap();
+    if (selectedId) { const v=liveFleet.find(x=>x.id==selectedId); if(v) showDetail(v); }
+    updateStats();
+  }, 2000);
+
+  // Initial render
+  updateStats();
+  renderList();
+  renderMap();
+  toast(`✅ Tracking active — ${liveFleet.length} vehicles loaded`);
+}
+</script>
+</body>
+</html>

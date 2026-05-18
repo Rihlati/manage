@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1a237e">
+<meta name="mobile-web-app-capable" content="apple-mobile-web-app-capable">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rihlati Driver">
+<meta name="description" content="Rihlati Driver — Live GPS Tracking">
+<link rel="manifest" href="driver-manifest.json">
+<!-- iOS icons -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%231a237e'/><text y='.9em' font-size='80' x='10'>🚗</text></svg>">
+<title>Rihlati Driver</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --primary:#1a237e;--accent:#ff5722;--success:#4caf50;
+  --warning:#ff9800;--danger:#f44336;--card:#fff;
+}
+html,body{height:100%;overflow:hidden;background:var(--primary)}
+body{font-family:'Cairo','Segoe UI',sans-serif;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:0}
+
+/* ── SCREENS ── */
+.screen{width:100%;min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px 20px;text-align:center}
+.screen.active{display:flex}
+
+/* ── PERMISSION SCREEN (Uber-style) ── */
+#permScreen{background:linear-gradient(160deg,#0d1b4b 0%,#1a237e 50%,#283593 100%)}
+.perm-icon-wrap{width:120px;height:120px;border-radius:36px;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:60px;margin:0 auto 28px;animation:floatIcon 3s ease-in-out infinite}
+@keyframes floatIcon{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.perm-title{font-size:26px;font-weight:800;margin-bottom:10px;line-height:1.2}
+.perm-sub{font-size:14px;color:rgba(255,255,255,.65);line-height:1.7;margin-bottom:32px;max-width:300px}
+.perm-features{display:flex;flex-direction:column;gap:12px;width:100%;max-width:320px;margin-bottom:36px;text-align:left}
+.pf-item{display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.08);padding:14px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
+.pf-icon{font-size:22px;flex-shrink:0}
+.pf-text{font-size:13px;color:rgba(255,255,255,.85);line-height:1.5}
+.pf-text strong{color:#fff;font-weight:700}
+.btn-allow{width:100%;max-width:320px;padding:16px;background:var(--accent);border:none;border-radius:16px;color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 8px 32px rgba(255,87,34,.4);transition:transform .1s,box-shadow .1s}
+.btn-allow:active{transform:scale(.97);box-shadow:0 4px 16px rgba(255,87,34,.3)}
+.btn-skip{margin-top:14px;background:none;border:none;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:inherit}
+
+/* ── LOGIN SCREEN ── */
+#loginScreen{background:linear-gradient(160deg,#0d1b4b,#1a237e)}
+.login-logo{font-size:56px;margin-bottom:16px}
+.login-title{font-size:24px;font-weight:800;margin-bottom:8px}
+.login-sub{font-size:13px;color:rgba(255,255,255,.6);margin-bottom:32px}
+.login-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+.login-input{width:100%;padding:15px 16px;border-radius:14px;border:1.5px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:15px;font-family:inherit;outline:none;transition:border-color .2s}
+.login-input::placeholder{color:rgba(255,255,255,.45)}
+.login-input:focus{border-color:rgba(255,255,255,.5)}
+.btn-login{width:100%;padding:16px;background:var(--accent);border:none;border-radius:16px;color:#fff;font-size:17px;font-weight:800;cursor:pointer;font-family:inherit;margin-top:4px}
+.login-err{font-size:12px;color:#ff8a80;min-height:16px}
+
+/* ── TRACKING ACTIVE SCREEN ── */
+#activeScreen{background:var(--primary);padding:0;justify-content:flex-start}
+.top-strip{width:100%;background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.1);padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
+.top-strip h2{font-size:16px;font-weight:700}
+.ts-badge{background:rgba(76,175,80,.25);color:#a5d6a7;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4caf50;animation:ldot 1.2s ease-in-out infinite}
+@keyframes ldot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+
+/* ── BIG GPS CIRCLE ── */
+.gps-ring-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:20px}
+.gps-ring{position:relative;width:220px;height:220px}
+.ring-outer{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.12);animation:ringpulse 2s ease-in-out infinite}
+.ring-mid{position:absolute;inset:20px;border-radius:50%;border:2px solid rgba(255,255,255,.18);animation:ringpulse 2s ease-in-out infinite .4s}
+.ring-inner{position:absolute;inset:40px;border-radius:50%;border:2px solid rgba(255,255,255,.25);animation:ringpulse 2s ease-in-out infinite .8s}
+.ring-core{position:absolute;inset:60px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
+.ring-icon{font-size:36px}
+.ring-status{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1px}
+@keyframes ringpulse{0%,100%{opacity:.5;transform:scale(1)}50%{opacity:1;transform:scale(1.04)}}
+.ring-core.acquiring .ring-icon{animation:spin 1.5s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── STATS GRID ── */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:360px;padding:0 20px}
+.stat-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;text-align:left}
+.stat-label{font-size:11px;color:rgba(255,255,255,.5);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.stat-value{font-size:20px;font-weight:800;color:#fff}
+.stat-unit{font-size:11px;color:rgba(255,255,255,.5);margin-left:3px}
+
+/* ── ACCURACY BAR ── */
+.acc-row{width:100%;max-width:360px;padding:0 20px;margin:16px 0 0}
+.acc-label{font-size:11px;color:rgba(255,255,255,.5);margin-bottom:6px;display:flex;justify-content:space-between}
+.acc-bar{height:4px;border-radius:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.acc-fill{height:100%;border-radius:2px;background:#4caf50;transition:width .5s}
+
+/* ── COORDS BOX ── */
+.coords-box{width:100%;max-width:360px;padding:0 20px;margin:12px 0}
+.coords-inner{background:rgba(255,255,255,.06);border-radius:12px;padding:10px 14px;display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.6)}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{width:100%;padding:16px 20px;padding-bottom:max(16px,env(safe-area-inset-bottom));display:flex;gap:10px}
+.btn-stop{flex:1;padding:15px;border-radius:14px;border:2px solid rgba(244,67,54,.5);background:rgba(244,67,54,.15);color:#ff8a80;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-stop:active{background:rgba(244,67,54,.25)}
+
+/* ── WAKE LOCK WARNING ── */
+.wakelock-warn{width:100%;max-width:360px;padding:0 20px;margin:8px 0}
+.wl-inner{background:rgba(255,152,0,.15);border:1px solid rgba(255,152,0,.3);border-radius:10px;padding:10px 14px;font-size:11px;color:rgba(255,200,120,.9);line-height:1.6;display:none}
+.wl-inner.show{display:block}
+
+/* ── ERROR SCREEN ── */
+#errorScreen{background:linear-gradient(160deg,#37111a,#b71c1c)}
+.err-icon{font-size:64px;margin-bottom:16px}
+.err-title{font-size:22px;font-weight:800;margin-bottom:10px}
+.err-msg{font-size:14px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:28px;max-width:300px}
+.btn-retry{padding:14px 32px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* ── DENIED SCREEN ── */
+#deniedScreen{background:linear-gradient(160deg,#1a0e37,#4527a0)}
+.denied-steps{background:rgba(255,255,255,.08);border-radius:14px;padding:16px;width:100%;max-width:320px;text-align:left;margin-bottom:24px}
+.ds-step{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:13px;color:rgba(255,255,255,.8);line-height:1.5}
+.ds-step:last-child{border:none}
+.ds-num{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+
+/* ── INSTALLING BANNER ── */
+#installBanner{position:fixed;bottom:0;left:0;right:0;background:#1a237e;border-top:1px solid rgba(255,255,255,.15);padding:14px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom));display:none;align-items:center;gap:12px;z-index:100}
+#installBanner.show{display:flex}
+.ib-text{flex:1;font-size:12px;color:rgba(255,255,255,.8);line-height:1.5}
+.ib-text strong{color:#fff}
+.ib-btn{background:var(--accent);border:none;color:#fff;padding:8px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ib-x{background:none;border:none;color:rgba(255,255,255,.5);font-size:20px;cursor:pointer;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<!-- SCREEN 1: Auth check / Login -->
+<div class="screen active" id="loginScreen">
+  <div class="login-logo">🚗</div>
+  <div class="login-title">Rihlati Driver</div>
+  <div class="login-sub">Sign in to start your shift tracking</div>
+  <div class="login-form">
+    <input class="login-input" type="email" id="li-email" placeholder="Email address" autocomplete="email">
+    <input class="login-input" type="password" id="li-pass" placeholder="Password" autocomplete="current-password">
+    <div class="login-err" id="li-err"></div>
+    <button class="btn-login" id="li-btn" onclick="doLogin()">Start Shift →</button>
+  </div>
+</div>
+
+<!-- SCREEN 2: Permission request (Uber-style) -->
+<div class="screen" id="permScreen">
+  <div class="perm-icon-wrap">📍</div>
+  <div class="perm-title">Allow Location Access</div>
+  <div class="perm-sub">Rihlati needs your location to track your vehicle and keep your fleet safe.</div>
+
+  <div class="perm-features">
+    <div class="pf-item">
+      <span class="pf-icon">🗺️</span>
+      <div class="pf-text"><strong>Real-time tracking</strong><br>Your supervisor sees your live position</div>
+    </div>
+    <div class="pf-item">
+      <span class="pf-icon">⛽</span>
+      <div class="pf-text"><strong>Auto fuel alerts</strong><br>System warns when fuel runs low</div>
+    </div>
+    <div class="pf-item">
+      <span class="pf-icon">🛡️</span>
+      <div class="pf-text"><strong>Only during your shift</strong><br>Tracking stops when you end the shift</div>
+    </div>
+    <div class="pf-item">
+      <span class="pf-icon">📱</span>
+      <div class="pf-text"><strong>Keep screen on</strong><br>App prevents phone sleep while tracking</div>
+    </div>
+  </div>
+
+  <button class="btn-allow" onclick="requestPermission()">Allow Location Access</button>
+  <button class="btn-skip" onclick="showDenied()">How to enable manually →</button>
+</div>
+
+<!-- SCREEN 3: Active Tracking -->
+<div class="screen" id="activeScreen">
+  <div class="top-strip">
+    <h2>🚗 Rihlati Driver</h2>
+    <div class="ts-badge"><div class="live-dot"></div><span id="liveLabel">Live</span></div>
+  </div>
+
+  <div class="gps-ring-wrap">
+    <div class="gps-ring" id="gpsRing">
+      <div class="ring-outer"></div>
+      <div class="ring-mid"></div>
+      <div class="ring-inner"></div>
+      <div class="ring-core acquiring" id="ringCore">
+        <span class="ring-icon" id="ringIcon">🛰️</span>
+        <span class="ring-status" id="ringStatus">Acquiring…</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Speed</div>
+      <div class="stat-value" id="st-speed">—<span class="stat-unit">km/h</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Updates sent</div>
+      <div class="stat-value" id="st-updates">0</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Distance</div>
+      <div class="stat-value" id="st-dist">0<span class="stat-unit">km</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Shift time</div>
+      <div class="stat-value" id="st-time">00:00</div>
+    </div>
+  </div>
+
+  <div class="acc-row">
+    <div class="acc-label">
+      <span>GPS Accuracy</span>
+      <span id="accText">—</span>
+    </div>
+    <div class="acc-bar"><div class="acc-fill" id="accFill" style="width:0%"></div></div>
+  </div>
+
+  <div class="coords-box">
+    <div class="coords-inner">
+      <span id="coordLat">Lat: —</span>
+      <span id="coordLng">Lng: —</span>
+      <span id="coordAlt">Alt: —</span>
+    </div>
+  </div>
+
+  <div class="wakelock-warn">
+    <div class="wl-inner" id="wlWarn">
+      ⚠️ <strong>Wake lock unavailable</strong> — Keep your screen on manually to prevent GPS from stopping.
+      Your phone's auto-lock will pause tracking.
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <button class="btn-stop" onclick="stopTracking()">⏹ End Shift & Stop Tracking</button>
+  </div>
+</div>
+
+<!-- SCREEN 4: Location denied -->
+<div class="screen" id="deniedScreen">
+  <div style="font-size:56px;margin-bottom:16px">🔒</div>
+  <div class="perm-title">Location Blocked</div>
+  <div class="perm-sub">You need to enable location permission manually. Follow these steps:</div>
+  <div class="denied-steps" id="deniedSteps">
+    <!-- filled by JS based on device -->
+  </div>
+  <button class="btn-retry" onclick="retryPermission()">I've enabled it — Try Again</button>
+</div>
+
+<!-- SCREEN 5: Error -->
+<div class="screen" id="errorScreen">
+  <div class="err-icon" id="errIcon">❌</div>
+  <div class="err-title" id="errTitle">Something went wrong</div>
+  <div class="err-msg" id="errMsg">An error occurred.</div>
+  <button class="btn-retry" onclick="location.reload()">Try Again</button>
+</div>
+
+<!-- PWA Install Banner (Android Chrome) -->
+<div id="installBanner">
+  <div class="ib-text"><strong>Install Rihlati Driver</strong><br>Add to home screen for better background tracking</div>
+  <button class="ib-btn" id="installBtn">Install</button>
+  <button class="ib-x" onclick="dismissInstall()">×</button>
+</div>
+
+<script type="module">
+import { initializeApp }          from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut }
+                                   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, serverTimestamp }
+                                   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ─── Firebase ───────────────────────────────────────────────
+const app  = initializeApp({
+  apiKey:            "AIzaSyD_G8W1ORtcjZdnu0yz7F2GBN_dCofueRo",
+  authDomain:        "mange-ab6e6.firebaseapp.com",
+  projectId:         "mange-ab6e6",
+  storageBucket:     "mange-ab6e6.firebasestorage.app",
+  messagingSenderId: "436486480522",
+  appId:             "1:436486480522:web:4eaccb31804d95280c0373"
+});
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+// ─── State ───────────────────────────────────────────────────
+let currentUser  = null;
+let vehicleId    = null;
+let watchId      = null;
+let wakeLock     = null;
+let updateCount  = 0;
+let distanceKm   = 0;
+let lastCoord    = null;
+let shiftStart   = null;
+let shiftTimer   = null;
+let lastPos      = null;
+let deferredPrompt = null;
+
+// ─── Screens ─────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ─── Auth state ──────────────────────────────────────────────
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    currentUser = user;
+    // Load vehicle assigned to this user
+    try {
+      const snap = await getDoc(doc(db, 'rihlati_data', 'all'));
+      if (snap.exists()) {
+        const data  = snap.data();
+        const users = data.users || [];
+        const vehs  = data.vehicles || [];
+        const prof  = users.find(u => u.uid === user.uid || u.email === user.email);
+        if (prof) {
+          const v = vehs.find(v => String(v.assignedDriver) === String(prof.id));
+          vehicleId = v ? v.id : ('driver_' + user.uid.slice(0,8));
+        } else {
+          vehicleId = 'driver_' + user.uid.slice(0,8);
+        }
+      }
+    } catch(e) { vehicleId = 'driver_' + user.uid.slice(0,8); }
+    show('permScreen');
+  } else {
+    show('loginScreen');
+  }
+});
+
+// ─── Login ───────────────────────────────────────────────────
+window.doLogin = async function() {
+  const email = document.getElementById('li-email').value.trim();
+  const pass  = document.getElementById('li-pass').value;
+  const btn   = document.getElementById('li-btn');
+  const err   = document.getElementById('li-err');
+  if (!email || !pass) { err.textContent = 'Enter your email and password.'; return; }
+  btn.textContent = 'Signing in…'; btn.disabled = true; err.textContent = '';
+  try {
+    await signInWithEmailAndPassword(auth, email, pass);
+  } catch(e) {
+    const msgs = {
+      'auth/invalid-credential':'Wrong email or password.',
+      'auth/user-not-found':'Wrong email or password.',
+      'auth/wrong-password':'Wrong email or password.',
+      'auth/too-many-requests':'Too many attempts. Try later.',
+      'auth/network-request-failed':'No internet connection.',
+    };
+    err.textContent = msgs[e.code] || 'Login failed.';
+    btn.textContent = 'Start Shift →'; btn.disabled = false;
+  }
+};
+
+// Enter key on login
+document.getElementById('li-pass').addEventListener('keydown', e => {
+  if (e.key === 'Enter') window.doLogin();
+});
+
+// ─── Permission request ──────────────────────────────────────
+window.requestPermission = async function() {
+  if (!('geolocation' in navigator)) {
+    showError('GPS Not Supported', 'Your browser does not support GPS. Please use Chrome on Android for best results.');
+    return;
+  }
+  // Request position — this triggers the permission dialog
+  try {
+    await new Promise((res, rej) => {
+      navigator.geolocation.getCurrentPosition(res, rej, {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      });
+    });
+    startTracking();
+  } catch(err) {
+    if (err.code === 1) { // PERMISSION_DENIED
+      show('deniedScreen');
+      buildDeniedSteps();
+    } else if (err.code === 2) {
+      showError('GPS Signal Lost', 'Cannot get your location. Make sure you are outdoors or near a window and try again.');
+    } else {
+      showError('Location Timeout', 'GPS took too long. Move to an open area and try again.');
+    }
+  }
+};
+
+window.showDenied = function() { show('deniedScreen'); buildDeniedSteps(); };
+window.retryPermission = function() { show('permScreen'); };
+
+function buildDeniedSteps() {
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent);
+  const steps = ios ? [
+    ['Go to iPhone Settings', '⚙️'],
+    ['Scroll down and tap Safari', '🧭'],
+    ['Tap "Location"', '📍'],
+    ['Select "While Using the App" or "Ask"', '✅'],
+    ['Come back here and tap "Try Again"', '🔄'],
+  ] : [
+    ['Tap the lock icon 🔒 in your browser address bar', '🔒'],
+    ['Find "Location" and set to "Allow"', '📍'],
+    ['Or go to Android Settings → Apps → Chrome → Permissions → Location → Allow', '⚙️'],
+    ['Come back here and tap "Try Again"', '🔄'],
+  ];
+  document.getElementById('deniedSteps').innerHTML = steps.map(([txt, icon], i) =>
+    `<div class="ds-step"><div class="ds-num">${i+1}</div><div>${icon} ${txt}</div></div>`
+  ).join('');
+}
+
+// ─── Start Tracking ──────────────────────────────────────────
+async function startTracking() {
+  show('activeScreen');
+  shiftStart = Date.now();
+
+  // ── Wake Lock (keeps screen on) ──────────────────────────
+  if ('wakeLock' in navigator) {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', async () => {
+        // Re-acquire if page is still visible (e.g. after tab switch back)
+        if (document.visibilityState === 'visible' && watchId !== null) {
+          try { wakeLock = await navigator.wakeLock.request('screen'); } catch(_) {}
+        }
+      });
+    } catch(e) {
+      // Wake lock failed — show warning
+      document.getElementById('wlWarn').classList.add('show');
+    }
+  } else {
+    document.getElementById('wlWarn').classList.add('show');
+  }
+
+  // Re-acquire wake lock when page becomes visible again
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible' && watchId !== null) {
+      try {
+        if (!wakeLock || wakeLock.released) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch(_) {}
+    }
+  });
+
+  // ── Shift clock ──────────────────────────────────────────
+  shiftTimer = setInterval(updateClock, 1000);
+
+  // ── GPS watch ────────────────────────────────────────────
+  watchId = navigator.geolocation.watchPosition(
+    onPosition,
+    onGpsError,
+    {
+      enableHighAccuracy: true,
+      timeout: 30000,
+      maximumAge: 5000,     // accept a 5-second-old cached position
+    }
+  );
+
+  // First status
+  setRingState('acquiring');
+}
+
+// ─── GPS position callback ───────────────────────────────────
+async function onPosition(pos) {
+  const { latitude, longitude, speed, altitude, accuracy } = pos.coords;
+  const ts = Date.now();
+
+  setRingState('locked');
+
+  // Update stats
+  const kmhSpeed = speed != null ? Math.round(speed * 3.6) : 0;
+  document.getElementById('st-speed').innerHTML   = kmhSpeed + '<span class="stat-unit">km/h</span>';
+  document.getElementById('coordLat').textContent = 'Lat: ' + latitude.toFixed(5);
+  document.getElementById('coordLng').textContent = 'Lng: ' + longitude.toFixed(5);
+  document.getElementById('coordAlt').textContent = altitude ? 'Alt: ' + Math.round(altitude) + 'm' : 'Alt: —';
+
+  // Accuracy bar (0m = perfect, 100m = bad)
+  const accPct = Math.max(0, Math.min(100, 100 - accuracy));
+  document.getElementById('accFill').style.width = accPct + '%';
+  document.getElementById('accFill').style.background = accuracy < 20 ? '#4caf50' : accuracy < 60 ? '#ff9800' : '#f44336';
+  document.getElementById('accText').textContent = Math.round(accuracy) + 'm';
+
+  // Distance tracking
+  if (lastCoord) {
+    const d = haversine(lastCoord.lat, lastCoord.lng, latitude, longitude);
+    distanceKm += d;
+    document.getElementById('st-dist').innerHTML = distanceKm.toFixed(2) + '<span class="stat-unit">km</span>';
+  }
+  lastCoord = { lat: latitude, lng: longitude };
+  lastPos = pos;
+
+  // ── Send to Firestore ─────────────────────────────────────
+  updateCount++;
+  document.getElementById('st-updates').textContent = updateCount;
+
+  try {
+    await setDoc(
+      doc(db, 'telemetry', String(vehicleId)),
+      {
+        vehicleId,
+        driverUid:  currentUser.uid,
+        driverEmail: currentUser.email,
+        lat:        latitude,
+        lng:        longitude,
+        speed:      kmhSpeed,
+        accuracy,
+        altitude:   altitude || null,
+        heading:    pos.coords.heading || null,
+        status:     kmhSpeed > 5 ? 'moving' : 'idle',
+        fuelLevel:  null,   // GPS devices send this; phone can't
+        updatedAt:  serverTimestamp(),
+        distanceKm: parseFloat(distanceKm.toFixed(2)),
+        shiftStart: new Date(shiftStart).toISOString(),
+      },
+      { merge: true }
+    );
+  } catch(e) {
+    console.warn('Firestore write failed:', e.message);
+    // Don't stop GPS on write failure — retry next update
+  }
+}
+
+function onGpsError(err) {
+  if (err.code === 3) {
+    setRingState('acquiring'); // Timeout — keep trying
+  } else if (err.code === 2) {
+    setRingState('error');
+    document.getElementById('wlWarn').innerHTML =
+      '<div class="wl-inner show">⚠️ GPS signal lost. Move to an open area. Retrying…</div>';
+  }
+}
+
+// ─── Ring visual states ───────────────────────────────────────
+function setRingState(state) {
+  const core   = document.getElementById('ringCore');
+  const icon   = document.getElementById('ringIcon');
+  const status = document.getElementById('ringStatus');
+  core.className = 'ring-core ' + state;
+  if (state === 'acquiring') { icon.textContent = '🛰️'; status.textContent = 'Acquiring…'; }
+  if (state === 'locked')    { icon.textContent = '📍'; status.textContent = 'GPS Locked'; }
+  if (state === 'error')     { icon.textContent = '❌'; status.textContent = 'Signal Lost'; }
+}
+
+// ─── Stop tracking ────────────────────────────────────────────
+window.stopTracking = async function() {
+  if (!confirm('End your shift and stop location tracking?')) return;
+  if (watchId !== null) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  if (wakeLock) { try { await wakeLock.release(); } catch(_) {} }
+  if (shiftTimer) { clearInterval(shiftTimer); }
+  // Mark vehicle as stopped in Firestore
+  if (vehicleId) {
+    try {
+      await setDoc(doc(db, 'telemetry', String(vehicleId)), {
+        status: 'stopped', speed: 0, updatedAt: serverTimestamp(),
+      }, { merge: true });
+    } catch(_) {}
+  }
+  show('loginScreen');
+  updateCount = 0; distanceKm = 0; lastCoord = null;
+};
+
+// ─── Helpers ─────────────────────────────────────────────────
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2-lat1) * Math.PI/180;
+  const dLon = (lon2-lon1) * Math.PI/180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+function updateClock() {
+  const elapsed = Math.floor((Date.now() - shiftStart) / 1000);
+  const h = Math.floor(elapsed / 3600);
+  const m = Math.floor((elapsed % 3600) / 60);
+  const s = elapsed % 60;
+  document.getElementById('st-time').textContent =
+    (h > 0 ? h + ':' : '') + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+}
+
+function showError(title, msg) {
+  document.getElementById('errTitle').textContent = title;
+  document.getElementById('errMsg').textContent   = msg;
+  show('errorScreen');
+}
+window.showError = showError;
+
+// ─── PWA Install prompt (Android Chrome) ─────────────────────
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').classList.remove('show');
+});
+
+window.dismissInstall = function() {
+  document.getElementById('installBanner').classList.remove('show');
+};
+
+// Hide install banner after install
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').classList.remove('show');
+});
+</script>
+</body>
+</html>

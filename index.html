@@ -3271,6 +3271,7 @@ service cloud.firestore {
                                 <div class="form-group">
                                     <label>Driver Name <span class="required">*</span></label>
                                     <input type="text" id="t-maint-driver" placeholder="Driver full name" required>
+                                    <small style="color:#888;font-size:11px;margin-top:3px;display:block;">Auto-filled from your profile</small>
                                 </div>
                                 <div class="form-group">
                                     <label>Vehicle Number <span class="required">*</span></label>
@@ -3455,6 +3456,16 @@ service cloud.firestore {
                     </div>
                     <div class="table-responsive">
                         <div id="vehiclesTableContainer"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vehicle Live Tracking Section -->
+            <div id="vehicleTracking" class="content-section">
+                <div id="vehicleTrackingContainer" style="min-height:500px;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>Loading Tracking...</h3>
                     </div>
                 </div>
             </div>
@@ -4701,7 +4712,7 @@ service cloud.firestore {
             admin: {
                 label: 'Administrator', labelAr: 'مدير النظام', icon: '🛡️',
                 color: '#1976d2', bg: '#e3f2fd',
-                nav: ['dashboard', 'reports', 'users', 'analytics', 'tickets', 'financial'],
+                nav: ['dashboard', 'reports', 'users', 'analytics', 'vehicles', 'tracking', 'tickets', 'financial'],
                 canApprove: true, canReject: true, canManageUsers: true,
                 canSubmitReport: false, canViewAllReports: true, canViewAnalytics: true, canViewMyReports: false,
                 canSubmitTicket: false, canManageTickets: true, canManageFinancial: true, canViewFinancial: true, canManageCampaigns: true,
@@ -4710,7 +4721,7 @@ service cloud.firestore {
             manager: {
                 label: 'Manager', labelAr: 'مدير', icon: '👔',
                 color: '#6a1b9a', bg: '#f3e5f5',
-                nav: ['dashboard', 'reports', 'analytics', 'tickets'],
+                nav: ['dashboard', 'reports', 'analytics', 'vehicles', 'tracking', 'tickets'],
                 canApprove: true, canReject: true, canManageUsers: false,
                 canSubmitReport: false, canViewAllReports: true, canViewAnalytics: true, canViewMyReports: false,
                 canSubmitTicket: false, canManageTickets: true, canManageFinancial: false, canManageCampaigns: false,
@@ -4719,7 +4730,7 @@ service cloud.firestore {
             supervisor: {
                 label: 'Supervisor', labelAr: 'مشرف', icon: '👷',
                 color: '#e65100', bg: '#fff3e0',
-                nav: ['dashboard', 'reports'],
+                nav: ['dashboard', 'reports', 'tracking'],
                 canApprove: false, canReject: false, canManageUsers: false,
                 canSubmitReport: false, canViewAllReports: true, canViewAnalytics: false, canViewMyReports: false,
                 canSubmitTicket: false, canManageTickets: false, canManageFinancial: false, canManageCampaigns: false,
@@ -4777,7 +4788,7 @@ service cloud.firestore {
             vehicle_engineer: {
                 label: 'Vehicle Engineer', labelAr: 'مهندس المركبات', icon: '🔧',
                 color: '#37474f', bg: '#eceff1',
-                nav: ['dashboard', 'submit', 'myReports', 'reports'],
+                nav: ['dashboard', 'submit', 'myReports', 'reports', 'vehicles', 'tracking'],
                 canApprove: false, canReject: false, canManageUsers: false,
                 canSubmitReport: true, canViewAllReports: true, canViewAnalytics: false, canViewMyReports: true,
                 canSubmitTicket: false, canManageTickets: false, canManageFinancial: false, canManageCampaigns: false,
@@ -4810,7 +4821,7 @@ service cloud.firestore {
 
         setInterval(() => {
             AppState.checkSession();
-        }, 60000);
+        }, 10000); // FIX: was 60000 — must be less than WARNING_BEFORE (60s) to avoid missing the warning
 
         // ==================== DEBOUNCED FUNCTIONS ====================
         const debouncedFilterReports = Utils.debounce((term) => {
@@ -4989,6 +5000,9 @@ service cloud.firestore {
                 case 'vehicleManagement':
                     loadVehiclesTable();
                     break;
+                case 'vehicleTracking':
+                    loadVehicleTracking();
+                    break;
                 case 'financialDashboard':
                     loadFinancialDashboard();
                     break;
@@ -5049,6 +5063,11 @@ service cloud.firestore {
             if (perms.canManageVehicles) {
                 navItems += `<div class="nav-item" onclick="navigateTo('vehicleManagement', '🚗 ${currentLang === 'ar' ? 'المركبات' : 'Vehicles'}', this); loadVehiclesTable();" role="button" tabindex="0">
                     <i>🚗</i><span>${t('vehicles')}</span></div>`;
+            }
+            // Live Tracking — visible to admin, manager, supervisor, vehicle_engineer
+            if (perms.canManageVehicles || perms.canViewAllReports || user.role === 'supervisor' || user.role === 'vehicle_engineer') {
+                navItems += `<div class="nav-item" onclick="navigateTo('vehicleTracking', '${currentLang === 'ar' ? '📡 التتبع المباشر' : '📡 Live Tracking'}', this); loadVehicleTracking();" role="button" tabindex="0">
+                    <i>📡</i><span>${currentLang === 'ar' ? 'التتبع المباشر' : 'Live Tracking'}</span></div>`;
             }
             if (perms.canViewFinancial || perms.canManageFinancial) {
                 navItems += `<div class="nav-item" onclick="navigateTo('financialDashboard', '💰 ${t('financial')}', this); loadFinancialDashboard();" role="button" tabindex="0">
@@ -6890,6 +6909,23 @@ service cloud.firestore {
                     currentLang === 'ar'
                         ? `الخطوة 2: ${currentTicketType === 'maintenance' ? '🔧 تفاصيل طلب الصيانة' : currentTicketType === 'fuel' ? '⛽ تفاصيل طلب الوقود' : '🏖️ تفاصيل طلب الإجازة'}`
                         : `Step 2: ${currentTicketType === 'maintenance' ? '🔧 Maintenance' : currentTicketType === 'fuel' ? '⛽ Fuel' : '🏖️ Leave'} Request Details`;
+
+                // AUTO-FILL: pre-populate driver name from logged-in user
+                const driverName = AppState.currentUser ? AppState.currentUser.name : '';
+                ['t-maint-driver','t-fuel-driver','t-leave-driver'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && !el.value) el.value = driverName;
+                });
+                // AUTO-FILL: vehicle from user's assigned vehicle if present
+                const userVehicle = AppState.currentUser
+                    ? (AppState.vehicles || []).find(v => String(v.assignedDriver) === String(AppState.currentUser.id))
+                    : null;
+                if (userVehicle) {
+                    ['t-maint-vehicle','t-fuel-vehicle'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el && !el.value) el.value = userVehicle.plate;
+                    });
+                }
             }
 
             if (step === 3) {
@@ -9240,7 +9276,319 @@ function json(obj) {
             Utils.showToast(ar ? '🗑️ تم حذف المركبة من الأسطول.' : '🗑️ Vehicle removed from fleet.');
         }
 
-        // ==================== BACKUP & RESTORE ====================
+        // ==================== VEHICLE LIVE TRACKING ====================
+        function loadVehicleTracking() {
+            const container = document.getElementById('vehicleTrackingContainer');
+            if (!container) return;
+            const ar = currentLang === 'ar';
+            const vehicles = AppState.vehicles || [];
+
+            // Build simulated live telemetry from real vehicle records
+            // In production: these values come from a `telemetry` Firestore collection
+            const liveData = vehicles.map((v, i) => {
+                const statuses = ['moving','moving','idle','stopped','alert'];
+                const st = v.liveStatus || statuses[i % statuses.length];
+                return {
+                    id: v.id,
+                    plate: v.plate,
+                    driver: v.assignedDriverName || (AppState.users.find(u => String(u.id) === String(v.assignedDriver))?.name) || (ar ? 'غير معين' : 'Unassigned'),
+                    type: v.make ? `${v.make} ${v.model}` : 'Vehicle',
+                    status: v.status === 'maintenance' ? 'stopped' : st,
+                    speed: st === 'moving' ? (45 + (i * 17) % 60) : 0,
+                    fuel: v.fuelLevel || (30 + (i * 23) % 70),
+                    odometer: v.odometer || 0,
+                    lat: 200 + (i * 73) % 230,
+                    lng: 80 + (i * 89) % 440,
+                    area: v.lastArea || (ar ? 'المنطقة الصناعية' : 'Industrial Zone'),
+                    lastSeen: st === 'moving' ? (ar ? 'الآن' : 'Now') : (ar ? 'منذ دقائق' : 'A few min ago'),
+                    icon: v.make?.toLowerCase().includes('bus') ? '🚌' :
+                          v.make?.toLowerCase().includes('truck') ? '🚛' :
+                          v.fuelType === 'electric' ? '⚡' : '🚗',
+                };
+            });
+
+            // Check for low-fuel alerts → auto-create ticket
+            liveData.forEach(v => {
+                if (v.fuel < 15 && v.status !== 'stopped') {
+                    const alreadyExists = AppState.tickets.some(tk =>
+                        tk.type === 'fuel' && tk.vehicle === v.plate && tk.status === 'pending' && tk.autoAlert
+                    );
+                    if (!alreadyExists) {
+                        const alertTicket = {
+                            id: Utils.generateId(AppState.tickets),
+                            type: 'fuel',
+                            submittedBy: AppState.currentUser.id,
+                            submitterName: ar ? '🤖 تنبيه تلقائي' : '🤖 Auto Alert',
+                            submitterRole: 'system',
+                            driverName: v.driver,
+                            vehicle: v.plate,
+                            liters: 60,
+                            cost: 180,
+                            station: '',
+                            requestedDate: new Date().toISOString().slice(0,10),
+                            notes: ar ? `تنبيه تلقائي: مستوى الوقود منخفض (${v.fuel}%) للمركبة ${v.plate}` : `Auto alert: Low fuel (${v.fuel}%) detected on ${v.plate}`,
+                            status: 'pending',
+                            submittedAt: new Date().toISOString(),
+                            priority: 'urgent',
+                            autoAlert: true,
+                        };
+                        AppState.tickets = [...AppState.tickets, alertTicket];
+                        updatePendingTicketsBadge();
+                        Utils.showToast(ar ? `⚠️ تنبيه وقود منخفض: ${v.plate}` : `⚠️ Low fuel alert auto-created: ${v.plate}`, true);
+                    }
+                }
+            });
+
+            if (liveData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📡</div>
+                        <h3>${ar ? 'لا توجد مركبات مسجلة' : 'No vehicles registered'}</h3>
+                        <p>${ar ? 'أضف مركبات أولاً من صفحة إدارة المركبات' : 'Add vehicles first from Vehicle Management'}</p>
+                        <button class="btn btn-primary" onclick="navigateTo('vehicleManagement','Vehicles',document.querySelector(\'[onclick*=vehicleManagement]\'));loadVehiclesTable()">
+                            ${ar ? '➕ إضافة مركبة' : '➕ Add Vehicle'}
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            const moving  = liveData.filter(v => v.status === 'moving').length;
+            const idle    = liveData.filter(v => v.status === 'idle').length;
+            const stopped = liveData.filter(v => v.status === 'stopped').length;
+            const alerts  = liveData.filter(v => v.status === 'alert' || v.fuel < 15).length;
+            const totalKm = liveData.reduce((s,v) => s + (v.odometer||0), 0).toLocaleString();
+
+            container.innerHTML = `
+            <style>
+            .trk-root{display:flex;height:580px;border-radius:16px;overflow:hidden;border:1px solid var(--border-color);background:var(--card-bg)}
+            .trk-sidebar{width:270px;flex-shrink:0;background:var(--card-bg);border-right:1px solid var(--border-color);display:flex;flex-direction:column}
+            .trk-shead{padding:12px 14px;border-bottom:1px solid var(--border-color)}
+            .trk-shead h3{font-size:14px;font-weight:700;color:var(--primary-color);margin-bottom:8px}
+            .trk-search{width:100%;padding:7px 11px;font-size:12px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-color);color:var(--text-color);outline:none}
+            .trk-tabs{display:flex;padding:8px 10px;gap:4px;border-bottom:1px solid var(--border-color)}
+            .trk-tab{flex:1;padding:4px 0;font-size:11px;font-weight:600;border:1px solid var(--border-color);border-radius:6px;background:transparent;color:#888;cursor:pointer}
+            .trk-tab.on{background:#e3f2fd;color:#1565c0;border-color:#90caf9}
+            .trk-vlist{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:6px}
+            .trk-vcard{padding:10px;border-radius:10px;border:1px solid var(--border-color);cursor:pointer;background:var(--card-bg);transition:all .15s}
+            .trk-vcard:hover,.trk-vcard.sel{border-color:#1976d2;background:#e3f2fd}
+            .trk-vtop{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+            .trk-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+            .trk-plate{font-size:12px;font-weight:700;flex:1;color:var(--text-color)}
+            .trk-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600}
+            .b-moving{background:#E8F5E9;color:#1B5E20}.b-idle{background:#FFF3E0;color:#BF360C}
+            .b-stopped{background:#F5F5F5;color:#616161}.b-alert{background:#FFEBEE;color:#B71C1C}
+            .trk-meta{display:flex;gap:8px;flex-wrap:wrap}
+            .trk-mi{font-size:11px;color:#888}
+            .trk-map{flex:1;position:relative;background:#dce8f0;overflow:hidden}
+            .trk-stats{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.95);border-top:1px solid var(--border-color);display:flex;padding:8px 16px;gap:16px;flex-wrap:wrap}
+            .trk-sval{font-size:16px;font-weight:700;color:var(--primary-color)}
+            .trk-slbl{font-size:10px;color:#888;display:block}
+            .trk-detail{position:absolute;top:10px;left:10px;width:200px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:12px;display:none;z-index:5}
+            .trk-detail.on{display:block}
+            .trk-dr{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0f0f0;font-size:12px}
+            .trk-dr:last-child{border:none}
+            .trk-drl{color:#888}.trk-drv{font-weight:600;color:var(--text-color)}
+            .trk-alert{background:#ffebee;border:1px solid #ef9a9a;color:#c62828;padding:6px 12px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px;cursor:pointer}
+            .trk-ctrls{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:4px;z-index:5}
+            .trk-cb{width:30px;height:30px;border:1px solid var(--border-color);border-radius:8px;background:var(--card-bg);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+            .trk-cb:hover{background:var(--bg-color)}
+            .dot-moving{background:#4CAF50}.dot-idle{background:#FF9800}.dot-stopped{background:#9E9E9E}.dot-alert{background:#F44336;animation:trkpulse 1s ease-in-out infinite}
+            @keyframes trkpulse{0%,100%{opacity:1}50%{opacity:.3}}
+            </style>
+
+            <div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                <h2 style="color:var(--primary-color);font-size:18px;">📡 ${ar ? 'التتبع المباشر للأسطول' : 'Fleet Live Tracking'}</h2>
+                <a href="tracking.html" target="_blank" style="background:var(--primary-color);color:white;padding:8px 16px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
+                    ${ar ? '🗺️ فتح خريطة كاملة' : '🗺️ Open Full Map'}
+                </a>
+            </div>
+
+            <div class="trk-root" id="trkRoot">
+              <div class="trk-sidebar">
+                <div class="trk-shead">
+                  <h3>📡 ${ar ? 'المركبات' : 'Vehicles'} (${liveData.length})</h3>
+                  <input class="trk-search" id="trkSearch" type="text" placeholder="${ar ? 'بحث...' : 'Search...'}" oninput="trkFilter(this.value)">
+                </div>
+                ${alerts > 0 ? `<div class="trk-alert" onclick="trkShowAlert()">⚠️ ${alerts} ${ar ? 'تنبيه يحتاج انتباهاً' : 'alert(s) need attention'}</div>` : ''}
+                <div class="trk-tabs">
+                  <button class="trk-tab on" onclick="trkTab(this,'all')">${ar?'الكل':'All'} ${liveData.length}</button>
+                  <button class="trk-tab" onclick="trkTab(this,'moving')">${ar?'يسير':'Moving'} ${moving}</button>
+                  <button class="trk-tab" onclick="trkTab(this,'idle')">${ar?'خامل':'Idle'} ${idle}</button>
+                  <button class="trk-tab" onclick="trkTab(this,'stopped')">${ar?'متوقف':'Off'} ${stopped}</button>
+                </div>
+                <div class="trk-vlist" id="trkList"></div>
+              </div>
+
+              <div class="trk-map">
+                <svg width="100%" height="100%" id="trkMap" viewBox="0 0 650 490" style="cursor:grab">
+                  <rect width="650" height="490" fill="#dce8f0"/>
+                  <rect x="20" y="20" width="110" height="80" rx="4" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="0.5"/>
+                  <rect x="490" y="25" width="130" height="75" rx="6" fill="#BBDEFB" stroke="#90CAF9" stroke-width="0.5"/>
+                  <rect x="40" y="130" width="75" height="55" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="135" y="130" width="85" height="55" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="240" y="130" width="75" height="55" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="380" y="130" width="85" height="55" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="480" y="130" width="75" height="55" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="40" y="265" width="95" height="65" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="165" y="265" width="75" height="65" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="360" y="265" width="95" height="65" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="480" y="265" width="115" height="65" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="55" y="385" width="85" height="60" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="195" y="380" width="105" height="70" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="405" y="385" width="95" height="70" rx="2" fill="#D0D8E0" stroke="#B8C4CE" stroke-width="0.5"/>
+                  <rect x="530" y="355" width="85" height="100" rx="4" fill="#C8E6C9" stroke="#A5D6A7" stroke-width="0.5"/>
+                  <line x1="0" y1="115" x2="650" y2="115" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <line x1="0" y1="250" x2="650" y2="250" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <line x1="0" y1="370" x2="650" y2="370" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <line x1="130" y1="0" x2="130" y2="490" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <line x1="330" y1="0" x2="330" y2="490" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <line x1="475" y1="0" x2="475" y2="490" stroke="#B0BEC5" stroke-width="2.5"/>
+                  <g id="trkVehicleLayer"></g>
+                </svg>
+
+                <div class="trk-ctrls">
+                  <button class="trk-cb" onclick="trkZoom(1.15)" title="${ar?'تكبير':'Zoom in'}">+</button>
+                  <button class="trk-cb" onclick="trkZoom(0.87)" title="${ar?'تصغير':'Zoom out'}">−</button>
+                  <button class="trk-cb" onclick="trkFit()" title="${ar?'ملاءمة':'Fit all'}">⊡</button>
+                  <button class="trk-cb" id="trkLiveBtn" onclick="trkToggleLive()" title="${ar?'إيقاف مؤقت':'Pause'}">⏸</button>
+                </div>
+
+                <div class="trk-detail" id="trkDetail">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <strong id="trkDP" style="font-size:13px;color:var(--primary-color)">—</strong>
+                    <button onclick="trkCloseDetail()" style="background:none;border:none;font-size:16px;cursor:pointer;color:#999">×</button>
+                  </div>
+                  <div id="trkDRows"></div>
+                </div>
+
+                <div class="trk-stats">
+                  <div><span class="trk-sval">${liveData.length}</span><span class="trk-slbl">${ar?'إجمالي':'Total'}</span></div>
+                  <div><span class="trk-sval" style="color:#4CAF50">${moving}</span><span class="trk-slbl">${ar?'يسير':'Moving'}</span></div>
+                  <div><span class="trk-sval" style="color:#FF9800">${idle}</span><span class="trk-slbl">${ar?'خامل':'Idle'}</span></div>
+                  <div><span class="trk-sval" style="color:#9E9E9E">${stopped}</span><span class="trk-slbl">${ar?'متوقف':'Off'}</span></div>
+                  <div><span class="trk-sval">${totalKm}</span><span class="trk-slbl">${ar?'إجمالي كم':'Total km'}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <script>
+            (function(){
+            var _trkData = ${JSON.stringify(liveData)};
+            var _trkSel = null, _trkTab = 'all', _trkLive = true, _trkZoom = 1, _trkTimer = null;
+            var _ar = ${JSON.stringify(ar)};
+
+            function scol(s){return{moving:'#4CAF50',idle:'#FF9800',stopped:'#9E9E9E',alert:'#F44336'}[s]||'#9E9E9E'}
+            function slab(s){return _ar?{moving:'يسير',idle:'خامل',stopped:'متوقف',alert:'⚠ تنبيه'}[s]||s:{moving:'Moving',idle:'Idle',stopped:'Off',alert:'⚠ Alert'}[s]||s}
+            function sbcls(s){return 'b-'+(s==='alert'?'alert':s)}
+
+            window.trkFilter = function(q){renderList(q)}
+            window.trkTab = function(btn,tab){
+                document.querySelectorAll('.trk-tab').forEach(b=>b.classList.remove('on'));
+                btn.classList.add('on'); _trkTab=tab; renderList();
+            }
+            window.trkShowAlert = function(){
+                var v=_trkData.find(x=>x.status==='alert'||x.fuel<15);
+                if(v)trkSelect(v.id);
+            }
+            window.trkZoom = function(f){
+                _trkZoom*=f;
+                var svg=document.getElementById('trkMap');
+                if(svg){svg.style.transform='scale('+_trkZoom+')';svg.style.transformOrigin='center center';}
+            }
+            window.trkFit = function(){
+                _trkZoom=1;
+                var svg=document.getElementById('trkMap');
+                if(svg){svg.style.transform='scale(1)';}
+            }
+            window.trkCloseDetail = function(){
+                document.getElementById('trkDetail').classList.remove('on');
+                _trkSel=null; renderList(); renderMap();
+            }
+            window.trkToggleLive = function(){
+                _trkLive=!_trkLive;
+                var btn=document.getElementById('trkLiveBtn');
+                if(btn)btn.textContent=_trkLive?'⏸':'▶';
+            }
+            window.trkSelect = function(id){
+                _trkSel=_trkSel===id?null:id;
+                renderList(); renderMap();
+                if(_trkSel){var v=_trkData.find(x=>x.id==id);if(v)showDetail(v);}
+                else document.getElementById('trkDetail').classList.remove('on');
+            }
+
+            function showDetail(v){
+                document.getElementById('trkDP').textContent=v.plate+' '+v.icon;
+                var rows=[
+                    [_ar?'السائق':'Driver',v.driver],
+                    [_ar?'النوع':'Type',v.type],
+                    [_ar?'الحالة':'Status',slab(v.status)],
+                    [_ar?'السرعة':'Speed',v.speed>0?v.speed+' km/h':(_ar?'متوقف':'Stopped')],
+                    [_ar?'الوقود':'Fuel',v.fuel+'%'+(v.fuel<15?' ⚠':'')],
+                    [_ar?'عداد الكيلومتر':'Odometer',v.odometer.toLocaleString()+' km'],
+                    [_ar?'المنطقة':'Area',v.area],
+                    [_ar?'آخر ظهور':'Last seen',v.lastSeen],
+                ].map(function(r){return '<div class="trk-dr"><span class="trk-drl">'+r[0]+'</span><span class="trk-drv">'+r[1]+'</span></div>';}).join('');
+                document.getElementById('trkDRows').innerHTML=rows;
+                document.getElementById('trkDetail').classList.add('on');
+            }
+
+            function renderList(q){
+                q=q||document.getElementById('trkSearch')?.value||'';
+                var list=document.getElementById('trkList');
+                if(!list)return;
+                var filtered=_trkData.filter(function(v){
+                    if(_trkTab!=='all'&&v.status!==_trkTab)return false;
+                    if(q&&!v.plate.toLowerCase().includes(q.toLowerCase())&&!v.driver.toLowerCase().includes(q.toLowerCase()))return false;
+                    return true;
+                });
+                list.innerHTML=filtered.map(function(v){
+                    return '<div class="trk-vcard'+((_trkSel==v.id)?' sel':'')+'" onclick="trkSelect(\''+v.id+'\')">'
+                        +'<div class="trk-vtop"><span class="trk-dot dot-'+v.status+'"></span>'
+                        +'<span class="trk-plate">'+v.plate+'</span>'
+                        +'<span class="trk-badge '+sbcls(v.status)+'">'+slab(v.status)+'</span></div>'
+                        +'<div class="trk-meta">'
+                        +'<span class="trk-mi">👤 '+v.driver.split(' ')[0]+'</span>'
+                        +(v.speed>0?'<span class="trk-mi">⚡ '+v.speed+' km/h</span>':'')
+                        +'<span class="trk-mi">'+(v.fuel<15?'⚠️':'⛽')+' '+v.fuel+'%</span>'
+                        +'</div></div>';
+                }).join('');
+            }
+
+            function renderMap(){
+                var layer=document.getElementById('trkVehicleLayer');
+                if(!layer)return;
+                layer.innerHTML=_trkData.map(function(v){
+                    var cx=v.lng,cy=v.lat,col=scol(v.status),sel=(_trkSel==v.id);
+                    return '<g onclick="trkSelect(\''+v.id+'\')" style="cursor:pointer">'
+                        +(sel?'<circle cx="'+cx+'" cy="'+cy+'" r="22" fill="'+col+'" opacity="0.15"/>':'')
+                        +'<circle cx="'+cx+'" cy="'+cy+'" r="'+(sel?14:11)+'" fill="'+col+'" stroke="white" stroke-width="2.5" opacity="0.95"/>'
+                        +'<text x="'+cx+'" y="'+(cy+1)+'" text-anchor="middle" dominant-baseline="central" font-size="'+(sel?13:10)+'" style="pointer-events:none;font-family:inherit">'+v.icon+'</text>'
+                        +(v.status==='alert'?'<circle cx="'+cx+'" cy="'+cy+'" r="18" fill="none" stroke="'+col+'" stroke-width="1.5" opacity="0.5" style="animation:trkpulse 1s ease-in-out infinite"/>':'')
+                        +(sel?'<text x="'+cx+'" y="'+(cy-20)+'" text-anchor="middle" font-size="10" fill="#333" font-family="inherit" font-weight="700">'+v.plate+'</text>':'')
+                        +'</g>';
+                }).join('');
+            }
+
+            function updatePositions(){
+                if(!_trkLive)return;
+                _trkData.forEach(function(v){
+                    if(v.status==='moving'){
+                        v.lng=Math.max(50,Math.min(600,v.lng+((Math.random()-.5)*7)));
+                        v.lat=Math.max(30,Math.min(450,v.lat+((Math.random()-.5)*7)));
+                        v.speed=Math.max(30,Math.min(120,v.speed+Math.round((Math.random()-.5)*8)));
+                    }
+                });
+                renderMap();
+                if(_trkSel){var v=_trkData.find(x=>x.id==_trkSel);if(v)showDetail(v);}
+            }
+
+            renderList(); renderMap();
+            _trkTimer=setInterval(updatePositions,2000);
+            })();
+            <\/script>`;
+        }
+
+
 
         function backupAllData() {
             try {
